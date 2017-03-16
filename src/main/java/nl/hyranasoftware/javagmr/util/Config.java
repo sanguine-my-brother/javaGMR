@@ -5,10 +5,27 @@
  */
 package nl.hyranasoftware.javagmr.util;
 
+import java.io.Serializable;
+
 /**
  *
  * @author danny_000
  */
-public class Config {
+public class Config implements Serializable {
+    
+    String path;
+    String authCode;
+    private static Config instance = null;
+    
+    protected Config(){
+        
+    }
+    
+    public static Config getInstance(){
+        if (instance == null){
+            instance = new Config();
+        }
+        return instance;
+    }
     
 }
