@@ -11,4 +11,32 @@ package nl.hyranasoftware.javagmr.domain;
  */
 public class Player {
     
+    int steamId;
+    String personalname;
+    String avatarUrl;
+    int PersonaState;
+    int gameId;
+
+    public int getSteamId() {
+        return steamId;
+    }
+
+    public String getPersonalname() {
+        return personalname;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public int getPersonaState() {
+        return PersonaState;
+    }
+
+    public int getGameId() {
+        return gameId;
+    }
+    
+    
+    
 }
