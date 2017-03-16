@@ -17,6 +17,18 @@ public class Player {
     int PersonaState;
     int gameId;
 
+    public Player() {
+    }
+
+    public Player(int steamId, String personalname, String avatarUrl, int PersonaState, int gameId) {
+        this.steamId = steamId;
+        this.personalname = personalname;
+        this.avatarUrl = avatarUrl;
+        this.PersonaState = PersonaState;
+        this.gameId = gameId;
+    }
+    
+    
     public int getSteamId() {
         return steamId;
     }
