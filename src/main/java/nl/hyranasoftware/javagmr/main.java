@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
@@ -20,7 +21,7 @@ public class main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         try {
             PlayerController pc = new PlayerController();
             Player player = pc.getPlayerFromGMR("76561198037737017");

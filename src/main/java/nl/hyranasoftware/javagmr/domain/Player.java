@@ -5,36 +5,44 @@
  */
 package nl.hyranasoftware.javagmr.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  *
  * @author danny_000
  */
 public class Player {
     
-    int steamId;
-    String personalname;
-    String avatarUrl;
-    int PersonaState;
-    int gameId;
+    @JsonProperty("SteamID")
+    public String steamId;
+    @JsonProperty("PersonaName")
+    public String personaName;
+    @JsonProperty("AvatarUrl")
+    public String avatarUrl;
+    @JsonProperty("PersonaState")
+    public int PersonaState;
+    @JsonProperty("GameID")
+    public int gameId;
 
     public Player() {
     }
 
-    public Player(int steamId, String personalname, String avatarUrl, int PersonaState, int gameId) {
+    public Player(String steamId, String personalname, String avatarUrl, int PersonaState, int gameId) {
+
         this.steamId = steamId;
-        this.personalname = personalname;
+        this.personaName = personalname;
         this.avatarUrl = avatarUrl;
         this.PersonaState = PersonaState;
         this.gameId = gameId;
     }
     
     
-    public int getSteamId() {
+    public String getSteamId() {
         return steamId;
     }
 
     public String getPersonalname() {
-        return personalname;
+        return personaName;
     }
 
     public String getAvatarUrl() {
