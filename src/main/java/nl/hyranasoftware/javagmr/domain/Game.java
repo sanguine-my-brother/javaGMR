@@ -9,6 +9,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
@@ -51,7 +54,10 @@ public class Game {
     public void getPlayersFromGMR(){
         try {
             RetrievePlayers rp = new RetrievePlayers(players);
-            players = rp.call();
+            ExecutorService executor = Executors.newFixedThreadPool(1);
+            Future<List<Player>> future = executor.submit(rp);
+            players = future.get();
+            executor.shutdown();
         } catch (Exception ex) {
             Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
         }

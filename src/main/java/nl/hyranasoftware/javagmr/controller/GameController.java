@@ -22,25 +22,39 @@ import nl.hyranasoftware.javagmr.util.JGMRConfig;
  * @author danny_000
  */
 public class GameController {
-    
-    public List<Game> getGames(){
+
+    public List<Game> getGames() {
         try {
             String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetGamesAndPlayers?playerIDText";
             String response = Unirest.get(requestUrl).queryString("playerIDText", "").queryString("authKey", JGMRConfig.getInstance().getAuthCode()).asJson().getBody().toString();
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JodaModule());
             String gamesNode = mapper.readTree(response).get("Games").toString();
-            List<Game> games = mapper.readValue(gamesNode, new TypeReference<List<Game>>(){});
-            for(Game g : games){
-                Thread t = new Thread();
+            List<Game> games = mapper.readValue(gamesNode, new TypeReference<List<Game>>() {
+            });
+            class PlayersTask implements Runnable {
+
+                List<Game> games;
+
+                PlayersTask(List<Game> s) {
+                    games = s;
+                }
+
+                public void run() {
+                    for (Game g : games) {
+                        g.getPlayersFromGMR();
+                    }
+                }
             }
+            Thread t = new Thread(new PlayersTask(games));
+            t.start();
             return games;
-        } catch (UnirestException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnirestException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
-    
+
 }

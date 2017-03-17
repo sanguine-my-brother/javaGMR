@@ -5,15 +5,10 @@
  */
 package nl.hyranasoftware.javagmr;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.controller.GameController;
-import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.domain.Game;
-import nl.hyranasoftware.javagmr.domain.Player;
 
 /**
  *
