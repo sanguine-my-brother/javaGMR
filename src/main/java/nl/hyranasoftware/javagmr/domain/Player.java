@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
  *
@@ -23,6 +24,8 @@ public class Player {
     public int PersonaState;
     @JsonProperty("GameID")
     public int gameId;
+    @JsonProperty("TurnOrder")
+    int turnOrder;
 
     public Player() {
     }
@@ -35,6 +38,7 @@ public class Player {
         this.PersonaState = PersonaState;
         this.gameId = gameId;
     }
+    
     
     
     public String getSteamId() {
@@ -55,6 +59,18 @@ public class Player {
 
     public int getGameId() {
         return gameId;
+    }
+
+    public String getPersonaName() {
+        return personaName;
+    }
+
+    public int getTurnOrder() {
+        return turnOrder;
+    }
+    @JsonSetter("UserId")
+    public void setUserId(String userId){
+        this.steamId = userId;
     }
     
     

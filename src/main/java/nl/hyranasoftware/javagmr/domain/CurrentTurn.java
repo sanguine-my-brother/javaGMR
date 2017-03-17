@@ -5,6 +5,7 @@
  */
 package nl.hyranasoftware.javagmr.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.joda.time.DateTime;
 
 /**
@@ -12,13 +13,21 @@ import org.joda.time.DateTime;
  * @author danny_000
  */
 public class CurrentTurn {
+    @JsonProperty("TurnId")
     int turnId;
+    @JsonProperty("Number")
     int number;
+    @JsonProperty("UserId")
     String userId;
+    @JsonProperty("Started")
     DateTime started;
+    @JsonProperty("Expires")
     DateTime expires;
-    Player player;
+    @JsonProperty("PlayerNumber")
+    int playerNumber;
+    @JsonProperty("Skipped")
     boolean skipped;
+    @JsonProperty("IsFirstTurn")
     boolean isfirstTurn;
 
     public int getTurnId() {
@@ -41,8 +50,8 @@ public class CurrentTurn {
         return expires;
     }
 
-    public Player getPlayer() {
-        return player;
+    public int getPlayerNumber() {
+        return playerNumber;
     }
 
     public boolean isSkipped() {

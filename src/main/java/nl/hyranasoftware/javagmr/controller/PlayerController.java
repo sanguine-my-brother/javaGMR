@@ -27,7 +27,7 @@ public class PlayerController {
 
         Player player = mapper.readValue(playerNode, Player.class);
         
-        return null;
+        return player;
         
     }
     

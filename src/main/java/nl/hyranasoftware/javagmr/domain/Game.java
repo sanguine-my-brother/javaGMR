@@ -5,6 +5,7 @@
  */
 package nl.hyranasoftware.javagmr.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
@@ -13,10 +14,16 @@ import java.util.List;
  */
 public class Game {
     
+    @JsonProperty("GameId")
     int gameid;
+    @JsonProperty("Name")
     String name;
+    @JsonProperty("Players")
     List<Player> players;
+    @JsonProperty("CurrentTurn")
     CurrentTurn currentTurn;
+    @JsonProperty("Type")
+    int type;
 
     public int getGameid() {
         return gameid;
