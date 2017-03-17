@@ -10,8 +10,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import nl.hyranasoftware.javagmr.util.JGMRConfig;
 
 /**
  * FXML Controller class
@@ -19,13 +21,20 @@ import javafx.stage.Stage;
  * @author danny_000
  */
 public class SettingsDialogController implements Initializable {
+    
+    
+    @FXML
+    TextField tbSaveDirectory;
+    @FXML
+    TextField tbAuthCode;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        tbSaveDirectory.setText(JGMRConfig.getInstance().getPath());
+        tbAuthCode.setText(JGMRConfig.getInstance().getAuthCode());
     }
 
     @FXML
@@ -37,6 +46,15 @@ public class SettingsDialogController implements Initializable {
         if (selectedDirectory != null) {
                 selectedDirectory.getAbsolutePath();
             }
+        tbSaveDirectory.setText(selectedDirectory.getAbsolutePath());
     }
+    @FXML
+    private void saveConfig(){
+        JGMRConfig.getInstance().setAuthCode(tbAuthCode.getText());
+        JGMRConfig.getInstance().setPath(tbSaveDirectory.getText());
+        Stage stage = (Stage) tbAuthCode.getScene().getWindow();
+        stage.close();
+    }
+    
     
 }
