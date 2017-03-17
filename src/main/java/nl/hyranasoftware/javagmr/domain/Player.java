@@ -7,6 +7,7 @@ package nl.hyranasoftware.javagmr.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import java.util.Objects;
 
 /**
  *
@@ -70,8 +71,36 @@ public class Player {
     }
     @JsonSetter("UserId")
     public void setUserId(String userId){
-        this.steamId = userId;
+            this.steamId = userId;
     }
+
+    public void setTurnOrder(int turnOrder) {
+        this.turnOrder = turnOrder;
+    }
+    
+    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        
+        
+        final Player other = (Player) obj;
+        if (!Objects.equals(this.steamId, other.steamId)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
     
     
     

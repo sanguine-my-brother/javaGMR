@@ -31,7 +31,10 @@ public class GameController {
             mapper.registerModule(new JodaModule());
             String gamesNode = mapper.readTree(response).get("Games").toString();
             List<Game> games = mapper.readValue(gamesNode, new TypeReference<List<Game>>(){});
-            return null;
+            for(Game g : games){
+                Thread t = new Thread();
+            }
+            return games;
         } catch (UnirestException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
