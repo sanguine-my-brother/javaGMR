@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
+import nl.hyranasoftware.javagmr.util.JGMRConfig;
 
 /**
  *
@@ -22,8 +23,7 @@ public class main {
     public static void main(String[] args) throws IOException {
         //PlayerController pc = new PlayerController();
         //Player player = pc.getPlayerFromGMR("76561198037737017");
-        GameController gc = new GameController();
-        List<Game> games = gc.getGames();
+        JGMRConfig.getInstance().setPath("Penis");
     }
     
 }
