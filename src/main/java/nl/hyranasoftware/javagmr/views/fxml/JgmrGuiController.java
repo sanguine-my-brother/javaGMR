@@ -5,11 +5,19 @@
  */
 package nl.hyranasoftware.javagmr.views.fxml;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.stage.Stage;
+import nl.hyranasoftware.javagmr.gui;
 
 /**
  * FXML Controller class
@@ -31,7 +39,22 @@ public class JgmrGuiController implements Initializable {
 
     @FXML
     private void settingsButton(){
-        System.out.println("penis");
+                FXMLLoader loader = null;
+        String url = null;
+        url  = getClass().getResource("settingsDialog.fxml").toString();
+        System.out.println( "  * url: " + url );
+        loader = new FXMLLoader(getClass().getResource("settingsDialog.fxml"));
+        Parent root = null;
+        try {
+            root = (Parent)loader.load();
+        } catch (IOException ex) {
+            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Stage dialog = new Stage();
+        Scene scene = new Scene(root); 
+        dialog.setTitle("Giant Multi Robot Java-Client");
+        dialog.setScene(scene);
+        dialog.show();
     }
     
 }

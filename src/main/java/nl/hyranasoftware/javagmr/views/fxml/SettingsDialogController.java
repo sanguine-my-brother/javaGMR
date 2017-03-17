@@ -5,9 +5,13 @@
  */
 package nl.hyranasoftware.javagmr.views.fxml;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 
 /**
  * FXML Controller class
@@ -22,6 +26,17 @@ public class SettingsDialogController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-    }    
+    }
+
+    @FXML
+    private void browseSaveDirectory(){
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        Stage stage = new Stage();
+        File selectedDirectory = directoryChooser.showDialog(stage);
+        if (selectedDirectory != null) {
+                selectedDirectory.getAbsolutePath();
+            }
+    }
     
 }
