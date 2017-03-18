@@ -17,14 +17,20 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Dialog;
+import nl.hyranasoftware.javagmr.controller.GameController;
+import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 
 /**
@@ -34,11 +40,18 @@ import nl.hyranasoftware.javagmr.util.JGMRConfig;
 public class WatchDirectory implements Runnable {
 
     WatchService watcher;
-    Dialog newSaveFile;
-    
-    
+    ChoiceDialog<Game> newSaveFile;
+    String fileName;
+    List<Game> playerGames;
+    int index;
+    GameController gc = new GameController();
 
-
+    public WatchDirectory(List<Game> playerGames, int index) {
+        newSaveFile = new ChoiceDialog<>(playerGames.get(index), playerGames);
+        newSaveFile.setTitle("Save file");
+        newSaveFile.setHeaderText("I see you played your turn");
+        newSaveFile.setContentText("Choose the game you would to submit to GMR");
+    }
 
     public void processEvents() throws Exception {
         if (JGMRConfig.getInstance().getPath() != null) {
@@ -75,11 +88,14 @@ public class WatchDirectory implements Runnable {
 
                     WatchEvent pathEvent = (WatchEvent) genericEvent;
                     Path file = (Path) pathEvent.context();
-                                Platform.runLater(() -> {
-                                   newSaveFile = new Dialog();
-                    newSaveFile.show();
-            });
-
+                    fileName = file.toString();
+                    Platform.runLater(() -> {
+                        Optional<Game> result = newSaveFile.showAndWait();
+                        if (result.isPresent()){
+                           gc.uploadSaveFile(result.get(), fileName);
+                        }
+                    });
+                    
                     System.out.println("New save file detected: " + file.toString());
 
                 }
@@ -96,21 +112,16 @@ public class WatchDirectory implements Runnable {
             } // end infinite for loop
         }
         return;
-        
-        
+
     }
 
     @Override
     public void run() {
         try {
-            Platform.runLater(() -> {
-                // code that updates UI
-            });
             processEvents();
         } catch (Exception ex) {
             Logger.getLogger(WatchDirectory.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
 
 }

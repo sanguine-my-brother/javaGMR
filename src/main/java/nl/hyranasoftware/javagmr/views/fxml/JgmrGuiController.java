@@ -7,14 +7,14 @@ package nl.hyranasoftware.javagmr.views.fxml;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.WatchService;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.application.Platform;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,10 +34,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.gui;
 import nl.hyranasoftware.javagmr.threads.WatchDirectory;
+import nl.hyranasoftware.javagmr.util.JGMRConfig;
 
 /**
  * FXML Controller class
@@ -57,7 +59,9 @@ public class JgmrGuiController implements Initializable {
     private AnchorPane apAbove;
 
     ContextMenu cm = new ContextMenu();
-    ObservableList<Game> currentGames;
+    WatchDirectory wd;
+    Thread wdt;
+    ObservableList<Game> currentGames = FXCollections.observableArrayList();
     ObservableList<Game> playerGames;
     Dialog newSaveFile;
 
@@ -68,16 +72,28 @@ public class JgmrGuiController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        System.out.println("  * jdskfhksdhf: " + url);
+
+        initializeContextMenu();
+        initializeListViews();
+        new Timeline(new KeyFrame(
+        Duration.seconds(2),
+        ae -> pullGames()))
+    .play();
+        Timeline timeline = new Timeline(new KeyFrame(
+        Duration.minutes(2),
+        ae -> pullGames()));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+        
+
+    }
+    
+    private void pullGames(){
         currentGames = FXCollections.observableArrayList(gc.getGames());
         lvAllGames.setItems(currentGames);
         playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
         lvPlayerTurnGames.setItems(playerGames);
-        initializeContextMenu();
-        WatchDirectory wd = new WatchDirectory();
-        new Thread(wd).start();
-        initializeListViews();
-
+       // currentGames.notify();
     }
 
     @FXML
@@ -148,6 +164,21 @@ public class JgmrGuiController implements Initializable {
 
         });
     }
+    
+    private void startListeningForChanges(){
+        if(JGMRConfig.getInstance().getPath() != null){
+            wd = new WatchDirectory(playerGames, lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
+            if(wdt == null){
+                wdt = new Thread(wd);
+                wdt.setDaemon(true);
+                wdt.start();
+            }
+        }
+    }
+    
+    private void stopListeningForChanges(){
+        wdt.stop();
+    }
 
     private void initializeContextMenu() {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
@@ -158,6 +189,7 @@ public class JgmrGuiController implements Initializable {
             dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
             dialog.setTitle("Onward my noble Leader and conquer thy enemies");
             dialog.show();
+            startListeningForChanges();
         });
         cm.getItems().addAll(downloadSaveFile);
 

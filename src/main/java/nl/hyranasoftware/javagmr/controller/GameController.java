@@ -92,8 +92,14 @@ public class GameController {
         
     }
     
-    public void uploadSaveFile(Game selectedItem){
-        
+    public void uploadSaveFile(Game game, String filename){
+        String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
+        try {
+            Unirest.post(requestUrl).queryString("authKey", JGMRConfig.getInstance().getAuthCode()).queryString("turnId", game.getCurrentTurn().getTurnId())
+                    .field("gmrsave", new File(JGMRConfig.getInstance().getPath() + "/" + filename)).asBinary();
+        } catch (UnirestException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }
