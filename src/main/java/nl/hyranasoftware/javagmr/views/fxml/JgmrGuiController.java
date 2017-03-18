@@ -7,11 +7,14 @@ package nl.hyranasoftware.javagmr.views.fxml;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.WatchService;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,6 +37,7 @@ import javafx.util.Callback;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.gui;
+import nl.hyranasoftware.javagmr.threads.WatchDirectory;
 
 /**
  * FXML Controller class
@@ -55,7 +59,8 @@ public class JgmrGuiController implements Initializable {
     ContextMenu cm = new ContextMenu();
     ObservableList<Game> currentGames;
     ObservableList<Game> playerGames;
-    
+    Dialog newSaveFile;
+
     GameController gc = new GameController();
 
     /**
@@ -69,6 +74,8 @@ public class JgmrGuiController implements Initializable {
         playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
         lvPlayerTurnGames.setItems(playerGames);
         initializeContextMenu();
+        WatchDirectory wd = new WatchDirectory();
+        new Thread(wd).start();
         initializeListViews();
 
     }
@@ -96,8 +103,6 @@ public class JgmrGuiController implements Initializable {
     private void initializeListViews() {
         Group root = new Group();
 
-
- 
         lvAllGames.setCellFactory(new Callback<ListView<Game>, ListCell<Game>>() {
             @Override
             public ListCell<Game> call(ListView<Game> param) {
@@ -126,15 +131,16 @@ public class JgmrGuiController implements Initializable {
                         }
                     }
                 };
-                cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>(){
+                cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
-                        if(cell.getText().length() > 0){
-                        if(event.getButton() == MouseButton.PRIMARY)
-                            cm.show(cell, event.getScreenX(), event.getScreenY());
+                        if (cell.getText().length() > 0) {
+                            if (event.getButton() == MouseButton.PRIMARY) {
+                                cm.show(cell, event.getScreenX(), event.getScreenY());
+                            }
                         }
                     }
-                    
+
                 });
                 cell.setContextMenu(cm);
                 return cell;
@@ -157,4 +163,7 @@ public class JgmrGuiController implements Initializable {
 
     }
 
+    private void initializeWatcher() throws IOException {
+
+    }
 }
