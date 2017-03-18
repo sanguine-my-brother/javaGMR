@@ -11,6 +11,7 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,6 +56,18 @@ public class GameController {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+    
+    public List<Game> retrievePlayersTurns(List<Game> games){
+        List<Game> playerTurns = new ArrayList<Game>();
+        for(Game g : games){
+            if(g.getCurrentTurn().getUserId().equals(JGMRConfig.getInstance().getPlayerSteamId())){
+                playerTurns.add(g);
+            }
+        }
+        
+        
+        return playerTurns;
     }
 
 }

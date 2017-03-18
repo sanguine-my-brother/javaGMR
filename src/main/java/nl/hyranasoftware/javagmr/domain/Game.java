@@ -22,7 +22,7 @@ import nl.hyranasoftware.javagmr.threads.RetrievePlayers;
  * @author danny_000
  */
 public class Game {
-    PlayerController pc = new PlayerController();
+
     
     @JsonProperty("GameId")
     int gameid;
@@ -62,6 +62,13 @@ public class Game {
             Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
+    
+    
     
     
     
