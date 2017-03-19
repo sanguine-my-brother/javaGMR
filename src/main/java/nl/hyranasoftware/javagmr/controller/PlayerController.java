@@ -75,5 +75,20 @@ public class PlayerController {
         return players;
     }
     
+    public String getPlayerId(String authCode){
+        String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/AuthenticateUser";
+        String response = null;
+        try {
+            response = Unirest.get(requestUrl).queryString("authKey", authCode).asString().getBody();
+        } catch (UnirestException ex) {
+            Logger.getLogger(PlayerController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (!response.equals("null")){
+            return response;
+        }else{
+            return null;
+        }
+    }
+    
     
 }
