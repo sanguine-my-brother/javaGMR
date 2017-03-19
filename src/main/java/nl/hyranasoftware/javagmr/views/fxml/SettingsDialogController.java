@@ -38,8 +38,12 @@ public class SettingsDialogController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        if(JGMRConfig.getInstance().getPath() != null){
         tbSaveDirectory.setText(JGMRConfig.getInstance().getPath());
+        }
+        if(JGMRConfig.getInstance().getAuthCode() != null){
         tbAuthCode.setText(JGMRConfig.getInstance().getAuthCode());
+        }
     }
 
     @FXML
@@ -62,7 +66,6 @@ public class SettingsDialogController implements Initializable {
             Stage stage = (Stage) tbAuthCode.getScene().getWindow();
             stage.close();
         } catch (InValidUserException ex) {
-            Logger.getLogger(SettingsDialogController.class.getName()).log(Level.SEVERE, null, ex);
             Dialog dg = new Dialog();
             dg.setContentText("Invalid Authcode");
             dg.getDialogPane().getButtonTypes().add(ButtonType.OK);

@@ -26,6 +26,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
@@ -57,6 +58,8 @@ public class JgmrGuiController implements Initializable {
     private ListView lvAllGames;
     @FXML
     private AnchorPane apAbove;
+    @FXML
+    private Label lbTime;
 
     ContextMenu cm = new ContextMenu();
     WatchDirectory wd;
@@ -64,6 +67,7 @@ public class JgmrGuiController implements Initializable {
     ObservableList<Game> currentGames = FXCollections.observableArrayList();
     ObservableList<Game> playerGames;
     Dialog newSaveFile;
+    int timeLeft;
 
     GameController gc = new GameController();
 
@@ -75,25 +79,52 @@ public class JgmrGuiController implements Initializable {
 
         initializeContextMenu();
         initializeListViews();
-        new Timeline(new KeyFrame(
-        Duration.seconds(2),
-        ae -> pullGames()))
-    .play();
+        if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
+            new Timeline(new KeyFrame(
+                    Duration.seconds(2),
+                    ae -> pullGames()))
+                    .play();
+        } else {
+            lbTime.setText("Please enter your authcode in the settings");
+            timeLeft = 60;
+            pullGames();
+        }
         Timeline timeline = new Timeline(new KeyFrame(
-        Duration.minutes(1),
-        ae -> pullGames()));
-        timeline.setCycleCount(Animation.INDEFINITE);
+                Duration.minutes(1),
+                ae -> pullGames()));
+        timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-        
 
     }
-    
-    private void pullGames(){
+
+    private void pullGames() {
+        if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
+            lbTime.setText("Retrieving game list from GMR... Please wait");
+        
         currentGames = FXCollections.observableArrayList(gc.getGames());
         lvAllGames.setItems(currentGames);
         playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
         lvPlayerTurnGames.setItems(playerGames);
-       // currentGames.notify();
+        }
+        timeLeft = 60;
+        // currentGames.notify();
+        Timeline labelUpdater = new Timeline(new KeyFrame(
+                Duration.seconds(1),
+                ae -> updateLabel()));
+        labelUpdater.setCycleCount(Timeline.INDEFINITE);
+        labelUpdater.play();
+
+    }
+
+    private void updateLabel() {
+        
+        timeLeft--;
+        if (JGMRConfig.getInstance().getPlayerSteamId() != null){
+        lbTime.setText("Time left until next pull: " + timeLeft + " seconds");
+        }else{
+            lbTime.setText("Please enter your authcode in the settings..." + " Next pull: " + timeLeft + " seconds");
+        }
+
     }
 
     @FXML
@@ -164,29 +195,27 @@ public class JgmrGuiController implements Initializable {
 
         });
     }
-    
-    private void startListeningForChanges(){
-        if(JGMRConfig.getInstance().getPath() != null){
-            if(wdt == null){
-            wd = new WatchDirectory(playerGames, lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
+
+    private void startListeningForChanges() {
+        if (JGMRConfig.getInstance().getPath() != null) {
+            if (wdt == null) {
+                wd = new WatchDirectory(playerGames, lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
                 wdt = new Thread(wd);
                 wdt.setDaemon(true);
                 wdt.start();
-            }else{
+            } else {
                 wd.setPlayerGames(playerGames);
                 wd.setIndex(lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
             }
-            
-        }
-    }
-    
-    private void pauseWatchService(){
-        if(wd != null){
-        wd.setNewDownload();
-        }
-    }
-    
 
+        }
+    }
+
+    private void pauseWatchService() {
+        if (wd != null) {
+            wd.setNewDownload();
+        }
+    }
 
     private void initializeContextMenu() {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
