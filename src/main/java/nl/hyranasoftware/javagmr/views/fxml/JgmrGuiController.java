@@ -95,19 +95,6 @@ public class JgmrGuiController implements Initializable {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
 
-    }
-
-    private void pullGames() {
-        if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
-            lbTime.setText("Retrieving game list from GMR... Please wait");
-        
-        currentGames = FXCollections.observableArrayList(gc.getGames());
-        lvAllGames.setItems(currentGames);
-        playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
-        lvPlayerTurnGames.setItems(playerGames);
-        }
-        timeLeft = 60;
-        // currentGames.notify();
         Timeline labelUpdater = new Timeline(new KeyFrame(
                 Duration.seconds(1),
                 ae -> updateLabel()));
@@ -116,12 +103,26 @@ public class JgmrGuiController implements Initializable {
 
     }
 
+    private void pullGames() {
+        if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
+            lbTime.setText("Retrieving game list from GMR... Please wait");
+
+            currentGames = FXCollections.observableArrayList(gc.getGames());
+            lvAllGames.setItems(currentGames);
+            playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
+            lvPlayerTurnGames.setItems(playerGames);
+        }
+        timeLeft = 60;
+        // currentGames.notify();
+
+    }
+
     private void updateLabel() {
-        
+
         timeLeft--;
-        if (JGMRConfig.getInstance().getPlayerSteamId() != null){
-        lbTime.setText("Time left until next pull: " + timeLeft + " seconds");
-        }else{
+        if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
+            lbTime.setText("Time left until next pull: " + timeLeft + " seconds");
+        } else {
             lbTime.setText("Please enter your authcode in the settings..." + " Next pull: " + timeLeft + " seconds");
         }
 
