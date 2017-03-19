@@ -118,8 +118,9 @@ public class GameController {
                     .queryString("dir", "woeshhh")
                     .body(bytes)
                     .asString().getBody();
-            System.out.println(result);
 */
+            System.out.println(result);
+
             
         } catch (UnirestException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);

@@ -12,6 +12,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
+                        
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <mainClass>nl.hyranasoftware.javagmr.gui</mainClass>
