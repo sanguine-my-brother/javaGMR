@@ -43,6 +43,8 @@ public class WatchDirectory implements Runnable {
     ChoiceDialog<Game> newSaveFile;
     String fileName;
     List<Game> playerGames;
+    private volatile boolean newDownload = false;
+
     int index;
     GameController gc = new GameController();
 
@@ -51,6 +53,10 @@ public class WatchDirectory implements Runnable {
         newSaveFile.setTitle("Save file");
         newSaveFile.setHeaderText("I see you played your turn");
         newSaveFile.setContentText("Choose the game you would to submit to GMR");
+    }
+
+    public void setNewDownload() {
+        newDownload = true;
     }
 
     public void processEvents() throws Exception {
@@ -70,8 +76,7 @@ public class WatchDirectory implements Runnable {
                 try {
                     key = watcher.take();
                 } catch (InterruptedException ex) {
-                    System.out.println("Interrupted Exception");
-                    return;
+                    break;
                 }
 
                 List<WatchEvent<?>> eventList = key.pollEvents();
@@ -87,15 +92,23 @@ public class WatchDirectory implements Runnable {
                     }
 
                     WatchEvent pathEvent = (WatchEvent) genericEvent;
+
                     Path file = (Path) pathEvent.context();
                     fileName = file.toString();
                     Platform.runLater(() -> {
-                        Optional<Game> result = newSaveFile.showAndWait();
-                        if (result.isPresent()){
-                           gc.uploadSaveFile(result.get(), fileName);
+                        if (!newDownload) {
+                            if (!newSaveFile.isShowing()) {
+                                newSaveFile.setSelectedItem(playerGames.get(index));
+                                Optional<Game> result = newSaveFile.showAndWait();
+                                if (result.isPresent()) {
+                                    gc.uploadSaveFile(result.get(), fileName);
+                                }
+                            }
+                        } else {
+                            newDownload = false;
                         }
                     });
-                    
+
                     System.out.println("New save file detected: " + file.toString());
 
                 }
@@ -115,10 +128,19 @@ public class WatchDirectory implements Runnable {
 
     }
 
+    public void setPlayerGames(List<Game> playerGames) {
+        this.playerGames = playerGames;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     @Override
     public void run() {
         try {
             processEvents();
+
         } catch (Exception ex) {
             Logger.getLogger(WatchDirectory.class.getName()).log(Level.SEVERE, null, ex);
         }

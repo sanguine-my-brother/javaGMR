@@ -11,6 +11,8 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,10 +96,36 @@ public class GameController {
     
     public void uploadSaveFile(Game game, String filename){
         String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
+        //String requestUrl = "http://posttestserver.com/post.php";
         try {
-            Unirest.post(requestUrl).queryString("authKey", JGMRConfig.getInstance().getAuthCode()).queryString("turnId", game.getCurrentTurn().getTurnId())
-                    .field("gmrsave", new File(JGMRConfig.getInstance().getPath() + "/" + filename)).asBinary();
+            final InputStream stream = new FileInputStream(new File(JGMRConfig.getInstance().getPath() + "/" + filename));
+            
+            int available = stream.available();
+            final byte bytes[] = new byte[available];
+            stream.read(bytes);
+            
+            stream.close();
+            
+            String result = Unirest.post(requestUrl)
+                    .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
+                    .queryString("turnId", game.getCurrentTurn().getTurnId())
+                    .body(bytes)
+                    .asJson().getBody().toString();
+
+            /*
+            
+            String result = Unirest.post(requestUrl)
+                    .queryString("dir", "woeshhh")
+                    .body(bytes)
+                    .asString().getBody();
+            System.out.println(result);
+*/
+            
         } catch (UnirestException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

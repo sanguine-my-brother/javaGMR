@@ -80,7 +80,7 @@ public class JgmrGuiController implements Initializable {
         ae -> pullGames()))
     .play();
         Timeline timeline = new Timeline(new KeyFrame(
-        Duration.minutes(2),
+        Duration.minutes(1),
         ae -> pullGames()));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
@@ -167,22 +167,31 @@ public class JgmrGuiController implements Initializable {
     
     private void startListeningForChanges(){
         if(JGMRConfig.getInstance().getPath() != null){
-            wd = new WatchDirectory(playerGames, lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
             if(wdt == null){
+            wd = new WatchDirectory(playerGames, lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
                 wdt = new Thread(wd);
                 wdt.setDaemon(true);
                 wdt.start();
+            }else{
+                wd.setPlayerGames(playerGames);
+                wd.setIndex(lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
             }
+            
         }
     }
     
-    private void stopListeningForChanges(){
-        wdt.stop();
+    private void pauseWatchService(){
+        if(wd != null){
+        wd.setNewDownload();
+        }
     }
+    
+
 
     private void initializeContextMenu() {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
         downloadSaveFile.setOnAction(event -> {
+            pauseWatchService();
             gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
             Dialog dialog = new Dialog();
             dialog.setContentText("The save file has succesfully been downloaded");
