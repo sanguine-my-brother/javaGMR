@@ -34,6 +34,7 @@ public class GameController {
         try {
             String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetGamesAndPlayers?playerIDText";
             String response = Unirest.get(requestUrl).queryString("playerIDText", "").queryString("authKey", JGMRConfig.getInstance().getAuthCode()).asJson().getBody().toString();
+            
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JodaModule());
             String gamesNode = mapper.readTree(response).get("Games").toString();
@@ -54,7 +55,9 @@ public class GameController {
                 }
             }
             Thread t = new Thread(new PlayersTask(games));
-            t.start();
+            //Commented out this line of code because the application does currently have a GUI for displaying the users in an game
+            //This Thread can be enabled later on.
+            //t.start();
             return games;
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
@@ -67,6 +70,7 @@ public class GameController {
     public List<Game> retrievePlayersTurns(List<Game> games){
         List<Game> playerTurns = new ArrayList<Game>();
         for(Game g : games){
+            System.out.println(g.getName() + ": " + g.getCurrentTurn().getTurnId());
             if(g.getCurrentTurn().getUserId().equals(JGMRConfig.getInstance().getPlayerSteamId())){
                 playerTurns.add(g);
             }
@@ -111,14 +115,7 @@ public class GameController {
                     .queryString("turnId", game.getCurrentTurn().getTurnId())
                     .body(bytes)
                     .asJson().getBody().toString();
-
-            /*
             
-            String result = Unirest.post(requestUrl)
-                    .queryString("dir", "woeshhh")
-                    .body(bytes)
-                    .asString().getBody();
-*/
             System.out.println(result);
 
             

@@ -45,7 +45,7 @@ public class WatchDirectory implements Runnable {
     List<Game> playerGames;
     private volatile boolean newDownload = false;
 
-    int index;
+    int index = 0;
     GameController gc = new GameController();
 
     public WatchDirectory(List<Game> playerGames, int index) {
