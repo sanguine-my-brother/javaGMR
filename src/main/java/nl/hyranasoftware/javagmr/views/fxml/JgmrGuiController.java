@@ -7,12 +7,14 @@ package nl.hyranasoftware.javagmr.views.fxml;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -65,7 +67,7 @@ public class JgmrGuiController implements Initializable {
     WatchDirectory wd;
     Thread wdt;
     ObservableList<Game> currentGames = FXCollections.observableArrayList();
-    ObservableList<Game> playerGames;
+    ObservableList<Game> playerGames = FXCollections.observableArrayList();
     Dialog newSaveFile;
     int timeLeft;
 
@@ -106,11 +108,26 @@ public class JgmrGuiController implements Initializable {
     private void pullGames() {
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
             lbTime.setText("Retrieving game list from GMR... Please wait");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    List<Game> retrievedGames = FXCollections.observableArrayList(gc.getGames());
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            currentGames.clear();
+                            currentGames = FXCollections.observableArrayList(retrievedGames);
+                            lvAllGames.setItems(currentGames);
+                            
+                            playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
+                            lvPlayerTurnGames.setItems(playerGames);
+                        }
 
-            currentGames = FXCollections.observableArrayList(gc.getGames());
-            lvAllGames.setItems(currentGames);
-            playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
-            lvPlayerTurnGames.setItems(playerGames);
+                    });
+                }
+
+            }).start();
+            ;
         }
         timeLeft = 60;
         // currentGames.notify();
@@ -182,7 +199,7 @@ public class JgmrGuiController implements Initializable {
                 cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
-                        if (cell.getText().length() > 0) {
+                        if (cell.getText() != null) {
                             if (event.getButton() == MouseButton.PRIMARY) {
                                 cm.show(cell, event.getScreenX(), event.getScreenY());
                             }
@@ -201,6 +218,8 @@ public class JgmrGuiController implements Initializable {
         if (JGMRConfig.getInstance().getPath() != null) {
             if (wdt == null) {
                 wd = new WatchDirectory(playerGames, lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
+                wd.setPlayerGames(playerGames);
+                wd.setIndex(lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
                 wdt = new Thread(wd);
                 wdt.setDaemon(true);
                 wdt.start();
