@@ -70,7 +70,7 @@ public class GameController {
     public List<Game> retrievePlayersTurns(List<Game> games){
         List<Game> playerTurns = new ArrayList<Game>();
         for(Game g : games){
-            System.out.println(g.getName() + ": " + g.getCurrentTurn().getTurnId());
+            //System.out.println(g.getName() + ": " + g.getCurrentTurn().getTurnId());
             if(g.getCurrentTurn().getUserId().equals(JGMRConfig.getInstance().getPlayerSteamId())){
                 playerTurns.add(g);
             }
@@ -92,13 +92,18 @@ public class GameController {
             while ((bytesRead = is.read(buffer)) != -1) {
                 outStream.write(buffer, 0, bytesRead);
         }
+            JGMRConfig.getInstance().readDirectory();
+            outStream.close();
         } catch (Exception ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
     
-    public void uploadSaveFile(Game game, String filename){
+    /*
+    Returns a true value if the upload was successful 
+    */
+    public boolean uploadSaveFile(Game game, String filename){
         String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
         //String requestUrl = "http://posttestserver.com/post.php";
         try {
@@ -116,7 +121,16 @@ public class GameController {
                     .body(bytes)
                     .asJson().getBody().toString();
             
+            ObjectMapper mapper = new ObjectMapper();
+            String gamesNode = mapper.readTree(result).get("ResultType").toString();
+            int resultType = mapper.readValue(gamesNode, int.class);
+            if(resultType == 1){
+                JGMRConfig.getInstance().readDirectory();
+                return true;
+            }
+            
             System.out.println(result);
+            return false;
 
             
         } catch (UnirestException ex) {
@@ -126,6 +140,10 @@ public class GameController {
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
+        JGMRConfig.getInstance().readDirectory();
+        
+        return false;
+        
     }
 
 }
