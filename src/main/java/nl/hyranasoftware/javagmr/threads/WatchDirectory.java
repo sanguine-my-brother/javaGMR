@@ -32,6 +32,7 @@ import javafx.scene.control.Dialog;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import nl.hyranasoftware.javagmr.util.SaveFile;
 
 /**
  *
@@ -92,22 +93,22 @@ public class WatchDirectory implements Runnable {
                     }
 
                     WatchEvent pathEvent = (WatchEvent) genericEvent;
-
                     Path file = (Path) pathEvent.context();
-                    fileName = file.toString();
-                    Platform.runLater(() -> {
-                        if (!newDownload) {
-                            if (!newSaveFile.isShowing()) {
-                                newSaveFile.setSelectedItem(playerGames.get(index));
-                                Optional<Game> result = newSaveFile.showAndWait();
-                                if (result.isPresent()) {
-                                    gc.uploadSaveFile(result.get(), fileName);
-                                }
-                            }
-                        } else {
-                            newDownload = false;
+                    if (!newDownload) {
+                        if (eventKind == ENTRY_CREATE) {
+                            launchDialog(file);
                         }
-                    });
+                        if (eventKind == ENTRY_MODIFY) {
+                            SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
+                            if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
+                                launchDialog(file);
+                            }
+
+                        }
+                    }
+                    else{
+                        newDownload = false;
+                    }
 
                     System.out.println("New save file detected: " + file.toString());
 
@@ -125,6 +126,32 @@ public class WatchDirectory implements Runnable {
             } // end infinite for loop
         }
         return;
+
+    }
+
+    private void launchDialog(Path file) {
+        fileName = file.toString();
+        Platform.runLater(() -> {
+            if (!newDownload) {
+                if (!newSaveFile.isShowing()) {
+                    newSaveFile.setSelectedItem(playerGames.get(index));
+                    Optional<Game> result = newSaveFile.showAndWait();
+                    if (result.isPresent()) {
+                        boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
+                        if(!didUpload){
+                            Dialog dialog = new Dialog();
+                            dialog.setTitle("Couldn't upload savefile");
+                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
+                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                            dialog.show();
+                        }
+                    }
+                }
+            } else {
+                newDownload = false;
+            }
+            JGMRConfig.getInstance().readDirectory();
+        });
 
     }
 
