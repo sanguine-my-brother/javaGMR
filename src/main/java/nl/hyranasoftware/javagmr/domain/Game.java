@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.threads.RetrievePlayers;
+import org.ocpsoft.prettytime.PrettyTime;
 
 /**
  *
@@ -23,7 +24,6 @@ import nl.hyranasoftware.javagmr.threads.RetrievePlayers;
  */
 public class Game {
 
-    
     @JsonProperty("GameId")
     int gameid;
     @JsonProperty("Name")
@@ -34,7 +34,7 @@ public class Game {
     CurrentTurn currentTurn;
     @JsonProperty("Type")
     int type;
-    
+
     public int getGameid() {
         return gameid;
     }
@@ -50,8 +50,8 @@ public class Game {
     public CurrentTurn getCurrentTurn() {
         return currentTurn;
     }
-    
-    public void getPlayersFromGMR(){
+
+    public void getPlayersFromGMR() {
         try {
             RetrievePlayers rp = new RetrievePlayers(players);
             ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -65,11 +65,13 @@ public class Game {
 
     @Override
     public String toString() {
-        return this.name;
+        PrettyTime p = new PrettyTime();
+        if (currentTurn.getExpires() != null) {
+            return this.name + " || Expires: " + p.format(currentTurn.getExpires().toDate());
+        } else{
+            return this.name + " || Last turn: " + p.format(currentTurn.getStarted().toDate());
+        }
+
     }
-    
-    
-    
-    
-    
+
 }

@@ -176,7 +176,7 @@ public class JgmrGuiController implements Initializable {
                     protected void updateItem(Game g, boolean b) {
                         super.updateItem(g, b);
                         if (g != null) {
-                            setText(g.getName());
+                            setText(g.toString());
                         }
                     }
                 };
@@ -192,7 +192,7 @@ public class JgmrGuiController implements Initializable {
                     protected void updateItem(Game g, boolean b) {
                         super.updateItem(g, b);
                         if (g != null) {
-                            setText(g.getName());
+                            setText(g.toString());
                         }
                     }
                 };
