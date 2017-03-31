@@ -49,7 +49,7 @@ public class WatchDirectory implements Runnable {
     int index = 0;
     GameController gc = new GameController();
 
-    public WatchDirectory(List<Game> playerGames, int index) {
+    public WatchDirectory(List<Game> playerGames) {
         newSaveFile = new ChoiceDialog<>(playerGames.get(index), playerGames);
         newSaveFile.setTitle("Save file");
         newSaveFile.setHeaderText("I see you played your turn");
@@ -147,9 +147,7 @@ public class WatchDirectory implements Runnable {
                         }
                     }
                 }
-            } else {
-                newDownload = false;
-            }
+            } 
             JGMRConfig.getInstance().readDirectory();
         });
 
@@ -171,6 +169,10 @@ public class WatchDirectory implements Runnable {
         } catch (Exception ex) {
             Logger.getLogger(WatchDirectory.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public void activateWatchService() {
+        this.newDownload = false;
     }
 
 }

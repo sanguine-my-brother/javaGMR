@@ -17,6 +17,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -118,9 +119,12 @@ public class JgmrGuiController implements Initializable {
                             currentGames.clear();
                             currentGames = FXCollections.observableArrayList(retrievedGames);
                             lvAllGames.setItems(currentGames);
-                            
+
                             playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
                             lvPlayerTurnGames.setItems(playerGames);
+                            if (wdt == null) {
+                                startListeningForChanges();
+                            }
                         }
 
                     });
@@ -217,9 +221,10 @@ public class JgmrGuiController implements Initializable {
     private void startListeningForChanges() {
         if (JGMRConfig.getInstance().getPath() != null) {
             if (wdt == null) {
-                wd = new WatchDirectory(playerGames, lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
-                wd.setPlayerGames(playerGames);
-                wd.setIndex(lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
+                if (playerGames != null) {
+                    wd = new WatchDirectory(playerGames);
+                    wd.setPlayerGames(playerGames);
+                }
                 wdt = new Thread(wd);
                 wdt.setDaemon(true);
                 wdt.start();
@@ -237,17 +242,32 @@ public class JgmrGuiController implements Initializable {
         }
     }
 
+    private void resumeWatchService() {
+        if (wd != null) {
+            wd.activateWatchService();
+        }
+    }
+
+    private Dialog initializeDownloadDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setContentText("The save file has succesfully been downloaded");
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.setTitle("Onward my noble Leader and conquer thy enemies");
+        final Button btOk = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        btOk.addEventFilter(ActionEvent.ACTION, (event) -> {
+            resumeWatchService();
+        });
+
+        return dialog;
+    }
+
     private void initializeContextMenu() {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
         downloadSaveFile.setOnAction(event -> {
             pauseWatchService();
             gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            Dialog dialog = new Dialog();
-            dialog.setContentText("The save file has succesfully been downloaded");
-            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-            dialog.setTitle("Onward my noble Leader and conquer thy enemies");
+            Dialog dialog = initializeDownloadDialog();
             dialog.show();
-            startListeningForChanges();
         });
         cm.getItems().addAll(downloadSaveFile);
 
