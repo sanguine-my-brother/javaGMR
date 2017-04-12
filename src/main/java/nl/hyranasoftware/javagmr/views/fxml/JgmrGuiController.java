@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr.views.fxml;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -222,7 +223,7 @@ public class JgmrGuiController implements Initializable {
         if (JGMRConfig.getInstance().getPath() != null) {
             if (wdt == null) {
                 if (playerGames != null) {
-                    wd = new WatchDirectory(playerGames);
+                    wd = new WatchDirectory(playerGames) {};
                     wd.setPlayerGames(playerGames);
                 }
                 wdt = new Thread(wd);
@@ -269,7 +270,17 @@ public class JgmrGuiController implements Initializable {
             Dialog dialog = initializeDownloadDialog();
             dialog.show();
         });
-        cm.getItems().addAll(downloadSaveFile);
+        
+        MenuItem goToGameSite = new MenuItem("View game's page on GMR");
+        goToGameSite.setOnAction(event -> {
+            String webURI = "http://multiplayerrobot.com/Game#" + ((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem()).getGameid();
+            try {
+                java.awt.Desktop.getDesktop().browse(URI.create(webURI));
+            } catch (IOException ex) {
+                Logger.getLogger(JgmrGuiController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        cm.getItems().addAll(downloadSaveFile, goToGameSite);
 
     }
 
