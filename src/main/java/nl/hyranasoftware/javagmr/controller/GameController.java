@@ -31,6 +31,10 @@ import org.joda.time.DateTime;
  */
 public class GameController {
 
+    /*
+    Gets the games from the GMR sites and returns a List of all the games the player is involved with
+    Including games where it is NOT the player's turn
+    */
     public List<Game> getGames() {
         try {
             String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetGamesAndPlayers?playerIDText";
@@ -68,6 +72,13 @@ public class GameController {
         return null;
     }
 
+    /*
+    This method will return all the games where it is the players turn
+    It will also look in the JGMRConfig singleton to check for recent uploaded games. If it find such a game it will not be returned in this list
+    The wait time for turns is 15 minutes.
+    @param games Insert here the list of all the games the player is involved with
+    
+    */
     public List<Game> retrievePlayersTurns(List<Game> games) {
         List<Game> playerTurns = new ArrayList<Game>();
                         List<Game> gamesx = JGMRConfig.getInstance().getUploadedGames();
@@ -90,6 +101,10 @@ public class GameController {
         return playerTurns;
     }
 
+    /*
+    Downloads the save file from the GMR site.
+    @param selectedItem This parameter is used to download the save file from the site
+    */
     public void downloadSaveFile(Game selectedItem) {
         String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetLatestSaveFileBytes";
         InputStream is = null;
@@ -112,6 +127,9 @@ public class GameController {
     
 
     /*
+    Uploads the save file to the GMR site
+    The game parameter is used to identify to which game the savefile should be uploaded to the GMR site
+    The filename parameter is used to identify the file you want to upload.
     Returns a true value if the upload was successful 
      */
     public boolean uploadSaveFile(Game game, String filename) {
@@ -119,6 +137,57 @@ public class GameController {
         //String requestUrl = "http://posttestserver.com/post.php";
         try {
             final InputStream stream = new FileInputStream(new File(JGMRConfig.getInstance().getPath() + "/" + filename));
+
+            int available = stream.available();
+            final byte bytes[] = new byte[available];
+            stream.read(bytes);
+
+            stream.close();
+
+            String result = Unirest.post(requestUrl)
+                    .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
+                    .queryString("turnId", game.getCurrentTurn().getTurnId())
+                    .body(bytes)
+                    .asJson().getBody().toString();
+
+            ObjectMapper mapper = new ObjectMapper();
+            String gamesNode = mapper.readTree(result).get("ResultType").toString();
+            int resultType = mapper.readValue(gamesNode, int.class);
+            if (resultType == 1) {
+                JGMRConfig.getInstance().readDirectory();
+                JGMRConfig.getInstance().addUploadedGame(game);
+                return true;
+            }
+            game.setUploaded(DateTime.now());
+
+            System.out.println(result);
+            return false;
+
+        } catch (UnirestException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        JGMRConfig.getInstance().readDirectory();
+
+        return false;
+
+    }
+        /*
+    Uploads the save file to the GMR site
+    The game parameter is used to identify to which game the savefile should be uploaded to the GMR site
+    The file parameter is used to identify the file you want to upload.
+    Returns a true value if the upload was successful 
+    @param game used to identify to where the save file should be uploaded
+    @param file used to identify the file you want to upload to GMR
+     */
+        public boolean uploadSaveFile(Game game, File file) {
+        String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
+        //String requestUrl = "http://posttestserver.com/post.php";
+        try {
+            final InputStream stream = new FileInputStream(file);
 
             int available = stream.available();
             final byte bytes[] = new byte[available];

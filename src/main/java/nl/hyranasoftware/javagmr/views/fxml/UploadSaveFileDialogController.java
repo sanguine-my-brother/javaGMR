@@ -59,7 +59,7 @@ public class UploadSaveFileDialogController implements Initializable {
         System.out.println(lvGames.getSelectionModel().getSelectedIndex());
         File file = new File(tbSaveFile.getText());
         if (lvGames.getSelectionModel().getSelectedIndex() > -1 && file.exists()) {
-            boolean uploadStatusSucces = gc.uploadSaveFile((Game) lvGames.getSelectionModel().getSelectedItem(), file.getName());
+            boolean uploadStatusSucces = gc.uploadSaveFile((Game) lvGames.getSelectionModel().getSelectedItem(), file);
             if (uploadStatusSucces) {
                 Stage stage = (Stage) lvGames.getScene().getWindow();
                 stage.close();
