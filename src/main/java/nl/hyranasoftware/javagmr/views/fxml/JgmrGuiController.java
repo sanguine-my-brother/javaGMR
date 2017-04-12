@@ -6,8 +6,10 @@
 package nl.hyranasoftware.javagmr.views.fxml;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +19,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,12 +29,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -43,6 +48,7 @@ import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.gui;
 import nl.hyranasoftware.javagmr.threads.WatchDirectory;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import nl.hyranasoftware.javagmr.util.SaveFile;
 
 /**
  * FXML Controller class
@@ -64,11 +70,12 @@ public class JgmrGuiController implements Initializable {
     private Label lbTime;
 
     ContextMenu cm = new ContextMenu();
+    boolean newDownload;
     WatchDirectory wd;
     Thread wdt;
     ObservableList<Game> currentGames = FXCollections.observableArrayList();
     ObservableList<Game> playerGames = FXCollections.observableArrayList();
-    Dialog newSaveFile;
+    ChoiceDialog<Game> newSaveFileDialog;
     int timeLeft;
 
     GameController gc = new GameController();
@@ -79,6 +86,7 @@ public class JgmrGuiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
+        initializeChoiceDialog();
         initializeContextMenu();
         initializeListViews();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
@@ -105,6 +113,13 @@ public class JgmrGuiController implements Initializable {
 
     }
 
+    private void initializeChoiceDialog() {
+        newSaveFileDialog = new ChoiceDialog<>(null, playerGames);
+        newSaveFileDialog.setTitle("Save file");
+        newSaveFileDialog.setHeaderText("I see you played your turn");
+        newSaveFileDialog.setContentText("Choose the game you would to submit to GMR");
+    }
+
     private void pullGames() {
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
             lbTime.setText("Retrieving game list from GMR... Please wait");
@@ -118,9 +133,12 @@ public class JgmrGuiController implements Initializable {
                             currentGames.clear();
                             currentGames = FXCollections.observableArrayList(retrievedGames);
                             lvAllGames.setItems(currentGames);
-                            
+
                             playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
                             lvPlayerTurnGames.setItems(playerGames);
+                            if (wdt == null) {
+                                startListeningForChanges();
+                            }
                         }
 
                     });
@@ -143,6 +161,28 @@ public class JgmrGuiController implements Initializable {
             lbTime.setText("Please enter your authcode in the settings..." + " Next pull: " + timeLeft + " seconds");
         }
 
+    }
+    
+    @FXML
+    private void uploadGameManually(){
+        FXMLLoader loader = null;
+        String url = null;
+        url = getClass().getResource("uploadSaveGameDialog.fxml").toString();
+        System.out.println("  * url: " + url);
+        loader = new FXMLLoader(getClass().getResource("uploadSaveGameDialog.fxml"));
+        Parent root = null;
+        try {
+            root = (Parent) loader.load();
+        } catch (IOException ex) {
+            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Stage dialog = new Stage();
+        Scene scene = new Scene(root);
+        UploadSaveFileDialogController usfd = loader.<UploadSaveFileDialogController>getController();
+        usfd.setGames(playerGames);
+        dialog.setTitle("Giant Multi Robot Java-Client Save uploader");
+        dialog.setScene(scene);
+        dialog.show();
     }
 
     @FXML
@@ -176,7 +216,7 @@ public class JgmrGuiController implements Initializable {
                     protected void updateItem(Game g, boolean b) {
                         super.updateItem(g, b);
                         if (g != null) {
-                            setText(g.getName());
+                            setText(g.toString());
                         }
                     }
                 };
@@ -192,8 +232,11 @@ public class JgmrGuiController implements Initializable {
                     protected void updateItem(Game g, boolean b) {
                         super.updateItem(g, b);
                         if (g != null) {
-                            setText(g.getName());
+                            setText(g.toString());
+                        }else{
+                            setText(null);
                         }
+                        
                     }
                 };
                 cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
@@ -217,17 +260,18 @@ public class JgmrGuiController implements Initializable {
     private void startListeningForChanges() {
         if (JGMRConfig.getInstance().getPath() != null) {
             if (wdt == null) {
-                wd = new WatchDirectory(playerGames, lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
-                wd.setPlayerGames(playerGames);
-                wd.setIndex(lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
+                if (playerGames != null) {
+                    wd = new WatchDirectory(playerGames) {
+                        @Override
+                        public void updatedSaveFile(SaveFile file) {
+                            handleNewSaveFile(file);
+                        }
+                    };
+                }
                 wdt = new Thread(wd);
                 wdt.setDaemon(true);
                 wdt.start();
-            } else {
-                wd.setPlayerGames(playerGames);
-                wd.setIndex(lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
             }
-
         }
     }
 
@@ -237,19 +281,69 @@ public class JgmrGuiController implements Initializable {
         }
     }
 
+    private void handleNewSaveFile(SaveFile file) {
+        String fileName = file.toString();
+        Platform.runLater(() -> {
+            if (!newDownload) {
+                if (!newSaveFileDialog.isShowing()) {
+                    Optional<Game> result = newSaveFileDialog.showAndWait();
+                    if (result.isPresent()) {
+                        boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
+                        if (!didUpload) {
+                            Dialog dialog = new Dialog();
+                            dialog.setTitle("Couldn't upload savefile");
+                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
+                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                            dialog.show();
+                        } else{
+                            lvPlayerTurnGames.getItems().remove(result);
+                        }
+                    }
+                }
+            }
+            JGMRConfig.getInstance().readDirectory();
+        });
+    }
+
+    private void resumeWatchService() {
+        if (wd != null) {
+            wd.activateWatchService();
+        }
+    }
+
+    private Dialog initializeDownloadDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setContentText("The save file has succesfully been downloaded");
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.setTitle("Onward my noble Leader and conquer thy enemies");
+        final Button btOk = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        btOk.addEventFilter(ActionEvent.ACTION, (event) -> {
+            resumeWatchService();
+        });
+
+        return dialog;
+    }
+
     private void initializeContextMenu() {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
         downloadSaveFile.setOnAction(event -> {
             pauseWatchService();
+            newSaveFileDialog.setSelectedItem((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
             gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            Dialog dialog = new Dialog();
-            dialog.setContentText("The save file has succesfully been downloaded");
-            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-            dialog.setTitle("Onward my noble Leader and conquer thy enemies");
+            Dialog dialog = initializeDownloadDialog();
             dialog.show();
-            startListeningForChanges();
         });
-        cm.getItems().addAll(downloadSaveFile);
+
+        MenuItem goToGameSite = new MenuItem("View game's page on GMR");
+        goToGameSite.setOnAction(event -> {
+            String webURI = "http://multiplayerrobot.com/Game#" + ((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem()).getGameid();
+            try {
+                java.awt.Desktop.getDesktop().browse(URI.create(webURI));
+            } catch (IOException ex) {
+                Logger.getLogger(JgmrGuiController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        cm.getItems().addAll(downloadSaveFile, goToGameSite);
 
     }
 

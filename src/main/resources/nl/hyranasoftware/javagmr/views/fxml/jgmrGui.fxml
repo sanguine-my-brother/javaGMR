@@ -13,7 +13,8 @@
       <ToolBar prefHeight="41.0" prefWidth="643.0">
         <items>
           <Button fx:id="btSettings" mnemonicParsing="false" onAction="#settingsButton" text="Settings" />
-            <Label text="Time until next pull from GMR:" fx:id="lbTime"/>
+            <Button mnemonicParsing="false" onAction="#uploadGameManually" text="Upload Game Manually" />
+            <Label fx:id="lbTime" text="Time until next pull from GMR:" />
         </items>
       </ToolBar>
       <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="488.0" prefWidth="761.0">
