@@ -36,6 +36,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -84,6 +85,7 @@ public class JgmrGuiController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
         initializeChoiceDialog();
         initializeContextMenu();
         initializeListViews();
