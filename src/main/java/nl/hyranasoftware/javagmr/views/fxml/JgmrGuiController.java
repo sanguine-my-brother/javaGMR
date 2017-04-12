@@ -160,6 +160,28 @@ public class JgmrGuiController implements Initializable {
         }
 
     }
+    
+    @FXML
+    private void uploadGameManually(){
+        FXMLLoader loader = null;
+        String url = null;
+        url = getClass().getResource("uploadSaveGameDialog.fxml").toString();
+        System.out.println("  * url: " + url);
+        loader = new FXMLLoader(getClass().getResource("uploadSaveGameDialog.fxml"));
+        Parent root = null;
+        try {
+            root = (Parent) loader.load();
+        } catch (IOException ex) {
+            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Stage dialog = new Stage();
+        Scene scene = new Scene(root);
+        UploadSaveFileDialogController usfd = loader.<UploadSaveFileDialogController>getController();
+        usfd.setGames(playerGames);
+        dialog.setTitle("Giant Multi Robot Java-Client Save uploader");
+        dialog.setScene(scene);
+        dialog.show();
+    }
 
     @FXML
     private void settingsButton() {
@@ -209,7 +231,10 @@ public class JgmrGuiController implements Initializable {
                         super.updateItem(g, b);
                         if (g != null) {
                             setText(g.toString());
+                        }else{
+                            setText(null);
                         }
+                        
                     }
                 };
                 cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {

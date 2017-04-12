@@ -7,6 +7,7 @@ package nl.hyranasoftware.javagmr.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,7 +32,7 @@ public class JGMRConfig implements Serializable {
     String path;
     String authCode;
     String playerSteamId;
-    List<Game> uploadedGames;
+    List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore
     List<SaveFile> saveFiles = new ArrayList();
@@ -47,6 +48,7 @@ public class JGMRConfig implements Serializable {
             try {
                 if (configFile.exists()) {
                     ObjectMapper mapper = new ObjectMapper();
+                    mapper.registerModule(new JodaModule());
                     instance = mapper.readValue(configFile, JGMRConfig.class);
                 } else {
                     instance = new JGMRConfig();
@@ -79,9 +81,6 @@ public class JGMRConfig implements Serializable {
             this.authCode = authCode;
             this.playerSteamId = playerCode;
             saveConfig();
-        } else {
-
-            throw new InValidUserException();
         }
 
     }
@@ -97,6 +96,7 @@ public class JGMRConfig implements Serializable {
     private void saveConfig() {
         try {
             ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JodaModule());
             File configFile = new File("jGMR.config");
             mapper.writeValue(configFile, this);
         } catch (IOException ex) {
@@ -134,24 +134,23 @@ public class JGMRConfig implements Serializable {
         return false;
     }
 
-    @JsonIgnore
     public List<Game> getUploadedGames() {
-        if(uploadedGames == null){
-            uploadedGames = new ArrayList();
-        }
         return uploadedGames;
     }
 
-    
-
-    public void addUploadedGame(Game game){
+    public void addUploadedGame(Game game) {
         game.setUploaded(DateTime.now());
         this.uploadedGames.add(game);
         this.saveConfig();
     }
-    
-    public void uploadedGameExpired(Game game){
+
+    @JsonIgnore
+    public void uploadedGameExpired(Game game) {
         this.uploadedGames.remove(game);
+    }
+    
+    public void setUploadedGames(List<Game> uploadedGames) {
+        this.uploadedGames = uploadedGames;
     }
     
     
