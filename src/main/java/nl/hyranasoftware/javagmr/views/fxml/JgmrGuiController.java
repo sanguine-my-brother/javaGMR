@@ -110,8 +110,8 @@ public class JgmrGuiController implements Initializable {
         labelUpdater.play();
 
     }
-    
-    private void initializeChoiceDialog(){
+
+    private void initializeChoiceDialog() {
         newSaveFileDialog = new ChoiceDialog<>(null, playerGames);
         newSaveFileDialog.setTitle("Save file");
         newSaveFileDialog.setHeaderText("I see you played your turn");
@@ -253,27 +253,29 @@ public class JgmrGuiController implements Initializable {
             wd.setNewDownload();
         }
     }
-    
-    private void handleNewSaveFile(SaveFile file){
-                String fileName = file.toString();
-                        Platform.runLater(() -> {
-                    if (!newDownload) {
+
+    private void handleNewSaveFile(SaveFile file) {
+        String fileName = file.toString();
+        Platform.runLater(() -> {
+            if (!newDownload) {
                 if (!newSaveFileDialog.isShowing()) {
                     Optional<Game> result = newSaveFileDialog.showAndWait();
                     if (result.isPresent()) {
                         boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
-                        if(!didUpload){
+                        if (!didUpload) {
                             Dialog dialog = new Dialog();
                             dialog.setTitle("Couldn't upload savefile");
                             dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
                             dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
                             dialog.show();
+                        } else{
+                            lvPlayerTurnGames.getItems().remove(result);
                         }
                     }
                 }
-            } 
+            }
             JGMRConfig.getInstance().readDirectory();
-                    });
+        });
     }
 
     private void resumeWatchService() {
@@ -304,7 +306,7 @@ public class JgmrGuiController implements Initializable {
             Dialog dialog = initializeDownloadDialog();
             dialog.show();
         });
-        
+
         MenuItem goToGameSite = new MenuItem("View game's page on GMR");
         goToGameSite.setOnAction(event -> {
             String webURI = "http://multiplayerrobot.com/Game#" + ((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem()).getGameid();

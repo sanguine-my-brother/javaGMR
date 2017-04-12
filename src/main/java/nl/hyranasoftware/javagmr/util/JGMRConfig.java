@@ -31,8 +31,7 @@ public class JGMRConfig implements Serializable {
     String path;
     String authCode;
     String playerSteamId;
-    
-    List<Game> uploadedGames = new ArrayList();
+    List<Game> uploadedGames;
 
     @JsonIgnore
     List<SaveFile> saveFiles = new ArrayList();
@@ -135,7 +134,11 @@ public class JGMRConfig implements Serializable {
         return false;
     }
 
+    @JsonIgnore
     public List<Game> getUploadedGames() {
+        if(uploadedGames == null){
+            uploadedGames = new ArrayList();
+        }
         return uploadedGames;
     }
 
@@ -144,6 +147,11 @@ public class JGMRConfig implements Serializable {
     public void addUploadedGame(Game game){
         game.setUploaded(DateTime.now());
         this.uploadedGames.add(game);
+        this.saveConfig();
+    }
+    
+    public void uploadedGameExpired(Game game){
+        this.uploadedGames.remove(game);
     }
     
     

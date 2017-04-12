@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,7 +37,7 @@ public class Game {
     CurrentTurn currentTurn;
     @JsonProperty("Type")
     int type;
-    @JsonIgnore
+    @JsonProperty("uploaded")
     DateTime uploaded;
 
     public int getGameid() {
@@ -87,6 +88,33 @@ public class Game {
         }
 
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + this.gameid;
+        hash = 89 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Game other = (Game) obj;
+        if (this.gameid != other.gameid) {
+            return false;
+        }
+        return true;
+    }
+    
     
     
 

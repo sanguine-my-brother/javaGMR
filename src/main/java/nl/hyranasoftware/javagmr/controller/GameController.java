@@ -75,9 +75,10 @@ public class GameController {
             if (g.getCurrentTurn().getUserId().equals(JGMRConfig.getInstance().getPlayerSteamId())) {
                 List<Game> gamesx = JGMRConfig.getInstance().getUploadedGames();
                 if (JGMRConfig.getInstance().getUploadedGames().contains(g)) {
-                    if(JGMRConfig.getInstance().getUploadedGames().get(JGMRConfig.getInstance().getUploadedGames().indexOf(g)).getUploaded().isBefore(DateTime.now().plusMinutes(10))){
-                    playerTurns.add(g);
-                    }
+                    if(JGMRConfig.getInstance().getUploadedGames().get(JGMRConfig.getInstance().getUploadedGames().indexOf(g)).getUploaded().isAfter(DateTime.now().plusMinutes(15))){
+                        JGMRConfig.getInstance().uploadedGameExpired(g);
+                        playerTurns.add(g);
+                    } 
                 }
                 else{
                    playerTurns.add(g); 
@@ -107,6 +108,7 @@ public class GameController {
         }
 
     }
+    
 
     /*
     Returns a true value if the upload was successful 
@@ -134,10 +136,10 @@ public class GameController {
             int resultType = mapper.readValue(gamesNode, int.class);
             if (resultType == 1) {
                 JGMRConfig.getInstance().readDirectory();
+                JGMRConfig.getInstance().addUploadedGame(game);
                 return true;
             }
             game.setUploaded(DateTime.now());
-            JGMRConfig.getInstance().addUploadedGame(game);
 
             System.out.println(result);
             return false;
