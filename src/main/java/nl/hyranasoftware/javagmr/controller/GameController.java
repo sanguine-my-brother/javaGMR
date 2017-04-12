@@ -70,10 +70,11 @@ public class GameController {
 
     public List<Game> retrievePlayersTurns(List<Game> games) {
         List<Game> playerTurns = new ArrayList<Game>();
+                        List<Game> gamesx = JGMRConfig.getInstance().getUploadedGames();
         for (Game g : games) {
             //System.out.println(g.getName() + ": " + g.getCurrentTurn().getTurnId());
             if (g.getCurrentTurn().getUserId().equals(JGMRConfig.getInstance().getPlayerSteamId())) {
-                List<Game> gamesx = JGMRConfig.getInstance().getUploadedGames();
+
                 if (JGMRConfig.getInstance().getUploadedGames().contains(g)) {
                     if(JGMRConfig.getInstance().getUploadedGames().get(JGMRConfig.getInstance().getUploadedGames().indexOf(g)).getUploaded().isAfter(DateTime.now().plusMinutes(15))){
                         JGMRConfig.getInstance().uploadedGameExpired(g);
