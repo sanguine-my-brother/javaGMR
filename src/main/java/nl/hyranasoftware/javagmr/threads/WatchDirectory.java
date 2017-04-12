@@ -10,25 +10,15 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.Dialog;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
@@ -38,22 +28,17 @@ import nl.hyranasoftware.javagmr.util.SaveFile;
  *
  * @author danny_000
  */
-public class WatchDirectory implements Runnable {
+public abstract class WatchDirectory implements Runnable {
 
     WatchService watcher;
-    ChoiceDialog<Game> newSaveFile;
     String fileName;
-    List<Game> playerGames;
     private volatile boolean newDownload = false;
 
     int index = 0;
     GameController gc = new GameController();
 
     public WatchDirectory(List<Game> playerGames) {
-        newSaveFile = new ChoiceDialog<>(playerGames.get(index), playerGames);
-        newSaveFile.setTitle("Save file");
-        newSaveFile.setHeaderText("I see you played your turn");
-        newSaveFile.setContentText("Choose the game you would to submit to GMR");
+
     }
 
     public void setNewDownload() {
@@ -96,12 +81,12 @@ public class WatchDirectory implements Runnable {
                     Path file = (Path) pathEvent.context();
                     if (!newDownload) {
                         if (eventKind == ENTRY_CREATE) {
-                            launchDialog(file);
+                            updatedSaveFile((SaveFile) file.toFile());
                         }
                         if (eventKind == ENTRY_MODIFY) {
                             SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
                             if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
-                                launchDialog(file);
+                                updatedSaveFile(new SaveFile(file.getFileName().toString()));
                             }
 
                         }
@@ -125,37 +110,15 @@ public class WatchDirectory implements Runnable {
 
             } // end infinite for loop
         }
-        return;
 
     }
 
     private void launchDialog(Path file) {
-        fileName = file.toString();
-        Platform.runLater(() -> {
-            if (!newDownload) {
-                if (!newSaveFile.isShowing()) {
-                    newSaveFile.setSelectedItem(playerGames.get(index));
-                    Optional<Game> result = newSaveFile.showAndWait();
-                    if (result.isPresent()) {
-                        boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
-                        if(!didUpload){
-                            Dialog dialog = new Dialog();
-                            dialog.setTitle("Couldn't upload savefile");
-                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
-                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                            dialog.show();
-                        }
-                    }
-                }
-            } 
-            JGMRConfig.getInstance().readDirectory();
-        });
 
     }
+    
+    public abstract void updatedSaveFile(SaveFile file);
 
-    public void setPlayerGames(List<Game> playerGames) {
-        this.playerGames = playerGames;
-    }
 
     public void setIndex(int index) {
         this.index = index;

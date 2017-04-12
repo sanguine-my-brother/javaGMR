@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
+import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.exception.InValidUserException;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -29,6 +31,8 @@ public class JGMRConfig implements Serializable {
     String path;
     String authCode;
     String playerSteamId;
+    
+    List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore
     List<SaveFile> saveFiles = new ArrayList();
@@ -130,5 +134,18 @@ public class JGMRConfig implements Serializable {
         }
         return false;
     }
+
+    public List<Game> getUploadedGames() {
+        return uploadedGames;
+    }
+
+    
+
+    public void addUploadedGame(Game game){
+        game.setUploaded(DateTime.now());
+        this.uploadedGames.add(game);
+    }
+    
+    
 
 }

@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.threads.RetrievePlayers;
+import org.joda.time.DateTime;
 import org.ocpsoft.prettytime.PrettyTime;
 
 /**
@@ -34,6 +36,8 @@ public class Game {
     CurrentTurn currentTurn;
     @JsonProperty("Type")
     int type;
+    @JsonIgnore
+    DateTime uploaded;
 
     public int getGameid() {
         return gameid;
@@ -50,6 +54,16 @@ public class Game {
     public CurrentTurn getCurrentTurn() {
         return currentTurn;
     }
+
+    public DateTime getUploaded() {
+        return uploaded;
+    }
+
+    public void setUploaded(DateTime uploaded) {
+        this.uploaded = uploaded;
+    }
+    
+    
 
     public void getPlayersFromGMR() {
         try {
@@ -73,5 +87,7 @@ public class Game {
         }
 
     }
+    
+    
 
 }

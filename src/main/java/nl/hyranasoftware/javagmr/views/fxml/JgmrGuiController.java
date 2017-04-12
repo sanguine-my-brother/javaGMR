@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +29,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -45,6 +47,7 @@ import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.gui;
 import nl.hyranasoftware.javagmr.threads.WatchDirectory;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import nl.hyranasoftware.javagmr.util.SaveFile;
 
 /**
  * FXML Controller class
@@ -66,11 +69,12 @@ public class JgmrGuiController implements Initializable {
     private Label lbTime;
 
     ContextMenu cm = new ContextMenu();
+    boolean newDownload;
     WatchDirectory wd;
     Thread wdt;
     ObservableList<Game> currentGames = FXCollections.observableArrayList();
     ObservableList<Game> playerGames = FXCollections.observableArrayList();
-    Dialog newSaveFile;
+    ChoiceDialog<Game> newSaveFileDialog;
     int timeLeft;
 
     GameController gc = new GameController();
@@ -80,7 +84,7 @@ public class JgmrGuiController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        initializeChoiceDialog();
         initializeContextMenu();
         initializeListViews();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
@@ -105,6 +109,13 @@ public class JgmrGuiController implements Initializable {
         labelUpdater.setCycleCount(Timeline.INDEFINITE);
         labelUpdater.play();
 
+    }
+    
+    private void initializeChoiceDialog(){
+        newSaveFileDialog = new ChoiceDialog<>(null, playerGames);
+        newSaveFileDialog.setTitle("Save file");
+        newSaveFileDialog.setHeaderText("I see you played your turn");
+        newSaveFileDialog.setContentText("Choose the game you would to submit to GMR");
     }
 
     private void pullGames() {
@@ -223,17 +234,17 @@ public class JgmrGuiController implements Initializable {
         if (JGMRConfig.getInstance().getPath() != null) {
             if (wdt == null) {
                 if (playerGames != null) {
-                    wd = new WatchDirectory(playerGames) {};
-                    wd.setPlayerGames(playerGames);
+                    wd = new WatchDirectory(playerGames) {
+                        @Override
+                        public void updatedSaveFile(SaveFile file) {
+                            handleNewSaveFile(file);
+                        }
+                    };
                 }
                 wdt = new Thread(wd);
                 wdt.setDaemon(true);
                 wdt.start();
-            } else {
-                wd.setPlayerGames(playerGames);
-                wd.setIndex(lvPlayerTurnGames.getSelectionModel().getSelectedIndex());
             }
-
         }
     }
 
@@ -241,6 +252,28 @@ public class JgmrGuiController implements Initializable {
         if (wd != null) {
             wd.setNewDownload();
         }
+    }
+    
+    private void handleNewSaveFile(SaveFile file){
+                String fileName = file.toString();
+                        Platform.runLater(() -> {
+                    if (!newDownload) {
+                if (!newSaveFileDialog.isShowing()) {
+                    Optional<Game> result = newSaveFileDialog.showAndWait();
+                    if (result.isPresent()) {
+                        boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
+                        if(!didUpload){
+                            Dialog dialog = new Dialog();
+                            dialog.setTitle("Couldn't upload savefile");
+                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
+                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                            dialog.show();
+                        }
+                    }
+                }
+            } 
+            JGMRConfig.getInstance().readDirectory();
+                    });
     }
 
     private void resumeWatchService() {
@@ -266,6 +299,7 @@ public class JgmrGuiController implements Initializable {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
         downloadSaveFile.setOnAction(event -> {
             pauseWatchService();
+            newSaveFileDialog.setSelectedItem((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
             gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
             Dialog dialog = initializeDownloadDialog();
             dialog.show();
