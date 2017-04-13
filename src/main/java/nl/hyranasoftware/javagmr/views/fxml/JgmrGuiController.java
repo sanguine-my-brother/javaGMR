@@ -55,6 +55,10 @@ import nl.hyranasoftware.javagmr.util.SaveFile;
  *
  * @author danny_000
  */
+
+    /* https://github.com/PlusHaze/TrayNotification 
+    Add this lib
+    */
 public class JgmrGuiController implements Initializable {
 
     @FXML
@@ -330,8 +334,13 @@ public class JgmrGuiController implements Initializable {
             pauseWatchService();
             newSaveFileDialog.setSelectedItem((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
             gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            Dialog dialog = initializeDownloadDialog();
+            Dialog dialog = new Dialog();
+            dialog.setContentText("The save file has succesfully been downloaded");
+            ((Stage) dialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+            dialog.setTitle("Onward my noble Leader and conquer thy enemies");
             dialog.show();
+            startListeningForChanges();
         });
 
         MenuItem goToGameSite = new MenuItem("View game's page on GMR");
