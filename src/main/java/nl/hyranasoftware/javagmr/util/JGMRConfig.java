@@ -32,7 +32,9 @@ public class JGMRConfig implements Serializable {
     String path;
     String authCode;
     String playerSteamId;
-    List<Game> uploadedGames = new ArrayList();
+    int notificationFrequency;
+    boolean notificationsMinized;
+    List<Game> uploadedGames;
 
     @JsonIgnore
     List<SaveFile> saveFiles = new ArrayList();
@@ -52,6 +54,8 @@ public class JGMRConfig implements Serializable {
                     instance = mapper.readValue(configFile, JGMRConfig.class);
                 } else {
                     instance = new JGMRConfig();
+                    instance.uploadedGames = new ArrayList();
+                    instance.notificationFrequency = 15;
                 }
             } catch (Exception ex) {
                 Logger.getLogger(JGMRConfig.class.getName()).log(Level.SEVERE, null, ex);
@@ -68,6 +72,24 @@ public class JGMRConfig implements Serializable {
         this.path = path;
         saveConfig();
         readDirectory();
+    }
+
+    public int getNotificationFrequency() {
+        return notificationFrequency;
+    }
+
+    public void setNotificationFrequency(int notificationFrequency) {
+        this.notificationFrequency = notificationFrequency;
+        saveConfig();
+    }
+
+    public boolean isNotificationsMinized() {
+        return notificationsMinized;
+    }
+
+    public void setNotificationsMinized(boolean notificationsMinized) {
+        this.notificationsMinized = notificationsMinized;
+        saveConfig();
     }
 
     public String getAuthCode() {
@@ -148,11 +170,9 @@ public class JGMRConfig implements Serializable {
     public void uploadedGameExpired(Game game) {
         this.uploadedGames.remove(game);
     }
-    
+
     public void setUploadedGames(List<Game> uploadedGames) {
         this.uploadedGames = uploadedGames;
     }
-    
-    
 
 }
