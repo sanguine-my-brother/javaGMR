@@ -8,6 +8,11 @@ package nl.hyranasoftware.javagmr.views.fxml;
 import com.github.plushaze.traynotification.animations.Animations;
 import com.github.plushaze.traynotification.notification.Notifications;
 import com.github.plushaze.traynotification.notification.TrayNotification;
+import java.awt.AWTException;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -96,7 +101,7 @@ public class JgmrGuiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
-        initializeNotifications();
+
         initializeChoiceDialog();
         initializeContextMenu();
         initializeListViews();
@@ -122,6 +127,7 @@ public class JgmrGuiController implements Initializable {
                 ae -> updateLabel()));
         labelUpdater.setCycleCount(Timeline.INDEFINITE);
         labelUpdater.play();
+                initializeNotifications();
 
     }
 
@@ -368,16 +374,28 @@ public class JgmrGuiController implements Initializable {
     private void initializeWatcher() throws IOException {
 
     }
-
-    private void initializeNotifications() {
-
-        if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
+    
+    private void displayNotification(){
             Image gmrLogo = new Image(getClass().getResourceAsStream("GMRLogo.png"));
             notification = new TrayNotification("It's your turn", "It's your turn in " + playerGames.size() + " games", Notifications.SUCCESS);
             notification.setRectangleFill(Paint.valueOf("#565656"));
             notification.setImage(gmrLogo);
             notification.setAnimation(Animations.POPUP);
             notification.showAndDismiss(Duration.seconds(15));
+    }
+
+    private void initializeNotifications() {
+        if(lvAllGames.getScene() != null){
+        Stage stage = (Stage) lvAllGames.getScene().getWindow();
+
+        if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
+            if(JGMRConfig.getInstance().isNotificationsMinized() && stage.isIconified()){
+                displayNotification();
+            }
+            else if(!stage.isIconified()) {
+                displayNotification();
+            }
+        }
         }
         if (JGMRConfig.getInstance().getNotificationFrequency() > 0) {
             notificationTimeline = new Timeline(new KeyFrame(
@@ -392,7 +410,7 @@ public class JgmrGuiController implements Initializable {
         }
     }
 
-    private void showNotification() {
+    private void initializeSystemtray() {
 
     }
 }
