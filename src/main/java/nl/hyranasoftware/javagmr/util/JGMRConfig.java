@@ -173,5 +173,7 @@ public class JGMRConfig implements Serializable {
     public void setUploadedGames(List<Game> uploadedGames) {
         this.uploadedGames = uploadedGames;
     }
+    
+    
 
 }

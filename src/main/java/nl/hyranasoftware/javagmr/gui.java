@@ -41,7 +41,6 @@ public class gui extends Application {
         }
         Scene scene = new Scene(root);
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("eicon.png")));
-        
         primaryStage.setTitle("Giant Multi Robot Java-Client");
         primaryStage.setScene(scene);
         primaryStage.show();
