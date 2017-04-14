@@ -5,6 +5,9 @@
  */
 package nl.hyranasoftware.javagmr.views.fxml;
 
+import com.github.plushaze.traynotification.animations.Animations;
+import com.github.plushaze.traynotification.notification.Notifications;
+import com.github.plushaze.traynotification.notification.TrayNotification;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -40,6 +43,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
@@ -56,9 +60,9 @@ import nl.hyranasoftware.javagmr.util.SaveFile;
  * @author danny_000
  */
 
-    /* https://github.com/PlusHaze/TrayNotification 
+/* https://github.com/PlusHaze/TrayNotification 
     Add this lib
-    */
+ */
 public class JgmrGuiController implements Initializable {
 
     @FXML
@@ -80,6 +84,8 @@ public class JgmrGuiController implements Initializable {
     ObservableList<Game> currentGames = FXCollections.observableArrayList();
     ObservableList<Game> playerGames = FXCollections.observableArrayList();
     ChoiceDialog<Game> newSaveFileDialog;
+    TrayNotification notification;
+    Timeline notificationTimeline;
     int timeLeft;
 
     GameController gc = new GameController();
@@ -90,6 +96,7 @@ public class JgmrGuiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
+        initializeNotifications();
         initializeChoiceDialog();
         initializeContextMenu();
         initializeListViews();
@@ -103,6 +110,7 @@ public class JgmrGuiController implements Initializable {
             timeLeft = 60;
             pullGames();
         }
+
         Timeline timeline = new Timeline(new KeyFrame(
                 Duration.minutes(1),
                 ae -> pullGames()));
@@ -121,6 +129,7 @@ public class JgmrGuiController implements Initializable {
         newSaveFileDialog = new ChoiceDialog<>(null, playerGames);
         newSaveFileDialog.setTitle("Save file");
         newSaveFileDialog.setHeaderText("I see you played your turn");
+        ((Stage) newSaveFileDialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
         newSaveFileDialog.setContentText("Choose the game you would to submit to GMR");
     }
 
@@ -166,9 +175,9 @@ public class JgmrGuiController implements Initializable {
         }
 
     }
-    
+
     @FXML
-    private void uploadGameManually(){
+    private void uploadGameManually() {
         FXMLLoader loader = null;
         String url = null;
         url = getClass().getResource("uploadSaveGameDialog.fxml").toString();
@@ -237,10 +246,10 @@ public class JgmrGuiController implements Initializable {
                         super.updateItem(g, b);
                         if (g != null) {
                             setText(g.toString());
-                        }else{
+                        } else {
                             setText(null);
                         }
-                        
+
                     }
                 };
                 cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
@@ -299,7 +308,7 @@ public class JgmrGuiController implements Initializable {
                             dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
                             dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
                             dialog.show();
-                        } else{
+                        } else {
                             lvPlayerTurnGames.getItems().remove(result);
                         }
                     }
@@ -357,6 +366,33 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void initializeWatcher() throws IOException {
+
+    }
+
+    private void initializeNotifications() {
+
+        if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
+            Image gmrLogo = new Image(getClass().getResourceAsStream("GMRLogo.png"));
+            notification = new TrayNotification("It's your turn", "It's your turn in " + playerGames.size() + " games", Notifications.SUCCESS);
+            notification.setRectangleFill(Paint.valueOf("#565656"));
+            notification.setImage(gmrLogo);
+            notification.setAnimation(Animations.POPUP);
+            notification.showAndDismiss(Duration.seconds(15));
+        }
+        if (JGMRConfig.getInstance().getNotificationFrequency() > 0) {
+            notificationTimeline = new Timeline(new KeyFrame(
+                    Duration.minutes(JGMRConfig.getInstance().getNotificationFrequency()),
+                    ae -> initializeNotifications()));
+            notificationTimeline.play();
+        } else {
+            notificationTimeline = new Timeline(new KeyFrame(
+                    Duration.minutes(5),
+                    ae -> initializeNotifications()));
+            notificationTimeline.play();
+        }
+    }
+
+    private void showNotification() {
 
     }
 }
