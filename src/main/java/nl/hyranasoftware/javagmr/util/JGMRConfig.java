@@ -34,7 +34,7 @@ public class JGMRConfig implements Serializable {
     String playerSteamId;
     int notificationFrequency;
     boolean notificationsMinized;
-    List<Game> uploadedGames;
+    List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore
     List<SaveFile> saveFiles = new ArrayList();
@@ -54,7 +54,6 @@ public class JGMRConfig implements Serializable {
                     instance = mapper.readValue(configFile, JGMRConfig.class);
                 } else {
                     instance = new JGMRConfig();
-                    instance.uploadedGames = new ArrayList();
                     instance.notificationFrequency = 15;
                 }
             } catch (Exception ex) {
