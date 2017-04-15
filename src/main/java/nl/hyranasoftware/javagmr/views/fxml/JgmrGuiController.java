@@ -396,11 +396,15 @@ public class JgmrGuiController implements Initializable {
     private void initializeNotifications() {
         if (lvAllGames.getScene() != null) {
             Stage stage = (Stage) lvAllGames.getScene().getWindow();
-
+            boolean test = stage.isShowing();
             if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
                 if (JGMRConfig.getInstance().isNotificationsMinized() && stage.isIconified()) {
                     displayNotification();
-                } else if (!stage.isIconified()) {
+                }
+                else if (JGMRConfig.getInstance().isNotificationsMinized() && !stage.isShowing()){
+                    displayNotification();
+                }
+                else if (!stage.isIconified() && stage.isShowing()) {
                     displayNotification();
                 }
             }
