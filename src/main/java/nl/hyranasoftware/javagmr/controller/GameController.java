@@ -111,22 +111,17 @@ public class GameController {
     @param selectedItem This parameter is used to download the save file from the site
      */
     public void downloadSaveFile(Game selectedItem) {
-
-        
         try {
-            
-            
             String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetLatestSaveFileBytes";
             URL url = new URL(requestUrl + "?authkey=" + JGMRConfig.getInstance().getAuthCode() + "&gameId=" + selectedItem.getGameid());
             HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
             long completeFileSize = httpConnection.getContentLength();
             //InputStream is = null;  
             try {
-                
-                //is = Unirest.get(requestUrl).queryString("authKey", JGMRConfig.getInstance().getAuthCode()).queryString("gameId", selectedItem.getGameid()).asBinary().getRawBody();
+
                 File targetFile = new File(JGMRConfig.getInstance().getPath() + "/(jGMR) Play this one.Civ5Save");
                 java.io.BufferedInputStream is = new java.io.BufferedInputStream(httpConnection.getInputStream());
-                
+
                 OutputStream outStream = new FileOutputStream(targetFile);
                 int totalSize = is.available();
                 byte[] buffer = new byte[8 * 1024];
@@ -135,16 +130,14 @@ public class GameController {
                 while ((bytesRead = is.read(buffer)) != -1) {
                     downLoadFileSize = downLoadFileSize + bytesRead;
                     outStream.write(buffer, 0, bytesRead);
-                    double progress = (double) ((double)downLoadFileSize / (double) completeFileSize);
-                    sendDownloadProgress(progress);
-                    
+                    sendDownloadProgress((double) ((double) downLoadFileSize / (double) completeFileSize));
                 }
                 JGMRConfig.getInstance().readDirectory();
                 outStream.close();
             } catch (Exception ex) {
                 Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         } catch (MalformedURLException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -161,47 +154,12 @@ public class GameController {
     Returns a true value if the upload was successful 
      */
     public boolean uploadSaveFile(Game game, String filename) {
-        String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
-        //String requestUrl = "http://posttestserver.com/post.php";
         try {
-            final InputStream stream = new FileInputStream(new File(JGMRConfig.getInstance().getPath() + "/" + filename));
-
-            int available = stream.available();
-            final byte bytes[] = new byte[available];
-            stream.read(bytes);
-
-            stream.close();
-
-            String result = Unirest.post(requestUrl)
-                    .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
-                    .queryString("turnId", game.getCurrentTurn().getTurnId())
-                    .body(bytes)
-                    .asJson().getBody().toString();
-
-            ObjectMapper mapper = new ObjectMapper();
-            String gamesNode = mapper.readTree(result).get("ResultType").toString();
-            int resultType = mapper.readValue(gamesNode, int.class);
-            if (resultType == 1) {
-                JGMRConfig.getInstance().readDirectory();
-                JGMRConfig.getInstance().addUploadedGame(game);
-                return true;
-            }
-            game.setUploaded(DateTime.now());
-
-            System.out.println(result);
-            return false;
-
-        } catch (UnirestException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+            return doUpload(new FileInputStream(new File(JGMRConfig.getInstance().getPath() + "/" + filename)), game);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        JGMRConfig.getInstance().readDirectory();
-
         return false;
-
     }
 
     /*
@@ -213,10 +171,20 @@ public class GameController {
     @param file used to identify the file you want to upload to GMR
      */
     public boolean uploadSaveFile(Game game, File file) {
-        String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
-        //String requestUrl = "http://posttestserver.com/post.php";
+
         try {
-            final InputStream stream = new FileInputStream(file);
+            //String requestUrl = "http://posttestserver.com/post.php";
+            return doUpload(new FileInputStream(file), game);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return false;
+    }
+
+    private boolean doUpload(InputStream stream, Game game) {
+                String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
+        try {
 
             int available = stream.available();
             final byte bytes[] = new byte[available];
@@ -253,10 +221,10 @@ public class GameController {
         JGMRConfig.getInstance().readDirectory();
 
         return false;
-
     }
 
-    /* This send the progress in percentage */
+    /* This sends the progress in percentage gets overridden
+            @param percent, the number of how much percent has been downloaded already*/
     public void sendDownloadProgress(double percent) {
 
     }
