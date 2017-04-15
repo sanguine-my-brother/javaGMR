@@ -34,6 +34,7 @@ public class JGMRConfig implements Serializable {
     String playerSteamId;
     int notificationFrequency;
     boolean notificationsMinized;
+    boolean minimizeToTray;
     List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore
@@ -90,6 +91,18 @@ public class JGMRConfig implements Serializable {
         this.notificationsMinized = notificationsMinized;
         saveConfig();
     }
+
+    public boolean isMinimizeToTray() {
+        return minimizeToTray;
+        
+    }
+
+    public void setMinimizeToTray(boolean minimizeToTray) {
+        this.minimizeToTray = minimizeToTray;
+        saveConfig();
+    }
+    
+    
 
     public String getAuthCode() {
         return authCode;
