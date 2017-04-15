@@ -396,6 +396,7 @@ public class JgmrGuiController implements Initializable {
                 @Override
                 protected Object call() throws Exception {
                     gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
+                    newDownload = true;
                     Platform.runLater(() -> {
                         TrayNotification uploadSucces = new TrayNotification("Download successful", "Onward my noble Leader and conquer thy enemies", Notifications.SUCCESS);
                         uploadSucces.setAnimation(Animations.POPUP);
@@ -403,6 +404,7 @@ public class JgmrGuiController implements Initializable {
                         pbDownload.setProgress(0);
                         jgmrVbox.getChildren().remove(hbDownload);
                         startListeningForChanges();
+                        newDownload = false;
                     });
                     return null;
                 }
