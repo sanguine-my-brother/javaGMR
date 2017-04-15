@@ -5,6 +5,9 @@
  */
 package nl.hyranasoftware.javagmr.views.fxml;
 
+import com.github.plushaze.traynotification.animations.Animations;
+import com.github.plushaze.traynotification.notification.Notifications;
+import com.github.plushaze.traynotification.notification.TrayNotification;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -19,6 +22,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
@@ -61,8 +65,9 @@ public class UploadSaveFileDialogController implements Initializable {
         if (lvGames.getSelectionModel().getSelectedIndex() > -1 && file.exists()) {
             boolean uploadStatusSucces = gc.uploadSaveFile((Game) lvGames.getSelectionModel().getSelectedItem(), file);
             if (uploadStatusSucces) {
-                Stage stage = (Stage) lvGames.getScene().getWindow();
-                stage.close();
+                TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
+                uploadSucces.setAnimation(Animations.POPUP);
+                uploadSucces.showAndDismiss(Duration.seconds(3));
             } else {
                 Dialog dg = new Dialog();
                 dg.setContentText("Either check on GMR if it's your turn or try uploading it again");
