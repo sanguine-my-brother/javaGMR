@@ -53,10 +53,10 @@ public class SettingsDialogController implements Initializable {
             tbAuthCode.setText(JGMRConfig.getInstance().getAuthCode());
         }
         cbSystemtray.selectedProperty().set(JGMRConfig.getInstance().isMinimizeToTray());
-        cbFrequency.getItems().addAll("15 minutes", "30 minutes", "60 minutes", "never");
+        cbFrequency.getItems().addAll("15 minutes", "30 minutes", "60 minutes", "Never");
         switch (JGMRConfig.getInstance().getNotificationFrequency()) {
             case 0:
-                cbFrequency.getSelectionModel().select("never");
+                cbFrequency.getSelectionModel().select("Never");
                 break;
             case 15:
                 cbFrequency.getSelectionModel().select("15 minutes");
@@ -102,7 +102,7 @@ public class SettingsDialogController implements Initializable {
                 case "60 minutes":
                     JGMRConfig.getInstance().setNotificationFrequency(60);
                     break;
-                case "never":
+                case "Never":
                     JGMRConfig.getInstance().setNotificationFrequency(0);
                     break;
             }
