@@ -35,7 +35,7 @@ public class UploadSaveFileDialogController implements Initializable {
     @FXML
     TextField tbSaveFile;
 
-    GameController gc = new GameController();
+    GameController gc;
     ObservableList<Game> playerTurns = FXCollections.observableArrayList();
 
     @Override

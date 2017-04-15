@@ -27,6 +27,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -44,10 +45,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -74,7 +78,12 @@ public class JgmrGuiController implements Initializable {
 
     @FXML
     private Button btSettings;
-
+    @FXML
+    private VBox jgmrVbox;
+    @FXML
+    private HBox hbUpload;
+    @FXML
+    private HBox hbDownload;
     @FXML
     private ListView lvPlayerTurnGames;
     @FXML
@@ -83,6 +92,8 @@ public class JgmrGuiController implements Initializable {
     private AnchorPane apAbove;
     @FXML
     private Label lbTime;
+    @FXML
+    private ProgressBar pbDownload;
 
     ContextMenu cm = new ContextMenu();
     boolean newDownload;
@@ -96,17 +107,24 @@ public class JgmrGuiController implements Initializable {
     Timeline notificationTimeline;
     int timeLeft;
 
-    GameController gc = new GameController();
+    GameController gc;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        gc = new GameController() {
+            @Override
+            public void sendDownloadProgress(double percent) {
+                updateDownloadProgressBar(percent);
+            }
+        };
 
         initializeChoiceDialog();
         initializeContextMenu();
-
+        jgmrVbox.getChildren().remove(hbDownload);
+        jgmrVbox.getChildren().remove(hbUpload);
         initializeListViews();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
             new Timeline(new KeyFrame(
@@ -356,15 +374,28 @@ public class JgmrGuiController implements Initializable {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
         downloadSaveFile.setOnAction(event -> {
             pauseWatchService();
+            jgmrVbox.getChildren().add(hbDownload);
             newSaveFileDialog.setSelectedItem((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            Dialog dialog = new Dialog();
-            dialog.setContentText("The save file has succesfully been downloaded");
-            ((Stage) dialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
-            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-            dialog.setTitle("Onward my noble Leader and conquer thy enemies");
-            dialog.show();
-            startListeningForChanges();
+            Task t = new Task() {
+                @Override
+                protected Object call() throws Exception {
+                                gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
+                Platform.runLater(() -> {
+                    Dialog dialog = new Dialog();
+                    dialog.setContentText("The save file has succesfully been downloaded");
+                    ((Stage) dialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
+                    dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                    dialog.setTitle("Onward my noble Leader and conquer thy enemies");
+                    dialog.show();
+                    pbDownload.setProgress(0);
+                    jgmrVbox.getChildren().remove(hbDownload);
+                    startListeningForChanges();
+                });
+                return null;
+                }
+            };
+            Thread thread = new Thread(t);
+            thread.start();
         });
 
         MenuItem goToGameSite = new MenuItem("View game's page on GMR");
@@ -400,11 +431,9 @@ public class JgmrGuiController implements Initializable {
             if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
                 if (JGMRConfig.getInstance().isNotificationsMinized() && stage.isIconified()) {
                     displayNotification();
-                }
-                else if (JGMRConfig.getInstance().isNotificationsMinized() && !stage.isShowing()){
+                } else if (JGMRConfig.getInstance().isNotificationsMinized() && !stage.isShowing()) {
                     displayNotification();
-                }
-                else if (!stage.isIconified() && stage.isShowing()) {
+                } else if (!stage.isIconified() && stage.isShowing()) {
                     displayNotification();
                 }
             }
@@ -420,6 +449,13 @@ public class JgmrGuiController implements Initializable {
                     ae -> initializeNotifications()));
             notificationTimeline.play();
         }
+    }
+
+    private void updateDownloadProgressBar(double size) {
+        System.out.println(size);
+        Platform.runLater(() -> {
+            pbDownload.setProgress(size);
+        });
     }
 
     private void initializeSystemtray() {
