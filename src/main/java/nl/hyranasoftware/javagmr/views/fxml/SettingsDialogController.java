@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ButtonType;
@@ -37,6 +38,8 @@ public class SettingsDialogController implements Initializable {
     ComboBox cbFrequency;
     @FXML
     CheckBox cbMinimized;
+    @FXML
+    CheckBox cbSystemtray;
 
     /**
      * Initializes the controller class.
@@ -49,6 +52,7 @@ public class SettingsDialogController implements Initializable {
         if (JGMRConfig.getInstance().getAuthCode() != null) {
             tbAuthCode.setText(JGMRConfig.getInstance().getAuthCode());
         }
+        cbSystemtray.selectedProperty().set(JGMRConfig.getInstance().isMinimizeToTray());
         cbFrequency.getItems().addAll("15 minutes", "30 minutes", "60 minutes", "never");
         switch (JGMRConfig.getInstance().getNotificationFrequency()) {
             case 0:
@@ -85,6 +89,8 @@ public class SettingsDialogController implements Initializable {
             JGMRConfig.getInstance().setAuthCode(tbAuthCode.getText());
             JGMRConfig.getInstance().setPath(tbSaveDirectory.getText());
             JGMRConfig.getInstance().setNotificationsMinized(cbMinimized.selectedProperty().get());
+            JGMRConfig.getInstance().setMinimizeToTray(cbSystemtray.selectedProperty().get());
+            Platform.setImplicitExit(!cbSystemtray.selectedProperty().get());
             String frequency = (String) cbFrequency.getSelectionModel().getSelectedItem();
             switch (frequency) {
                 case "15 minutes":

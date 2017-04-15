@@ -22,6 +22,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import nl.hyranasoftware.javagmr.views.fxml.JgmrGuiController;
 
 /**
@@ -44,35 +45,18 @@ public class gui extends Application {
             Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
         }
         Scene scene = new Scene(root);
-        systemtray(primaryStage);
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("eicon.png")));
         primaryStage.setTitle("Giant Multi Robot Java-Client");
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-
             @Override
             public void handle(WindowEvent arg0) {
-                Platform.setImplicitExit(false);
+                Platform.setImplicitExit(!JGMRConfig.getInstance().isMinimizeToTray());
                 primaryStage.hide();
             }
         });
+
         primaryStage.show();
-
-    }
-
-    private void hide(final Stage stage) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                if (true) {
-                    stage.hide();
-                }
-            }
-        });
-    }
-
-    private void systemtray(Stage stage) {
-
 
     }
 
