@@ -32,9 +32,9 @@ public class JGMRConfig implements Serializable {
     String path;
     String authCode;
     String playerSteamId;
-    int notificationFrequency;
-    boolean notificationsMinized;
-    boolean minimizeToTray;
+    int notificationFrequency = 15;
+    boolean notificationsMinized = true;
+    boolean minimizeToTray = true;
     List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore

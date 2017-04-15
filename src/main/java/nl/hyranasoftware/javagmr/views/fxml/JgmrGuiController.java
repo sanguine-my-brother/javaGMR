@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr.views.fxml;
 
 import com.github.plushaze.traynotification.animations.Animations;
+import com.github.plushaze.traynotification.notification.Notification;
 import com.github.plushaze.traynotification.notification.Notifications;
 import com.github.plushaze.traynotification.notification.TrayNotification;
 import dorkbox.systemTray.SystemTray;
@@ -94,6 +95,8 @@ public class JgmrGuiController implements Initializable {
     private Label lbTime;
     @FXML
     private ProgressBar pbDownload;
+    @FXML
+    private ProgressBar pbUpload;
 
     ContextMenu cm = new ContextMenu();
     boolean newDownload;
@@ -332,18 +335,44 @@ public class JgmrGuiController implements Initializable {
         Platform.runLater(() -> {
             if (!newDownload) {
                 if (!newSaveFileDialog.isShowing()) {
+                    newSaveFileDialog.getItems().removeAll();
+                    newSaveFileDialog.getItems().addAll(playerGames);
                     Optional<Game> result = newSaveFileDialog.showAndWait();
                     if (result.isPresent()) {
-                        boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
-                        if (!didUpload) {
-                            Dialog dialog = new Dialog();
-                            dialog.setTitle("Couldn't upload savefile");
-                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
-                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                            dialog.show();
-                        } else {
-                            lvPlayerTurnGames.getItems().remove(result);
-                        }
+                        jgmrVbox.getChildren().add(hbUpload);
+                        pbUpload.setProgress(-1.0f);
+                        Task t = new Task() {
+                            @Override
+                            protected Object call() throws Exception {
+                                boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
+                                if (!didUpload) {
+                                    Dialog dialog = new Dialog();
+                                    dialog.setTitle("Couldn't upload savefile");
+                                    dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
+                                    dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                                    Platform.runLater(() -> {
+                                        dialog.show();
+                                        pbUpload.setProgress(0);
+                                        jgmrVbox.getChildren().remove(hbUpload);
+                                    });
+
+                                } else {
+                                    lvPlayerTurnGames.getItems().remove(result);
+                                    Platform.runLater(() -> {
+                                        TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
+                                        uploadSucces.setAnimation(Animations.POPUP);
+                                        uploadSucces.showAndDismiss(Duration.seconds(3));
+                                        pbUpload.setProgress(0);
+                                        jgmrVbox.getChildren().remove(hbUpload);
+                                    });
+
+                                }
+                                return null;
+                            }
+                        };
+                        Thread thread = new Thread(t);
+                        thread.start();
+
                     }
                 }
             }
@@ -357,19 +386,6 @@ public class JgmrGuiController implements Initializable {
         }
     }
 
-    private Dialog initializeDownloadDialog() {
-        Dialog dialog = new Dialog();
-        dialog.setContentText("The save file has succesfully been downloaded");
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-        dialog.setTitle("Onward my noble Leader and conquer thy enemies");
-        final Button btOk = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-        btOk.addEventFilter(ActionEvent.ACTION, (event) -> {
-            resumeWatchService();
-        });
-
-        return dialog;
-    }
-
     private void initializeContextMenu() {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
         downloadSaveFile.setOnAction(event -> {
@@ -379,19 +395,16 @@ public class JgmrGuiController implements Initializable {
             Task t = new Task() {
                 @Override
                 protected Object call() throws Exception {
-                                gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-                Platform.runLater(() -> {
-                    Dialog dialog = new Dialog();
-                    dialog.setContentText("The save file has succesfully been downloaded");
-                    ((Stage) dialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
-                    dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                    dialog.setTitle("Onward my noble Leader and conquer thy enemies");
-                    dialog.show();
-                    pbDownload.setProgress(0);
-                    jgmrVbox.getChildren().remove(hbDownload);
-                    startListeningForChanges();
-                });
-                return null;
+                    gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
+                    Platform.runLater(() -> {
+                        TrayNotification uploadSucces = new TrayNotification("Download successful", "Onward my noble Leader and conquer thy enemies", Notifications.SUCCESS);
+                        uploadSucces.setAnimation(Animations.POPUP);
+                        uploadSucces.showAndDismiss(Duration.seconds(3));
+                        pbDownload.setProgress(0);
+                        jgmrVbox.getChildren().remove(hbDownload);
+                        startListeningForChanges();
+                    });
+                    return null;
                 }
             };
             Thread thread = new Thread(t);
@@ -452,7 +465,6 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void updateDownloadProgressBar(double size) {
-        System.out.println(size);
         Platform.runLater(() -> {
             pbDownload.setProgress(size);
         });
