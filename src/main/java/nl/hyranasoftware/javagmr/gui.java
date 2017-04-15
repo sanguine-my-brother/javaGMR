@@ -5,10 +5,13 @@
  */
 package nl.hyranasoftware.javagmr;
 
+import dorkbox.systemTray.SystemTray;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -18,6 +21,8 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import nl.hyranasoftware.javagmr.views.fxml.JgmrGuiController;
 
 /**
@@ -41,10 +46,18 @@ public class gui extends Application {
         }
         Scene scene = new Scene(root);
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("eicon.png")));
-        
         primaryStage.setTitle("Giant Multi Robot Java-Client");
         primaryStage.setScene(scene);
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent arg0) {
+                Platform.setImplicitExit(!JGMRConfig.getInstance().isMinimizeToTray());
+                primaryStage.hide();
+            }
+        });
+
         primaryStage.show();
+
     }
 
     /**

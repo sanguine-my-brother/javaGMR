@@ -5,6 +5,16 @@
  */
 package nl.hyranasoftware.javagmr.views.fxml;
 
+import com.github.plushaze.traynotification.animations.Animations;
+import com.github.plushaze.traynotification.notification.Notification;
+import com.github.plushaze.traynotification.notification.Notifications;
+import com.github.plushaze.traynotification.notification.TrayNotification;
+import dorkbox.systemTray.SystemTray;
+import dorkbox.systemTray.Checkbox;
+import dorkbox.systemTray.Menu;
+import dorkbox.systemTray.Separator;
+import dorkbox.systemTray.SystemTray;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -13,12 +23,12 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -36,11 +46,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
@@ -55,11 +70,21 @@ import nl.hyranasoftware.javagmr.util.SaveFile;
  *
  * @author danny_000
  */
+
+/* https://github.com/PlusHaze/TrayNotification 
+    Add this lib
+    https://github.com/dorkbox/SystemTray
+ */
 public class JgmrGuiController implements Initializable {
 
     @FXML
     private Button btSettings;
-
+    @FXML
+    private VBox jgmrVbox;
+    @FXML
+    private HBox hbUpload;
+    @FXML
+    private HBox hbDownload;
     @FXML
     private ListView lvPlayerTurnGames;
     @FXML
@@ -68,6 +93,10 @@ public class JgmrGuiController implements Initializable {
     private AnchorPane apAbove;
     @FXML
     private Label lbTime;
+    @FXML
+    private ProgressBar pbDownload;
+    @FXML
+    private ProgressBar pbUpload;
 
     ContextMenu cm = new ContextMenu();
     boolean newDownload;
@@ -76,18 +105,29 @@ public class JgmrGuiController implements Initializable {
     ObservableList<Game> currentGames = FXCollections.observableArrayList();
     ObservableList<Game> playerGames = FXCollections.observableArrayList();
     ChoiceDialog<Game> newSaveFileDialog;
+    TrayNotification notification;
+    SystemTray systemTray;
+    Timeline notificationTimeline;
     int timeLeft;
 
-    GameController gc = new GameController();
+    GameController gc;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        gc = new GameController() {
+            @Override
+            public void sendDownloadProgress(double percent) {
+                updateDownloadProgressBar(percent);
+            }
+        };
 
         initializeChoiceDialog();
         initializeContextMenu();
+        jgmrVbox.getChildren().remove(hbDownload);
+        jgmrVbox.getChildren().remove(hbUpload);
         initializeListViews();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
             new Timeline(new KeyFrame(
@@ -110,6 +150,11 @@ public class JgmrGuiController implements Initializable {
                 ae -> updateLabel()));
         labelUpdater.setCycleCount(Timeline.INDEFINITE);
         labelUpdater.play();
+        new Timeline(new KeyFrame(
+                Duration.seconds(2),
+                ae -> initializeSystemtray()))
+                .play();
+        initializeNotifications();
 
     }
 
@@ -117,6 +162,7 @@ public class JgmrGuiController implements Initializable {
         newSaveFileDialog = new ChoiceDialog<>(null, playerGames);
         newSaveFileDialog.setTitle("Save file");
         newSaveFileDialog.setHeaderText("I see you played your turn");
+        ((Stage) newSaveFileDialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
         newSaveFileDialog.setContentText("Choose the game you would to submit to GMR");
     }
 
@@ -148,6 +194,9 @@ public class JgmrGuiController implements Initializable {
             ;
         }
         timeLeft = 60;
+        if (systemTray != null) {
+            systemTray.setStatus(playerGames.size() + " games await your turn.");
+        }
         // currentGames.notify();
 
     }
@@ -162,9 +211,9 @@ public class JgmrGuiController implements Initializable {
         }
 
     }
-    
+
     @FXML
-    private void uploadGameManually(){
+    private void uploadGameManually() {
         FXMLLoader loader = null;
         String url = null;
         url = getClass().getResource("uploadSaveGameDialog.fxml").toString();
@@ -233,10 +282,10 @@ public class JgmrGuiController implements Initializable {
                         super.updateItem(g, b);
                         if (g != null) {
                             setText(g.toString());
-                        }else{
+                        } else {
                             setText(null);
                         }
-                        
+
                     }
                 };
                 cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
@@ -286,18 +335,44 @@ public class JgmrGuiController implements Initializable {
         Platform.runLater(() -> {
             if (!newDownload) {
                 if (!newSaveFileDialog.isShowing()) {
+                    newSaveFileDialog.getItems().removeAll();
+                    newSaveFileDialog.getItems().addAll(playerGames);
                     Optional<Game> result = newSaveFileDialog.showAndWait();
                     if (result.isPresent()) {
-                        boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
-                        if (!didUpload) {
-                            Dialog dialog = new Dialog();
-                            dialog.setTitle("Couldn't upload savefile");
-                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
-                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                            dialog.show();
-                        } else{
-                            lvPlayerTurnGames.getItems().remove(result);
-                        }
+                        jgmrVbox.getChildren().add(hbUpload);
+                        pbUpload.setProgress(-1.0f);
+                        Task t = new Task() {
+                            @Override
+                            protected Object call() throws Exception {
+                                boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
+                                if (!didUpload) {
+                                    Dialog dialog = new Dialog();
+                                    dialog.setTitle("Couldn't upload savefile");
+                                    dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
+                                    dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                                    Platform.runLater(() -> {
+                                        dialog.show();
+                                        pbUpload.setProgress(0);
+                                        jgmrVbox.getChildren().remove(hbUpload);
+                                    });
+
+                                } else {
+                                    lvPlayerTurnGames.getItems().remove(result);
+                                    Platform.runLater(() -> {
+                                        TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
+                                        uploadSucces.setAnimation(Animations.POPUP);
+                                        uploadSucces.showAndDismiss(Duration.seconds(3));
+                                        pbUpload.setProgress(0);
+                                        jgmrVbox.getChildren().remove(hbUpload);
+                                    });
+
+                                }
+                                return null;
+                            }
+                        };
+                        Thread thread = new Thread(t);
+                        thread.start();
+
                     }
                 }
             }
@@ -311,27 +386,29 @@ public class JgmrGuiController implements Initializable {
         }
     }
 
-    private Dialog initializeDownloadDialog() {
-        Dialog dialog = new Dialog();
-        dialog.setContentText("The save file has succesfully been downloaded");
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-        dialog.setTitle("Onward my noble Leader and conquer thy enemies");
-        final Button btOk = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-        btOk.addEventFilter(ActionEvent.ACTION, (event) -> {
-            resumeWatchService();
-        });
-
-        return dialog;
-    }
-
     private void initializeContextMenu() {
         MenuItem downloadSaveFile = new MenuItem("Download Save File");
         downloadSaveFile.setOnAction(event -> {
             pauseWatchService();
+            jgmrVbox.getChildren().add(hbDownload);
             newSaveFileDialog.setSelectedItem((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            Dialog dialog = initializeDownloadDialog();
-            dialog.show();
+            Task t = new Task() {
+                @Override
+                protected Object call() throws Exception {
+                    gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
+                    Platform.runLater(() -> {
+                        TrayNotification uploadSucces = new TrayNotification("Download successful", "Onward my noble Leader and conquer thy enemies", Notifications.SUCCESS);
+                        uploadSucces.setAnimation(Animations.POPUP);
+                        uploadSucces.showAndDismiss(Duration.seconds(3));
+                        pbDownload.setProgress(0);
+                        jgmrVbox.getChildren().remove(hbDownload);
+                        startListeningForChanges();
+                    });
+                    return null;
+                }
+            };
+            Thread thread = new Thread(t);
+            thread.start();
         });
 
         MenuItem goToGameSite = new MenuItem("View game's page on GMR");
@@ -349,5 +426,88 @@ public class JgmrGuiController implements Initializable {
 
     private void initializeWatcher() throws IOException {
 
+    }
+
+    private void displayNotification() {
+        Image gmrLogo = new Image(getClass().getResourceAsStream("GMRLogo.png"));
+        notification = new TrayNotification("It's your turn", "It's your turn in " + playerGames.size() + " games", Notifications.SUCCESS);
+        notification.setRectangleFill(Paint.valueOf("#565656"));
+        notification.setImage(gmrLogo);
+        notification.setAnimation(Animations.POPUP);
+        notification.showAndDismiss(Duration.seconds(15));
+    }
+
+    private void initializeNotifications() {
+        if (lvAllGames.getScene() != null) {
+            Stage stage = (Stage) lvAllGames.getScene().getWindow();
+            boolean test = stage.isShowing();
+            if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
+                if (JGMRConfig.getInstance().isNotificationsMinized() && stage.isIconified()) {
+                    displayNotification();
+                } else if (JGMRConfig.getInstance().isNotificationsMinized() && !stage.isShowing()) {
+                    displayNotification();
+                } else if (!stage.isIconified() && stage.isShowing()) {
+                    displayNotification();
+                }
+            }
+        }
+        if (JGMRConfig.getInstance().getNotificationFrequency() > 0) {
+            notificationTimeline = new Timeline(new KeyFrame(
+                    Duration.minutes(JGMRConfig.getInstance().getNotificationFrequency()),
+                    ae -> initializeNotifications()));
+            notificationTimeline.play();
+        } else {
+            notificationTimeline = new Timeline(new KeyFrame(
+                    Duration.minutes(5),
+                    ae -> initializeNotifications()));
+            notificationTimeline.play();
+        }
+    }
+
+    private void updateDownloadProgressBar(double size) {
+        Platform.runLater(() -> {
+            pbDownload.setProgress(size);
+        });
+    }
+
+    private void initializeSystemtray() {
+        //SystemTray.SWING_UI = new CustomSwingUI();
+        Stage stage = (Stage) lvAllGames.getScene().getWindow();
+
+        systemTray = SystemTray.get();
+        if (systemTray != null) {
+
+            systemTray.setImage(getClass().getResource("eicon.png"));
+            if (playerGames.size() > 0) {
+                systemTray.setStatus(playerGames.size() + " games await your turn.");
+            }
+            //OPEN
+            systemTray.getMenu().add(new dorkbox.systemTray.MenuItem("Show", new ActionListener() {
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    //Platform.runlater is needed otherwise the stage will not load anymmore
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.show();
+                        }
+                    });
+                }
+            }));
+            //QUIT
+            systemTray.getMenu().add(new dorkbox.systemTray.MenuItem("Quit JavaGMR", new ActionListener() {
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    //Platform.runlater is needed otherwise the stage will not load anymmore
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Platform.exit();
+                        }
+                    });
+                }
+            }));
+
+        }
     }
 }
