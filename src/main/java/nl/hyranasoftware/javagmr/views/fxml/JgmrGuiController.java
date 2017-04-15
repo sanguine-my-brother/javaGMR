@@ -8,11 +8,12 @@ package nl.hyranasoftware.javagmr.views.fxml;
 import com.github.plushaze.traynotification.animations.Animations;
 import com.github.plushaze.traynotification.notification.Notifications;
 import com.github.plushaze.traynotification.notification.TrayNotification;
-import java.awt.AWTException;
-import java.awt.PopupMenu;
-import java.awt.SystemTray;
-import java.awt.Toolkit;
-import java.awt.TrayIcon;
+import dorkbox.systemTray.SystemTray;
+import dorkbox.systemTray.Checkbox;
+import dorkbox.systemTray.Menu;
+import dorkbox.systemTray.Separator;
+import dorkbox.systemTray.SystemTray;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -21,7 +22,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -50,6 +50,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
@@ -67,6 +68,7 @@ import nl.hyranasoftware.javagmr.util.SaveFile;
 
 /* https://github.com/PlusHaze/TrayNotification 
     Add this lib
+    https://github.com/dorkbox/SystemTray
  */
 public class JgmrGuiController implements Initializable {
 
@@ -90,6 +92,7 @@ public class JgmrGuiController implements Initializable {
     ObservableList<Game> playerGames = FXCollections.observableArrayList();
     ChoiceDialog<Game> newSaveFileDialog;
     TrayNotification notification;
+    SystemTray systemTray;
     Timeline notificationTimeline;
     int timeLeft;
 
@@ -101,9 +104,9 @@ public class JgmrGuiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
-
         initializeChoiceDialog();
         initializeContextMenu();
+
         initializeListViews();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
             new Timeline(new KeyFrame(
@@ -115,7 +118,6 @@ public class JgmrGuiController implements Initializable {
             timeLeft = 60;
             pullGames();
         }
-
         Timeline timeline = new Timeline(new KeyFrame(
                 Duration.minutes(1),
                 ae -> pullGames()));
@@ -127,7 +129,11 @@ public class JgmrGuiController implements Initializable {
                 ae -> updateLabel()));
         labelUpdater.setCycleCount(Timeline.INDEFINITE);
         labelUpdater.play();
-                initializeNotifications();
+        new Timeline(new KeyFrame(
+                Duration.seconds(2),
+                ae -> initializeSystemtray()))
+                .play();
+        initializeNotifications();
 
     }
 
@@ -167,6 +173,9 @@ public class JgmrGuiController implements Initializable {
             ;
         }
         timeLeft = 60;
+        if (systemTray != null) {
+            systemTray.setStatus(playerGames.size() + " games await your turn.");
+        }
         // currentGames.notify();
 
     }
@@ -374,28 +383,27 @@ public class JgmrGuiController implements Initializable {
     private void initializeWatcher() throws IOException {
 
     }
-    
-    private void displayNotification(){
-            Image gmrLogo = new Image(getClass().getResourceAsStream("GMRLogo.png"));
-            notification = new TrayNotification("It's your turn", "It's your turn in " + playerGames.size() + " games", Notifications.SUCCESS);
-            notification.setRectangleFill(Paint.valueOf("#565656"));
-            notification.setImage(gmrLogo);
-            notification.setAnimation(Animations.POPUP);
-            notification.showAndDismiss(Duration.seconds(15));
+
+    private void displayNotification() {
+        Image gmrLogo = new Image(getClass().getResourceAsStream("GMRLogo.png"));
+        notification = new TrayNotification("It's your turn", "It's your turn in " + playerGames.size() + " games", Notifications.SUCCESS);
+        notification.setRectangleFill(Paint.valueOf("#565656"));
+        notification.setImage(gmrLogo);
+        notification.setAnimation(Animations.POPUP);
+        notification.showAndDismiss(Duration.seconds(15));
     }
 
     private void initializeNotifications() {
-        if(lvAllGames.getScene() != null){
-        Stage stage = (Stage) lvAllGames.getScene().getWindow();
+        if (lvAllGames.getScene() != null) {
+            Stage stage = (Stage) lvAllGames.getScene().getWindow();
 
-        if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
-            if(JGMRConfig.getInstance().isNotificationsMinized() && stage.isIconified()){
-                displayNotification();
+            if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
+                if (JGMRConfig.getInstance().isNotificationsMinized() && stage.isIconified()) {
+                    displayNotification();
+                } else if (!stage.isIconified()) {
+                    displayNotification();
+                }
             }
-            else if(!stage.isIconified()) {
-                displayNotification();
-            }
-        }
         }
         if (JGMRConfig.getInstance().getNotificationFrequency() > 0) {
             notificationTimeline = new Timeline(new KeyFrame(
@@ -411,6 +419,43 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void initializeSystemtray() {
+        //SystemTray.SWING_UI = new CustomSwingUI();
+        Stage stage = (Stage) lvAllGames.getScene().getWindow();
 
+        systemTray = SystemTray.get();
+        if (systemTray != null) {
+
+            systemTray.setImage(getClass().getResource("eicon.png"));
+            if (playerGames.size() > 0) {
+                systemTray.setStatus(playerGames.size() + " games await your turn.");
+            }
+            //OPEN
+            systemTray.getMenu().add(new dorkbox.systemTray.MenuItem("Show", new ActionListener() {
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    //Platform.runlater is needed otherwise the stage will not load anymmore
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.show();
+                        }
+                    });
+                }
+            }));
+            //QUIT
+            systemTray.getMenu().add(new dorkbox.systemTray.MenuItem("Quit JavaGMR", new ActionListener() {
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    //Platform.runlater is needed otherwise the stage will not load anymmore
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Platform.exit();
+                        }
+                    });
+                }
+            }));
+
+        }
     }
 }
