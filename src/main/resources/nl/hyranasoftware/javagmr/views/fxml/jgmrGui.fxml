@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -10,7 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="jgmrVbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="532.0" prefWidth="761.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.JgmrGuiController">
+<VBox fx:id="jgmrVbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="532.0" prefWidth="761.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.JgmrGuiController">
    <children>
       <ToolBar prefHeight="41.0" prefWidth="643.0">
         <items>
@@ -33,14 +37,14 @@
       </SplitPane>
       <HBox fx:id="hbUpload" prefHeight="0.0" prefWidth="200.0" visible="true">
          <children>
-            <Label prefHeight="17.0" prefWidth="85.0" text="Uploading:" />
-            <ProgressBar fx:id="pbUpload" prefHeight="18.0" prefWidth="674.0" progress="0.0" />
+            <Label prefHeight="17.0" prefWidth="110.0" text="Uploading:" />
+            <ProgressBar fx:id="pbUpload" prefHeight="20.0" prefWidth="648.0" progress="0.0" />
          </children>
       </HBox>
       <HBox fx:id="hbDownload" prefHeight="0.0" prefWidth="200.0" visible="true">
          <children>
-            <Label prefHeight="17.0" prefWidth="85.0" text="Downloading: " />
-            <ProgressBar fx:id="pbDownload" prefHeight="18.0" prefWidth="674.0" progress="0.0" />
+            <Label prefHeight="17.0" prefWidth="110.0" text="Downloading: " />
+            <ProgressBar fx:id="pbDownload" prefHeight="20.0" prefWidth="648.0" progress="0.0" />
          </children>
       </HBox>
    </children>

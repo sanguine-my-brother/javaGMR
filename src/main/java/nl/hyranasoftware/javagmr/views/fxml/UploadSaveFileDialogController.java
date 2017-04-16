@@ -11,8 +11,10 @@ import com.github.plushaze.traynotification.notification.TrayNotification;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ButtonType;
@@ -63,18 +65,30 @@ public class UploadSaveFileDialogController implements Initializable {
         System.out.println(lvGames.getSelectionModel().getSelectedIndex());
         File file = new File(tbSaveFile.getText());
         if (lvGames.getSelectionModel().getSelectedIndex() > -1 && file.exists()) {
-            boolean uploadStatusSucces = gc.uploadSaveFile((Game) lvGames.getSelectionModel().getSelectedItem(), file);
-            if (uploadStatusSucces) {
-                TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
-                uploadSucces.setAnimation(Animations.POPUP);
-                uploadSucces.showAndDismiss(Duration.seconds(3));
-            } else {
-                Dialog dg = new Dialog();
-                dg.setContentText("Either check on GMR if it's your turn or try uploading it again");
-                dg.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                dg.setTitle("Could not upload savefile");
-                dg.show();
-            }
+            Task task = new Task() {
+                @Override
+                protected Object call() throws Exception {
+                    boolean uploadStatusSucces = gc.uploadSaveFile((Game) lvGames.getSelectionModel().getSelectedItem(), file);
+                    Platform.runLater(() -> {
+                        if (uploadStatusSucces) {
+                            TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
+                            uploadSucces.setAnimation(Animations.POPUP);
+                            uploadSucces.showAndDismiss(Duration.seconds(3));
+                        } else {
+                            Dialog dg = new Dialog();
+                            dg.setContentText("Either check on GMR if it's your turn or try uploading it again");
+                            dg.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                            dg.setTitle("Could not upload savefile");
+                            dg.show();
+                        }
+                    });
+
+                    return null;
+                }
+            };
+            Thread t = new Thread(task);
+            t.start();
+
         } else {
             Dialog dg = new Dialog();
             dg.setContentText("Either you haven't selected a game or the file path is incorrect");

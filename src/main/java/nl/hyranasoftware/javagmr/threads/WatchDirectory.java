@@ -70,7 +70,6 @@ public abstract class WatchDirectory implements Runnable {
                 for (WatchEvent<?> genericEvent : eventList) {
 
                     WatchEvent.Kind<?> eventKind = genericEvent.kind();
-                    System.out.println("Event kind: " + eventKind);
 
                     if (eventKind == OVERFLOW) {
 
@@ -80,28 +79,24 @@ public abstract class WatchDirectory implements Runnable {
                     WatchEvent pathEvent = (WatchEvent) genericEvent;
                     Path file = (Path) pathEvent.context();
                     if (!newDownload) {
+                        System.out.println("Event kind: " + eventKind);
                         if (eventKind == ENTRY_CREATE) {
                             updatedSaveFile((SaveFile) file.toFile());
+                            System.out.println("New save file detected: " + file.toString());
                         }
                         if (eventKind == ENTRY_MODIFY) {
                             SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
                             if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
                                 updatedSaveFile(new SaveFile(file.getFileName().toString()));
+                                System.out.println("New save file detected: " + file.toString());
                             }
 
                         }
                     }
-                    else{
-                        newDownload = false;
-                    }
-
-                    System.out.println("New save file detected: " + file.toString());
 
                 }
 
                 boolean validKey = key.reset();
-                System.out.println("Key reset");
-                System.out.println("");
 
                 if (!validKey) {
                     System.out.println("Invalid key");
@@ -116,9 +111,8 @@ public abstract class WatchDirectory implements Runnable {
     private void launchDialog(Path file) {
 
     }
-    
-    public abstract void updatedSaveFile(SaveFile file);
 
+    public abstract void updatedSaveFile(SaveFile file);
 
     public void setIndex(int index) {
         this.index = index;

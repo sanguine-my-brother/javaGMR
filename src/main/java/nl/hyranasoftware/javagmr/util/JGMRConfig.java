@@ -156,11 +156,11 @@ public class JGMRConfig implements Serializable {
     }
 
     public boolean didSaveFileChange(SaveFile saveFile) {
-        if (saveFile.getSize() > 100 && saveFiles.size() > 0) {
+        if (saveFile.getSize() > 100 && saveFiles.size() > 0 && saveFiles.indexOf(saveFile) != -1) {            
             SaveFile retrievedFile = saveFiles.get(saveFiles.indexOf(saveFile));
             if (retrievedFile != null) {
-                System.out.println(retrievedFile.getSize() - saveFile.getSize());
-                if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() < (retrievedFile.getSize() - 30) && retrievedFile.getLastTimeModified() != saveFile.getLastTimeModified() && saveFile.getSize() != 0) {
+                System.out.println("size change: " + (retrievedFile.getSize() - saveFile.getSize()));
+                if (saveFile.getSize() > 0 || saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() < (retrievedFile.getSize() - 30) && retrievedFile.getLastTimeModified() != saveFile.getLastTimeModified() && saveFile.getSize() != 0) {
                     return true;
                 }
             }
