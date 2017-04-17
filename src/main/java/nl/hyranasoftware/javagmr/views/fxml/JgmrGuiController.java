@@ -414,7 +414,7 @@ public class JgmrGuiController implements Initializable {
             thread.start();
         });
 
-        MenuItem goToGameSite = new MenuItem("View game's page on GMR");
+        MenuItem goToGameSite = new MenuItem("View game's page on GMR (UNSTABLE)");
         goToGameSite.setOnAction(event -> {
             String webURI = "http://multiplayerrobot.com/Game#" + ((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem()).getGameid();
             try {

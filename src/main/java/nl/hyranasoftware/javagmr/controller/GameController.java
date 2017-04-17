@@ -171,7 +171,7 @@ public class GameController {
     @param file used to identify the file you want to upload to GMR
      */
     public boolean uploadSaveFile(Game game, File file) {
-
+        System.out.println("uploadSave manuel");
         try {
             //String requestUrl = "http://posttestserver.com/post.php";
             return doUpload(new FileInputStream(file), game);

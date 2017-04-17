@@ -41,7 +41,7 @@ public class UploadSaveFileDialogController implements Initializable {
     @FXML
     TextField tbSaveFile;
 
-    GameController gc;
+    GameController gc = new GameController();
     ObservableList<Game> playerTurns = FXCollections.observableArrayList();
 
     @Override
@@ -64,22 +64,29 @@ public class UploadSaveFileDialogController implements Initializable {
     protected void uploadSaveGame() {
         System.out.println(lvGames.getSelectionModel().getSelectedIndex());
         File file = new File(tbSaveFile.getText());
+        Game selectedGame = (Game) lvGames.getSelectionModel().getSelectedItem();
         if (lvGames.getSelectionModel().getSelectedIndex() > -1 && file.exists()) {
             Task task = new Task() {
                 @Override
                 protected Object call() throws Exception {
-                    boolean uploadStatusSucces = gc.uploadSaveFile((Game) lvGames.getSelectionModel().getSelectedItem(), file);
+
+                    boolean uploadStatusSucces = gc.uploadSaveFile(selectedGame, file);
+
                     Platform.runLater(() -> {
                         if (uploadStatusSucces) {
                             TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
                             uploadSucces.setAnimation(Animations.POPUP);
                             uploadSucces.showAndDismiss(Duration.seconds(3));
                         } else {
-                            Dialog dg = new Dialog();
-                            dg.setContentText("Either check on GMR if it's your turn or try uploading it again");
-                            dg.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                            dg.setTitle("Could not upload savefile");
-                            dg.show();
+                            try {
+                                Dialog dg = new Dialog();
+                                dg.setContentText("Either check on GMR if it's your turn or try uploading it again");
+                                dg.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                                dg.setTitle("Could not upload savefile");
+                                dg.show();
+                            } catch (Exception e) {
+                                System.out.print(e);
+                            }
                         }
                     });
 
@@ -87,6 +94,10 @@ public class UploadSaveFileDialogController implements Initializable {
                 }
             };
             Thread t = new Thread(task);
+            t.setName("Manuelupload");
+            TrayNotification uploadingInfo = new TrayNotification("Uploading game...", "Uploading save to: " + ((Game) lvGames.getSelectionModel().getSelectedItem()).getName(), Notifications.INFORMATION);
+            uploadingInfo.setAnimation(Animations.POPUP);
+            uploadingInfo.showAndDismiss(Duration.seconds(3));
             t.start();
 
         } else {
