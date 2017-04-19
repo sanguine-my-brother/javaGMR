@@ -26,7 +26,7 @@
                 <configuration>
                     <mainClass>nl.hyranasoftware.javagmr.gui</mainClass>
                     <iconFile>eicon.icns</iconFile>
-                    <jrePath>/home/danny/Programmeren/osxjre/jre1.8.0_121.jre/</jrePath>
+                    <!--        <jrePath>/home/danny/Programmeren/osxjre/jre1.8.0_121.jre/</jrePath> -->
                     <generateDiskImageFile>true</generateDiskImageFile>
                 </configuration>
                 <executions>
@@ -79,6 +79,13 @@
             <artifactId>javassist</artifactId>
             <version>3.12.1.GA</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/net.incongru.watchservice/barbary-watchservice -->
+        <dependency>
+            <groupId>net.incongru.watchservice</groupId>
+            <artifactId>barbary-watchservice</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.dorkbox</groupId>
             <artifactId>SystemTray</artifactId>
