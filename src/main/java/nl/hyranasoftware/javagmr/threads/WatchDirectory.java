@@ -84,13 +84,13 @@ public abstract class WatchDirectory implements Runnable {
                     if (!newDownload) {
                         System.out.println("Event kind: " + eventKind);
                         if (eventKind == ENTRY_CREATE) {
-                            updatedSaveFile(new SaveFile(file.getAbsolutePath()));
+                            updatedSaveFile(new SaveFile(file.getName()));
                             System.out.println("New save file detected: " + file.toString());
                         }
                         if (eventKind == ENTRY_MODIFY) {
                             SaveFile saveFile = new SaveFile(file.getAbsolutePath());
                             if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
-                                updatedSaveFile(new SaveFile(file.getAbsolutePath()));
+                                updatedSaveFile(new SaveFile(file.getName()));
                                 System.out.println("New save file detected: " + file.toString());
                             }
 
