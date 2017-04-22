@@ -25,7 +25,7 @@ import org.ocpsoft.prettytime.PrettyTime;
  *
  * @author danny_000
  */
-public class Game {
+public class Game implements Comparable<Game> {
 
     @JsonProperty("GameId")
     int gameid;
@@ -114,6 +114,16 @@ public class Game {
         }
         return true;
     }
+
+    @Override
+    public int compareTo(Game o) {
+        if(this.getCurrentTurn().started.isAfter(o.getCurrentTurn().started)){
+            return 1;
+        }
+        return -1;
+    }
+    
+    
     
     
     

@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -69,6 +70,7 @@ public class GameController {
             //Commented out this line of code because the application does currently have a GUI for displaying the users in an game
             //This Thread can be enabled later on.
             //t.start();
+            Collections.sort(games);
             return games;
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,9 +89,7 @@ public class GameController {
      */
     public List<Game> retrievePlayersTurns(List<Game> games) {
         List<Game> playerTurns = new ArrayList<Game>();
-        List<Game> gamesx = JGMRConfig.getInstance().getUploadedGames();
         for (Game g : games) {
-            //System.out.println(g.getName() + ": " + g.getCurrentTurn().getTurnId());
             if (g.getCurrentTurn().getUserId().equals(JGMRConfig.getInstance().getPlayerSteamId())) {
 
                 if (JGMRConfig.getInstance().getUploadedGames().contains(g)) {
@@ -102,7 +102,9 @@ public class GameController {
                 }
             }
         }
-
+        
+        Collections.sort(playerTurns);
+        Collections.reverse(playerTurns);
         return playerTurns;
     }
 

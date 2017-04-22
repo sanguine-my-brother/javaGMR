@@ -277,6 +277,7 @@ public class JgmrGuiController implements Initializable {
             @Override
             public ListCell<Game> call(ListView<Game> param) {
                 ListCell<Game> cell = new ListCell<Game>() {
+                    
                     @Override
                     protected void updateItem(Game g, boolean b) {
                         super.updateItem(g, b);
