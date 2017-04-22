@@ -50,4 +50,16 @@
                 <goal>package</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-sonarqube</actionName>
+            <displayName>sonarqube</displayName>
+            <goals>
+                <goal>sonar:sonar</goal>
+            </goals>
+            <properties>
+                <sonar.host.url>https://sonarqube.com</sonar.host.url>
+                <sonar.organization>eternia16-github</sonar.organization>
+                <sonar.login>48cd531dc6a0f71b6daefff132fd53111090a609</sonar.login>
+            </properties>
+        </action>
     </actions>

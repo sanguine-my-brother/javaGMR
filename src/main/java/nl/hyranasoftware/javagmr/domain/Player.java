@@ -73,6 +73,16 @@ public class Player {
     public void setTurnOrder(int turnOrder) {
         this.turnOrder = turnOrder;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 47 * hash + Objects.hashCode(this.steamId);
+        hash = 47 * hash + Objects.hashCode(this.personaName);
+        return hash;
+    }
+    
+    
     
     
 

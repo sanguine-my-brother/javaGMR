@@ -9,33 +9,28 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.domain.Game;
-import nl.hyranasoftware.javagmr.exception.InValidUserException;
 import org.joda.time.DateTime;
 
 /**
  *
  * @author danny_000
  */
-public class JGMRConfig implements Serializable {
+public class JGMRConfig {
 
-    String path;
-    String authCode;
-    String playerSteamId;
-    int notificationFrequency = 15;
-    boolean notificationsMinized = true;
-    boolean minimizeToTray = true;
-    List<Game> uploadedGames = new ArrayList();
+    private String path;
+    private String authCode;
+    private String playerSteamId;
+    private int notificationFrequency = 15;
+    private boolean notificationsMinized = true;
+    private boolean minimizeToTray = true;
+    private List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore
     List<SaveFile> saveFiles = new ArrayList();
@@ -94,28 +89,26 @@ public class JGMRConfig implements Serializable {
 
     public boolean isMinimizeToTray() {
         return minimizeToTray;
-        
+
     }
 
     public void setMinimizeToTray(boolean minimizeToTray) {
         this.minimizeToTray = minimizeToTray;
         saveConfig();
     }
-    
-    
 
     public String getAuthCode() {
         return authCode;
     }
 
-    public void setAuthCode(String authCode) throws InValidUserException {
+    public void setAuthCode(String authCode) {
         PlayerController pc = new PlayerController();
         String playerCode = pc.getPlayerId(authCode);
         if (playerCode != null) {
             this.authCode = authCode;
             this.playerSteamId = playerCode;
             saveConfig();
-        }
+        } 
 
     }
 
@@ -156,12 +149,13 @@ public class JGMRConfig implements Serializable {
     }
 
     public boolean didSaveFileChange(SaveFile saveFile) {
-        if (saveFile.getSize() > 100 && saveFiles.size() > 0 && saveFiles.indexOf(saveFile) != -1) {            
+        if (saveFile.getSize() > 100 && !saveFiles.isEmpty() && saveFiles.indexOf(saveFile) != -1) {
             SaveFile retrievedFile = saveFiles.get(saveFiles.indexOf(saveFile));
             if (retrievedFile != null) {
-                System.out.println("size change: " + (retrievedFile.getSize() - saveFile.getSize()));
-                if (saveFile.getSize() > 0 || saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() < (retrievedFile.getSize() - 30) && retrievedFile.getLastTimeModified() != saveFile.getLastTimeModified() && saveFile.getSize() != 0) {
-                    return true;
+                if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0) {
+                    if (saveFile.getSize() < (retrievedFile.getSize() - 30) && !retrievedFile.getLastTimeModified().equals(saveFile.getLastTimeModified())) {
+                        return true;
+                    }
                 }
             }
         }
@@ -186,7 +180,5 @@ public class JGMRConfig implements Serializable {
     public void setUploadedGames(List<Game> uploadedGames) {
         this.uploadedGames = uploadedGames;
     }
-    
-    
 
 }
