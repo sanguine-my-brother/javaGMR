@@ -391,7 +391,7 @@ public class JgmrGuiController implements Initializable {
                     try {
                         gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
                         Platform.runLater(() -> {
-                            TrayNotification uploadSucces = new TrayNotification("Download successful", "Onward my noble Leader and conquer thy enemies", Notifications.SUCCESS);
+                            TrayNotification uploadSucces = new TrayNotification("Download successful", "Go and conquer your enemies", Notifications.SUCCESS);
                             uploadSucces.setAnimation(Animations.POPUP);
                             uploadSucces.showAndDismiss(Duration.seconds(3));
                             pbDownload.setProgress(0);

@@ -65,6 +65,7 @@ public class GameController {
                 }
             }
             Collections.sort(games);
+            Collections.reverse(games);
             return games;
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
@@ -102,7 +103,6 @@ public class GameController {
         }
 
         Collections.sort(playerTurns);
-        Collections.reverse(playerTurns);
         return playerTurns;
     }
 
