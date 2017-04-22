@@ -10,9 +10,12 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
@@ -26,43 +29,83 @@ import nl.hyranasoftware.javagmr.util.JGMRConfig;
  * @author danny_000
  */
 public class SettingsDialogController implements Initializable {
-    
-    
+
     @FXML
     TextField tbSaveDirectory;
     @FXML
     TextField tbAuthCode;
+    @FXML
+    ComboBox cbFrequency;
+    @FXML
+    CheckBox cbMinimized;
+    @FXML
+    CheckBox cbSystemtray;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        if(JGMRConfig.getInstance().getPath() != null){
-        tbSaveDirectory.setText(JGMRConfig.getInstance().getPath());
+        if (JGMRConfig.getInstance().getPath() != null) {
+            tbSaveDirectory.setText(JGMRConfig.getInstance().getPath());
         }
-        if(JGMRConfig.getInstance().getAuthCode() != null){
-        tbAuthCode.setText(JGMRConfig.getInstance().getAuthCode());
+        if (JGMRConfig.getInstance().getAuthCode() != null) {
+            tbAuthCode.setText(JGMRConfig.getInstance().getAuthCode());
         }
+        cbSystemtray.selectedProperty().set(JGMRConfig.getInstance().isMinimizeToTray());
+        cbFrequency.getItems().addAll("15 minutes", "30 minutes", "60 minutes", "Never");
+        switch (JGMRConfig.getInstance().getNotificationFrequency()) {
+            case 0:
+                cbFrequency.getSelectionModel().select("Never");
+                break;
+            case 15:
+                cbFrequency.getSelectionModel().select("15 minutes");
+                break;
+            case 30:
+                cbFrequency.getSelectionModel().select("30 minutes");
+                break;
+            case 60:
+                cbFrequency.getSelectionModel().select("60 minutes");
+                break;
+        }
+        cbMinimized.selectedProperty().set(JGMRConfig.getInstance().isNotificationsMinized());
     }
 
     @FXML
-    private void browseSaveDirectory(){
+    private void browseSaveDirectory() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         Stage stage = new Stage();
         File selectedDirectory = directoryChooser.showDialog(stage);
         if (selectedDirectory != null) {
-                selectedDirectory.getAbsolutePath();
-            }
+            selectedDirectory.getAbsolutePath();
+        }
         tbSaveDirectory.setText(selectedDirectory.getAbsolutePath());
     }
-    
+
     @FXML
-    private void saveConfig(){
+    private void saveConfig() {
         try {
             JGMRConfig.getInstance().setAuthCode(tbAuthCode.getText());
             JGMRConfig.getInstance().setPath(tbSaveDirectory.getText());
+            JGMRConfig.getInstance().setNotificationsMinized(cbMinimized.selectedProperty().get());
+            JGMRConfig.getInstance().setMinimizeToTray(cbSystemtray.selectedProperty().get());
+            Platform.setImplicitExit(!cbSystemtray.selectedProperty().get());
+            String frequency = (String) cbFrequency.getSelectionModel().getSelectedItem();
+            switch (frequency) {
+                case "15 minutes":
+                    JGMRConfig.getInstance().setNotificationFrequency(15);
+                    break;
+                case "30 minutes":
+                    JGMRConfig.getInstance().setNotificationFrequency(30);
+                    break;
+                case "60 minutes":
+                    JGMRConfig.getInstance().setNotificationFrequency(60);
+                    break;
+                case "Never":
+                    JGMRConfig.getInstance().setNotificationFrequency(0);
+                    break;
+            }
             Stage stage = (Stage) tbAuthCode.getScene().getWindow();
             stage.close();
         } catch (InValidUserException ex) {
@@ -73,6 +116,5 @@ public class SettingsDialogController implements Initializable {
             dg.show();
         }
     }
-    
-    
+
 }

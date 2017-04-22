@@ -31,10 +31,10 @@ public class Player {
     public Player() {
     }
 
-    public Player(String steamId, String personalname, String avatarUrl, int PersonaState, int gameId) {
+    public Player(String steamId, String PersonaName, String avatarUrl, int PersonaState, int GameID) {
 
         this.steamId = steamId;
-        this.personaName = personalname;
+        this.personaName = PersonaName;
         this.avatarUrl = avatarUrl;
         this.PersonaState = PersonaState;
         this.gameId = gameId;
@@ -46,14 +46,10 @@ public class Player {
         return steamId;
     }
 
-    public String getPersonalname() {
-        return personaName;
-    }
-
     public String getAvatarUrl() {
         return avatarUrl;
     }
-
+    @JsonProperty("PersonaState")
     public int getPersonaState() {
         return PersonaState;
     }
