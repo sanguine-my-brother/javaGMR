@@ -6,13 +6,8 @@
 package nl.hyranasoftware.javagmr.views.fxml;
 
 import com.github.plushaze.traynotification.animations.Animations;
-import com.github.plushaze.traynotification.notification.Notification;
 import com.github.plushaze.traynotification.notification.Notifications;
 import com.github.plushaze.traynotification.notification.TrayNotification;
-import dorkbox.systemTray.SystemTray;
-import dorkbox.systemTray.Checkbox;
-import dorkbox.systemTray.Menu;
-import dorkbox.systemTray.Separator;
 import dorkbox.systemTray.SystemTray;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -29,12 +24,10 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -55,7 +48,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
@@ -158,6 +150,24 @@ public class JgmrGuiController implements Initializable {
 
     }
 
+    private Scene getScene(String fxml) {
+        FXMLLoader loader = null;
+        String url = null;
+        url = getClass().getResource(fxml).toString();
+        System.out.println("  * url: " + url);
+        loader = new FXMLLoader(getClass().getResource(fxml));
+        Parent root = null;
+        try {
+            root = (Parent) loader.load();
+        } catch (IOException ex) {
+            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Object controller = loader.getController();
+        Scene scene = new Scene(root);
+        scene.setUserData(controller);
+        return scene;
+    }
+
     private void initializeChoiceDialog() {
         newSaveFileDialog = new ChoiceDialog<>(null, playerGames);
         newSaveFileDialog.setTitle("Save file");
@@ -214,20 +224,9 @@ public class JgmrGuiController implements Initializable {
 
     @FXML
     private void uploadGameManually() {
-        FXMLLoader loader = null;
-        String url = null;
-        url = getClass().getResource("uploadSaveGameDialog.fxml").toString();
-        System.out.println("  * url: " + url);
-        loader = new FXMLLoader(getClass().getResource("uploadSaveGameDialog.fxml"));
-        Parent root = null;
-        try {
-            root = (Parent) loader.load();
-        } catch (IOException ex) {
-            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
-        }
         Stage dialog = new Stage();
-        Scene scene = new Scene(root);
-        UploadSaveFileDialogController usfd = loader.<UploadSaveFileDialogController>getController();
+        Scene scene = getScene("uploadSaveGameDialog.fxml");
+        UploadSaveFileDialogController usfd = (UploadSaveFileDialogController) scene.getUserData();
         usfd.setGames(playerGames);
         dialog.setTitle("Giant Multi Robot Java-Client Save uploader");
         dialog.setScene(scene);
@@ -236,27 +235,14 @@ public class JgmrGuiController implements Initializable {
 
     @FXML
     private void settingsButton() {
-        FXMLLoader loader = null;
-        String url = null;
-        url = getClass().getResource("settingsDialog.fxml").toString();
-        System.out.println("  * url: " + url);
-        loader = new FXMLLoader(getClass().getResource("settingsDialog.fxml"));
-        Parent root = null;
-        try {
-            root = (Parent) loader.load();
-        } catch (IOException ex) {
-            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
-        }
         Stage dialog = new Stage();
-        Scene scene = new Scene(root);
+        Scene scene = getScene("settingsDialog.fxml");
         dialog.setTitle("Giant Multi Robot Java-Client");
         dialog.setScene(scene);
         dialog.show();
     }
 
     private void initializeListViews() {
-        Group root = new Group();
-
         lvAllGames.setCellFactory(new Callback<ListView<Game>, ListCell<Game>>() {
             @Override
             public ListCell<Game> call(ListView<Game> param) {
@@ -277,6 +263,7 @@ public class JgmrGuiController implements Initializable {
             @Override
             public ListCell<Game> call(ListView<Game> param) {
                 ListCell<Game> cell = new ListCell<Game>() {
+
                     @Override
                     protected void updateItem(Game g, boolean b) {
                         super.updateItem(g, b);
@@ -344,28 +331,33 @@ public class JgmrGuiController implements Initializable {
                         Task t = new Task() {
                             @Override
                             protected Object call() throws Exception {
-                                boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
-                                if (!didUpload) {
-                                    Dialog dialog = new Dialog();
-                                    dialog.setTitle("Couldn't upload savefile");
-                                    dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
-                                    dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                                    Platform.runLater(() -> {
-                                        dialog.show();
-                                        pbUpload.setProgress(0);
-                                        jgmrVbox.getChildren().remove(hbUpload);
-                                    });
+                                if (result.isPresent()) {
+                                    boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
+                                    if (!didUpload) {
 
-                                } else {
-                                    lvPlayerTurnGames.getItems().remove(result);
-                                    Platform.runLater(() -> {
-                                        TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
-                                        uploadSucces.setAnimation(Animations.POPUP);
-                                        uploadSucces.showAndDismiss(Duration.seconds(3));
-                                        pbUpload.setProgress(0);
-                                        jgmrVbox.getChildren().remove(hbUpload);
-                                    });
+                                        Platform.runLater(() -> {
+                                            Dialog dialog = new Dialog();
+                                            dialog.setTitle("Couldn't upload savefile");
+                                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
+                                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                                            
+                                            dialog.show();
+                                            ((Stage) dialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
+                                            pbUpload.setProgress(0);
+                                            jgmrVbox.getChildren().remove(hbUpload);
+                                        });
 
+                                    } else {
+                                        lvPlayerTurnGames.getItems().remove(result);
+                                        Platform.runLater(() -> {
+                                            TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
+                                            uploadSucces.setAnimation(Animations.POPUP);
+                                            uploadSucces.showAndDismiss(Duration.seconds(3));
+                                            pbUpload.setProgress(0);
+                                            jgmrVbox.getChildren().remove(hbUpload);
+                                        });
+
+                                    }
                                 }
                                 return null;
                             }
@@ -395,18 +387,30 @@ public class JgmrGuiController implements Initializable {
             newSaveFileDialog.setSelectedItem((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
             Task t = new Task() {
                 @Override
-                protected Object call() throws Exception {
-                    gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-                    Platform.runLater(() -> {
-                        TrayNotification uploadSucces = new TrayNotification("Download successful", "Onward my noble Leader and conquer thy enemies", Notifications.SUCCESS);
-                        uploadSucces.setAnimation(Animations.POPUP);
-                        uploadSucces.showAndDismiss(Duration.seconds(3));
-                        pbDownload.setProgress(0);
-                        jgmrVbox.getChildren().remove(hbDownload);
-                        startListeningForChanges();
-                        resumeWatchService();
-                        newDownload = false;
-                    });
+                protected Object call() {
+                    try {
+                        gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
+                        Platform.runLater(() -> {
+                            TrayNotification uploadSucces = new TrayNotification("Download successful", "Onward my noble Leader and conquer thy enemies", Notifications.SUCCESS);
+                            uploadSucces.setAnimation(Animations.POPUP);
+                            uploadSucces.showAndDismiss(Duration.seconds(3));
+                            pbDownload.setProgress(0);
+                            jgmrVbox.getChildren().remove(hbDownload);
+                            startListeningForChanges();
+                            resumeWatchService();
+                            newDownload = false;
+                        });
+                        return null;
+                    } catch (Exception ex) {
+                        Platform.runLater(() -> {
+                            TrayNotification downloadFailure = new TrayNotification("Download failed", "Check your internet connection \nor check if the GMR site is down", Notifications.ERROR);
+                            downloadFailure.setAnimation(Animations.POPUP);
+                            downloadFailure.showAndDismiss(Duration.seconds(3));
+                            pbDownload.setProgress(0);
+                            jgmrVbox.getChildren().remove(hbDownload);
+                        });
+
+                    }
                     return null;
                 }
             };
@@ -443,7 +447,6 @@ public class JgmrGuiController implements Initializable {
     private void initializeNotifications() {
         if (lvAllGames.getScene() != null) {
             Stage stage = (Stage) lvAllGames.getScene().getWindow();
-            boolean test = stage.isShowing();
             if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
                 if (JGMRConfig.getInstance().isNotificationsMinized() && stage.isIconified()) {
                     displayNotification();

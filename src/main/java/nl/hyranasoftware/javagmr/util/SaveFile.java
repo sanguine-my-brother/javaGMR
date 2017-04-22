@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr.util;
 
 import java.io.File;
+import java.util.Objects;
 import org.joda.time.DateTime;
 
 /**
@@ -30,6 +31,16 @@ public class SaveFile extends File{
     public long getSize() {
         return size;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 23 * hash + Objects.hashCode(this.lastTimeModified);
+        hash = 23 * hash + (int) (this.size ^ (this.size >>> 32));
+        return hash;
+    }
+    
+    
     
 
     @Override

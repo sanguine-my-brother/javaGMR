@@ -20,13 +20,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
+import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 
 /**
@@ -62,7 +62,7 @@ public class UploadSaveFileDialogController implements Initializable {
 
     @FXML
     protected void uploadSaveGame() {
-        System.out.println(lvGames.getSelectionModel().getSelectedIndex());
+         GMRLogger.logLine(lvGames.getSelectionModel().getSelectedIndex() + "");
         File file = new File(tbSaveFile.getText());
         Game selectedGame = (Game) lvGames.getSelectionModel().getSelectedItem();
         if (lvGames.getSelectionModel().getSelectedIndex() > -1 && file.exists()) {

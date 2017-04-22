@@ -5,10 +5,7 @@
  */
 package nl.hyranasoftware.javagmr.domain;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -16,7 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.threads.RetrievePlayers;
 import org.joda.time.DateTime;
 import org.ocpsoft.prettytime.PrettyTime;
@@ -25,7 +21,7 @@ import org.ocpsoft.prettytime.PrettyTime;
  *
  * @author danny_000
  */
-public class Game {
+public class Game implements Comparable<Game> {
 
     @JsonProperty("GameId")
     int gameid;
@@ -114,6 +110,18 @@ public class Game {
         }
         return true;
     }
+    
+    
+
+    @Override
+    public int compareTo(Game o) {
+        if(this.getCurrentTurn().started.isAfter(o.getCurrentTurn().started)){
+            return 1;
+        }
+        return -1;
+    }
+    
+    
     
     
     
