@@ -28,7 +28,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -332,30 +331,33 @@ public class JgmrGuiController implements Initializable {
                         Task t = new Task() {
                             @Override
                             protected Object call() throws Exception {
-                                if(result.isPresent()){
-                                boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
-                                if (!didUpload) {
-                                    Dialog dialog = new Dialog();
-                                    dialog.setTitle("Couldn't upload savefile");
-                                    dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
-                                    dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                                    Platform.runLater(() -> {
-                                        dialog.show();
-                                        pbUpload.setProgress(0);
-                                        jgmrVbox.getChildren().remove(hbUpload);
-                                    });
+                                if (result.isPresent()) {
+                                    boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
+                                    if (!didUpload) {
 
-                                } else {
-                                    lvPlayerTurnGames.getItems().remove(result);
-                                    Platform.runLater(() -> {
-                                        TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
-                                        uploadSucces.setAnimation(Animations.POPUP);
-                                        uploadSucces.showAndDismiss(Duration.seconds(3));
-                                        pbUpload.setProgress(0);
-                                        jgmrVbox.getChildren().remove(hbUpload);
-                                    });
+                                        Platform.runLater(() -> {
+                                            Dialog dialog = new Dialog();
+                                            dialog.setTitle("Couldn't upload savefile");
+                                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
+                                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                                            
+                                            dialog.show();
+                                            ((Stage) dialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
+                                            pbUpload.setProgress(0);
+                                            jgmrVbox.getChildren().remove(hbUpload);
+                                        });
 
-                                }
+                                    } else {
+                                        lvPlayerTurnGames.getItems().remove(result);
+                                        Platform.runLater(() -> {
+                                            TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
+                                            uploadSucces.setAnimation(Animations.POPUP);
+                                            uploadSucces.showAndDismiss(Duration.seconds(3));
+                                            pbUpload.setProgress(0);
+                                            jgmrVbox.getChildren().remove(hbUpload);
+                                        });
+
+                                    }
                                 }
                                 return null;
                             }

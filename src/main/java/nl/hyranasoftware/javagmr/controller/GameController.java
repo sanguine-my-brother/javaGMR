@@ -175,18 +175,16 @@ public class GameController {
         String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
         try {
 
-            int available = stream.available();
-            
+            int available = stream.available();       
             final byte bytes[] = new byte[available];
-            //stream.read(bytes);
-            int count = 0;
             
             while (stream.read(bytes) > 0) {
 
             }
 
             stream.close();
-
+ 
+            Unirest.setTimeouts(10000, 15000);
             String result = Unirest.post(requestUrl)
                     .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
                     .queryString("turnId", game.getCurrentTurn().getTurnId())
