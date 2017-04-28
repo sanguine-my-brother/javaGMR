@@ -8,9 +8,11 @@ package nl.hyranasoftware.javagmr.util;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -153,32 +155,18 @@ public class JGMRConfig {
     }
 
     public boolean didSaveFileChange(SaveFile saveFile) {
-        boolean notLocked = false;
 
-        FileLock lock = null;
-        try {
-            Logger.getLogger(JGMRConfig.class.getName()).log(Level.INFO, "Getting Lock", "Getting Lock");
-            FileChannel channel = new RandomAccessFile(saveFile, "rw").getChannel();
-            lock = channel.tryLock();
-            notLocked = lock.isValid();
-            lock.release();
-            channel.close();
-            Logger.getLogger(JGMRConfig.class.getName()).log(Level.INFO, "Got Lock", "Got Lock");
-        } catch (Exception ex) {
-            Logger.getLogger(JGMRConfig.class.getName()).log(Level.INFO, "Is being written to", "Is locked");
-        }
-        if (notLocked) {
-            if (saveFile.getSize() > 100 && !saveFiles.isEmpty() && saveFiles.indexOf(saveFile) != -1) {
-                SaveFile retrievedFile = saveFiles.get(saveFiles.indexOf(saveFile));
-                if (retrievedFile != null) {
-                    if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0 || saveFile.getSize() < (retrievedFile.getSize() - 30)) {
-                        if (!retrievedFile.getLastTimeModified().equals(saveFile.getLastTimeModified())) {
-                            return true;
-                        }
+        if (saveFile.getSize() > 100 && !saveFiles.isEmpty() && saveFiles.indexOf(saveFile) != -1) {
+            SaveFile retrievedFile = saveFiles.get(saveFiles.indexOf(saveFile));
+            if (retrievedFile != null) {
+                if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0 || saveFile.getSize() < (retrievedFile.getSize() - 30)) {
+                    if (!retrievedFile.getLastTimeModified().equals(saveFile.getLastTimeModified())) {
+                        return true;
                     }
                 }
             }
         }
+
         return false;
     }
 

@@ -142,7 +142,7 @@ public class UpdateDialogController implements Initializable {
                 Platform.runLater(() -> {
                     pbDownload.setVisible(false);
                     lbDownload.setVisible(false);
-                    TrayNotification downloadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
+                    TrayNotification downloadSucces = new TrayNotification("Download successful", "", Notifications.SUCCESS);
                     downloadSucces.setMessage("Please close this client and open the new one");
                     downloadSucces.setAnimation(Animations.POPUP);
                     downloadSucces.showAndDismiss(Duration.seconds(6));
