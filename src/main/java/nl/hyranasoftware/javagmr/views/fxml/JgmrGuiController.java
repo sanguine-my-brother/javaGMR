@@ -8,6 +8,7 @@ package nl.hyranasoftware.javagmr.views.fxml;
 import com.github.plushaze.traynotification.animations.Animations;
 import com.github.plushaze.traynotification.notification.Notifications;
 import com.github.plushaze.traynotification.notification.TrayNotification;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import dorkbox.systemTray.SystemTray;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,11 +52,14 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import nl.hyranasoftware.githubupdater.GithubUtility;
+import nl.hyranasoftware.githubupdater.domain.Release;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.gui;
 import nl.hyranasoftware.javagmr.threads.WatchDirectory;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import nl.hyranasoftware.javagmr.util.OpenURL;
 import nl.hyranasoftware.javagmr.util.SaveFile;
 
 /**
@@ -115,7 +120,7 @@ public class JgmrGuiController implements Initializable {
                 updateDownloadProgressBar(percent);
             }
         };
-
+        checkForUpdates();
         initializeChoiceDialog();
         initializeContextMenu();
         jgmrVbox.getChildren().remove(hbDownload);
@@ -340,7 +345,7 @@ public class JgmrGuiController implements Initializable {
                                             dialog.setTitle("Couldn't upload savefile");
                                             dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
                                             dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-                                            
+
                                             dialog.show();
                                             ((Stage) dialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
                                             pbUpload.setProgress(0);
@@ -421,11 +426,7 @@ public class JgmrGuiController implements Initializable {
         MenuItem goToGameSite = new MenuItem("View game's page on GMR (UNSTABLE)");
         goToGameSite.setOnAction(event -> {
             String webURI = "http://multiplayerrobot.com/Game#" + ((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem()).getGameid();
-            try {
-                java.awt.Desktop.getDesktop().browse(URI.create(webURI));
-            } catch (IOException ex) {
-                Logger.getLogger(JgmrGuiController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            OpenURL.openUrlInBrowser(webURI);
         });
         cm.getItems().addAll(downloadSaveFile, goToGameSite);
 
@@ -515,5 +516,35 @@ public class JgmrGuiController implements Initializable {
             }));
 
         }
+    }
+
+    private void checkForUpdates() {
+                Properties props = new Properties();
+        try {
+            props.load(getClass().getResourceAsStream("version.properties"));
+        } catch (IOException ex) {
+            Logger.getLogger(UpdateDialogController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        GithubUtility gu = new GithubUtility("eternia16", "javaGMR", props.getProperty("version"));
+        Thread t = new Thread(() -> {
+            try {
+                if (gu.checkForUpdates()) {
+                    Release release = gu.getLatestRelease();
+                    Platform.runLater(() -> {
+                        Scene scene = getScene("updateDialog.fxml");
+                        UpdateDialogController udc = (UpdateDialogController) scene.getUserData();
+                        udc.setAssets(release.getAssets());
+                        Stage dialog = new Stage();
+                        dialog.setTitle("Update detected");
+                        dialog.setScene(scene);
+
+                        dialog.show();
+                    });
+                }
+            } catch (UnirestException ex) {
+                Logger.getLogger(JgmrGuiController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        t.run();
     }
 }

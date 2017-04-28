@@ -34,27 +34,7 @@ public class gui extends Application {
     @Override
     @java.lang.SuppressWarnings("squid:AVuVjDYZtpYg8Dj43Cce")
     public void start(Stage primaryStage) {
-        Properties props = new Properties();
-        try {
-            props.load(getClass().getResourceAsStream("version.properties"));
-        } catch (IOException ex) {
-            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        GithubUtility update = new GithubUtility("eternia16", "javaGMR", props.getProperty("version"));
-        try {
-            Release release = update.getLatestRelease();
-            File file = new File(gui.class.getProtectionDomain()
-                    .getCodeSource()
-                    .getLocation()
-                    .getPath());
-            update.updateCurrentJar(file, release.getAssets().get(1));
 
-        } catch (UnirestException ex) {
-            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        GMRLogger.logLine(props.getProperty("version"));
         FXMLLoader loader = null;
         String url = null;
         url = getClass().getResource("views/fxml/jgmrGui.fxml").toString();
