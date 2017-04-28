@@ -29,6 +29,8 @@ import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import org.joda.time.DateTime;
+import static org.joda.time.DateTime.now;
+import org.joda.time.Interval;
 
 /**
  *
@@ -92,7 +94,8 @@ public class GameController {
             if (g.getCurrentTurn().getUserId().equals(JGMRConfig.getInstance().getPlayerSteamId())) {
 
                 if (JGMRConfig.getInstance().getUploadedGames().contains(g)) {
-                    if (JGMRConfig.getInstance().getUploadedGames().get(JGMRConfig.getInstance().getUploadedGames().indexOf(g)).getUploaded().isAfter(DateTime.now().plusMinutes(15))) {
+                    Game uploadedGame = JGMRConfig.getInstance().getUploadedGames().get(JGMRConfig.getInstance().getUploadedGames().indexOf(g));
+                    if (!uploadedGame.getCurrentTurn().equals(g.getCurrentTurn())){
                         JGMRConfig.getInstance().uploadedGameExpired(g);
                         playerTurns.add(g);
                     }

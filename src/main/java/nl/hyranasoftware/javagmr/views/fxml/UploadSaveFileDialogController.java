@@ -59,6 +59,8 @@ public class UploadSaveFileDialogController implements Initializable {
         Stage stage = (Stage) lvGames.getScene().getWindow();
         stage.close();
     }
+    
+ 
 
     @FXML
     protected void uploadSaveGame() {

@@ -8,8 +8,14 @@ package nl.hyranasoftware.javagmr.util;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -108,7 +114,7 @@ public class JGMRConfig {
             this.authCode = authCode;
             this.playerSteamId = playerCode;
             saveConfig();
-        } 
+        }
 
     }
 
@@ -149,16 +155,18 @@ public class JGMRConfig {
     }
 
     public boolean didSaveFileChange(SaveFile saveFile) {
+
         if (saveFile.getSize() > 100 && !saveFiles.isEmpty() && saveFiles.indexOf(saveFile) != -1) {
             SaveFile retrievedFile = saveFiles.get(saveFiles.indexOf(saveFile));
             if (retrievedFile != null) {
-                if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() < (retrievedFile.getSize() - 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0) {
+ if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0 || saveFile.getSize() < (retrievedFile.getSize() - 30)) {
                     if (!retrievedFile.getLastTimeModified().equals(saveFile.getLastTimeModified())) {
                         return true;
                     }
                 }
             }
         }
+
         return false;
     }
 

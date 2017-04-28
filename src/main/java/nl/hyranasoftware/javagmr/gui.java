@@ -5,7 +5,10 @@
  */
 package nl.hyranasoftware.javagmr;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -17,7 +20,10 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import nl.hyranasoftware.githubupdater.GithubUtility;
+import nl.hyranasoftware.githubupdater.domain.Release;
 
 /**
  *
@@ -28,6 +34,7 @@ public class gui extends Application {
     @Override
     @java.lang.SuppressWarnings("squid:AVuVjDYZtpYg8Dj43Cce")
     public void start(Stage primaryStage) {
+
         FXMLLoader loader = null;
         String url = null;
         url = getClass().getResource("views/fxml/jgmrGui.fxml").toString();
