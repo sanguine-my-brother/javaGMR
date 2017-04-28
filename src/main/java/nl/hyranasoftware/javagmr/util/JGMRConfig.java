@@ -159,7 +159,7 @@ public class JGMRConfig {
         if (saveFile.getSize() > 100 && !saveFiles.isEmpty() && saveFiles.indexOf(saveFile) != -1) {
             SaveFile retrievedFile = saveFiles.get(saveFiles.indexOf(saveFile));
             if (retrievedFile != null) {
-                if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0 || saveFile.getSize() < (retrievedFile.getSize() - 30)) {
+ if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0 || saveFile.getSize() < (retrievedFile.getSize() - 30)) {
                     if (!retrievedFile.getLastTimeModified().equals(saveFile.getLastTimeModified())) {
                         return true;
                     }

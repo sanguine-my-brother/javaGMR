@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  * @author danny_000
  */
 public class GMRLogger {
-    private final static Logger LOGGER = Logger.getLogger(GMRLogger.class.getName());
+    private final static Logger LOGGER = Logger.getLogger("GMR Logger");
     
     public static void logLine(String line){
         LOGGER.log(Level.INFO, line);
