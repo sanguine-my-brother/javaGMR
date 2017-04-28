@@ -94,7 +94,6 @@ public class GameController {
 
                 if (JGMRConfig.getInstance().getUploadedGames().contains(g)) {
                     Game uploadedGame = JGMRConfig.getInstance().getUploadedGames().get(JGMRConfig.getInstance().getUploadedGames().indexOf(g));
-                    Interval interval = new Interval(uploadedGame.getUploaded(), DateTime.now());
                     if (!uploadedGame.getCurrentTurn().equals(g.getCurrentTurn())){
                         JGMRConfig.getInstance().uploadedGameExpired(g);
                         playerTurns.add(g);
