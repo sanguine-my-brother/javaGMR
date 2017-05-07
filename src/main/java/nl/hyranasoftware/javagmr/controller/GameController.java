@@ -187,7 +187,7 @@ public class GameController {
 
             stream.close();
  
-            Unirest.setTimeouts(10000, 15000);
+            Unirest.setTimeouts(10000, 80000);
             String result = Unirest.post(requestUrl)
                     .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
                     .queryString("turnId", game.getCurrentTurn().getTurnId())

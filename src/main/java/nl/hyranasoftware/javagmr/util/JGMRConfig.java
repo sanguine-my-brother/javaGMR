@@ -159,7 +159,7 @@ public class JGMRConfig {
         if (saveFile.getSize() > 100 && !saveFiles.isEmpty() && saveFiles.indexOf(saveFile) != -1) {
             SaveFile retrievedFile = saveFiles.get(saveFiles.indexOf(saveFile));
             if (retrievedFile != null) {
- if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0 || saveFile.getSize() < (retrievedFile.getSize() - 30)) {
+                if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0 || saveFile.getSize() < (retrievedFile.getSize() - 30)) {
                     if (!retrievedFile.getLastTimeModified().equals(saveFile.getLastTimeModified())) {
                         return true;
                     }
@@ -169,11 +169,10 @@ public class JGMRConfig {
 
         return false;
     }
-
     public List<Game> getUploadedGames() {
         return uploadedGames;
     }
-
+    @JsonIgnore
     public void addUploadedGame(Game game) {
         game.setUploaded(DateTime.now());
         this.uploadedGames.add(game);
@@ -184,7 +183,6 @@ public class JGMRConfig {
     public void uploadedGameExpired(Game game) {
         this.uploadedGames.remove(game);
     }
-
     public void setUploadedGames(List<Game> uploadedGames) {
         this.uploadedGames = uploadedGames;
     }

@@ -116,9 +116,9 @@ public class Game implements Comparable<Game> {
     @Override
     public int compareTo(Game o) {
         if(this.getCurrentTurn().started.isAfter(o.getCurrentTurn().started)){
-            return -1;
+            return 1;
         }
-        return 1;
+        return -1;
     }
     
     
