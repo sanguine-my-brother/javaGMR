@@ -76,6 +76,15 @@ public class Game implements Comparable<Game> {
         }
     }
 
+    public String getPrettyTimeLeft() {
+        PrettyTime p = new PrettyTime();
+        if (currentTurn.getExpires() != null) {
+            return p.format(currentTurn.getExpires().toDate());
+        } else {
+            return p.format(currentTurn.getStarted().toDate());
+        }
+    }
+
     @Override
     public String toString() {
         PrettyTime p = new PrettyTime();

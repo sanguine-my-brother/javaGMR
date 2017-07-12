@@ -42,6 +42,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -79,11 +80,13 @@ public class JgmrGuiController implements Initializable {
     @FXML
     private VBox jgmrVbox;
     @FXML
+    private VBox vbPlayerTurnBox;
+    @FXML
     private HBox hbUpload;
     @FXML
     private HBox hbDownload;
     @FXML
-    private ListView lvPlayerTurnGames;
+    private ScrollPane gamesPane;
     @FXML
     private ListView lvAllGames;
     @FXML
@@ -122,7 +125,6 @@ public class JgmrGuiController implements Initializable {
         };
         checkForUpdates();
         initializeChoiceDialog();
-        initializeContextMenu();
         jgmrVbox.getChildren().remove(hbDownload);
         jgmrVbox.getChildren().remove(hbUpload);
         initializeListViews();
@@ -196,7 +198,14 @@ public class JgmrGuiController implements Initializable {
                             lvAllGames.setItems(currentGames);
 
                             playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
-                            lvPlayerTurnGames.setItems(playerGames);
+                            for (Game g : playerGames) {
+                                Stage dialog = new Stage();
+                                Scene scene = getScene("gamepane.fxml");
+                                GamepaneController gpc = (GamepaneController) scene.getUserData();
+                                gpc.constructView(g);
+                                vbPlayerTurnBox.getChildren().add(gpc.getVbGamePane());     
+                                vbPlayerTurnBox.prefHeightProperty().add(50);
+                            }
                             if (wdt == null) {
                                 startListeningForChanges();
                             }
@@ -264,38 +273,6 @@ public class JgmrGuiController implements Initializable {
             }
 
         });
-        lvPlayerTurnGames.setCellFactory(new Callback<ListView<Game>, ListCell<Game>>() {
-            @Override
-            public ListCell<Game> call(ListView<Game> param) {
-                ListCell<Game> cell = new ListCell<Game>() {
-
-                    @Override
-                    protected void updateItem(Game g, boolean b) {
-                        super.updateItem(g, b);
-                        if (g != null) {
-                            setText(g.toString());
-                        } else {
-                            setText(null);
-                        }
-
-                    }
-                };
-                cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent event) {
-                        if (cell.getText() != null) {
-                            if (event.getButton() == MouseButton.PRIMARY) {
-                                cm.show(cell, event.getScreenX(), event.getScreenY());
-                            }
-                        }
-                    }
-
-                });
-                cell.setContextMenu(cm);
-                return cell;
-            }
-
-        });
     }
 
     private void startListeningForChanges() {
@@ -353,7 +330,6 @@ public class JgmrGuiController implements Initializable {
                                         });
 
                                     } else {
-                                        lvPlayerTurnGames.getItems().remove(result);
                                         Platform.runLater(() -> {
                                             TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
                                             uploadSucces.setAnimation(Animations.POPUP);
@@ -383,54 +359,6 @@ public class JgmrGuiController implements Initializable {
         }
     }
 
-    private void initializeContextMenu() {
-        MenuItem downloadSaveFile = new MenuItem("Download Save File");
-        downloadSaveFile.setOnAction(event -> {
-            pauseWatchService();
-            newDownload = true;
-            jgmrVbox.getChildren().add(hbDownload);
-            newSaveFileDialog.setSelectedItem((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            Task t = new Task() {
-                @Override
-                protected Object call() {
-                    try {
-                        gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-                        Platform.runLater(() -> {
-                            TrayNotification uploadSucces = new TrayNotification("Download successful", "Go and conquer your enemies", Notifications.SUCCESS);
-                            uploadSucces.setAnimation(Animations.POPUP);
-                            uploadSucces.showAndDismiss(Duration.seconds(3));
-                            pbDownload.setProgress(0);
-                            jgmrVbox.getChildren().remove(hbDownload);
-                            startListeningForChanges();
-                            resumeWatchService();
-                            newDownload = false;
-                        });
-                        return null;
-                    } catch (Exception ex) {
-                        Platform.runLater(() -> {
-                            TrayNotification downloadFailure = new TrayNotification("Download failed", "Check your internet connection \nor check if the GMR site is down", Notifications.ERROR);
-                            downloadFailure.setAnimation(Animations.POPUP);
-                            downloadFailure.showAndDismiss(Duration.seconds(3));
-                            pbDownload.setProgress(0);
-                            jgmrVbox.getChildren().remove(hbDownload);
-                        });
-
-                    }
-                    return null;
-                }
-            };
-            Thread thread = new Thread(t);
-            thread.start();
-        });
-
-        MenuItem goToGameSite = new MenuItem("View game's page on GMR (UNSTABLE)");
-        goToGameSite.setOnAction(event -> {
-            String webURI = "http://multiplayerrobot.com/Game#" + ((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem()).getGameid();
-            OpenURL.openUrlInBrowser(webURI);
-        });
-        cm.getItems().addAll(downloadSaveFile, goToGameSite);
-
-    }
 
     private void initializeWatcher() throws IOException {
 
@@ -519,7 +447,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void checkForUpdates() {
-                Properties props = new Properties();
+        Properties props = new Properties();
         try {
             props.load(getClass().getResourceAsStream("version.properties"));
         } catch (IOException ex) {
