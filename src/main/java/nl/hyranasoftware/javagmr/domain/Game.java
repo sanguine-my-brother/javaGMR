@@ -23,35 +23,34 @@ import org.ocpsoft.prettytime.PrettyTime;
  */
 public class Game implements Comparable<Game> {
 
-    @JsonProperty("GameId")
-    int gameid;
-    @JsonProperty("Name")
-    String name;
-    @JsonProperty("Players")
-    List<Player> players;
-    @JsonProperty("CurrentTurn")
-    CurrentTurn currentTurn;
-    @JsonProperty("Type")
-    int type;
-    @JsonProperty("uploaded")
-    DateTime uploaded;
+    private int gameid;
+    private String name;
+    private List<Player> players;
+    private CurrentTurn currentTurn;
+    private int type;
+    private DateTime uploaded;
 
+    @JsonProperty("GameId")
     public int getGameid() {
         return gameid;
     }
 
+    @JsonProperty("Name")
     public String getName() {
         return name;
     }
 
+    @JsonProperty("Players")
     public List<Player> getPlayers() {
         return players;
     }
 
+    @JsonProperty("CurrentTurn")
     public CurrentTurn getCurrentTurn() {
         return currentTurn;
     }
 
+    @JsonProperty("uploaded")
     public DateTime getUploaded() {
         return uploaded;
     }
@@ -59,8 +58,11 @@ public class Game implements Comparable<Game> {
     public void setUploaded(DateTime uploaded) {
         this.uploaded = uploaded;
     }
-    
-    
+
+    @JsonProperty("Type")
+    public int getType() {
+        return type;
+    }
 
     public void getPlayersFromGMR() {
         try {
@@ -79,7 +81,7 @@ public class Game implements Comparable<Game> {
         PrettyTime p = new PrettyTime();
         if (currentTurn.getExpires() != null) {
             return this.name + " || Expires: " + p.format(currentTurn.getExpires().toDate());
-        } else{
+        } else {
             return this.name + " || Last turn: " + p.format(currentTurn.getStarted().toDate());
         }
 
@@ -110,20 +112,13 @@ public class Game implements Comparable<Game> {
         }
         return true;
     }
-    
-    
 
     @Override
     public int compareTo(Game o) {
-        if(this.getCurrentTurn().started.isAfter(o.getCurrentTurn().started)){
+        if (this.getCurrentTurn().started.isAfter(o.getCurrentTurn().started)) {
             return -1;
         }
         return 1;
     }
-    
-    
-    
-    
-    
 
 }

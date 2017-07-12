@@ -29,6 +29,7 @@ import nl.hyranasoftware.javagmr.util.SaveFile;
 public abstract class WatchDirectory implements Runnable {
 
     String fileName;
+    long previousFileSize = 0;
     private volatile boolean newDownload = false;
 
     int index = 0;
@@ -82,16 +83,24 @@ public abstract class WatchDirectory implements Runnable {
                     File file = new File(pathEvent.context().toString());
                     GMRLogger.logLine("File path: " + file.getAbsolutePath());
                     if (!newDownload) {
-                         GMRLogger.logLine("Event kind: " + eventKind);
+                        GMRLogger.logLine("Event kind: " + eventKind);
                         if (eventKind == ENTRY_CREATE) {
                             updatedSaveFile(new SaveFile(file.getName()));
-                             GMRLogger.logLine("New save file detected: " + file.toString());
+                            GMRLogger.logLine("New save file detected: " + file.toString());
                         }
                         if (eventKind == ENTRY_MODIFY) {
                             SaveFile saveFile = new SaveFile(file.getAbsolutePath());
-                            if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
-                                updatedSaveFile(new SaveFile(file.getName()));
-                                 GMRLogger.logLine("New save file detected: " + file.toString());
+                            if (saveFile.getSize() > previousFileSize && previousFileSize != 0) {
+                                if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
+                                    updatedSaveFile(new SaveFile(file.getName()));
+                                    GMRLogger.logLine("New save file detected: " + file.toString());
+                                }
+                            }
+                            previousFileSize = saveFile.getSize();
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(WatchDirectory.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
                         }
@@ -102,7 +111,7 @@ public abstract class WatchDirectory implements Runnable {
                 boolean validKey = key.reset();
 
                 if (!validKey) {
-                     GMRLogger.logLine("Invalid key");
+                    GMRLogger.logLine("Invalid key");
                     break; // infinite for loop
                 }
 
@@ -160,16 +169,16 @@ public abstract class WatchDirectory implements Runnable {
                     java.nio.file.WatchEvent pathEvent = (java.nio.file.WatchEvent) genericEvent;
                     Path file = (Path) pathEvent.context();
                     if (!newDownload) {
-                         GMRLogger.logLine("Event kind: " + eventKind);
+                        GMRLogger.logLine("Event kind: " + eventKind);
                         if (eventKind == java.nio.file.StandardWatchEventKinds.ENTRY_CREATE) {
                             updatedSaveFile((SaveFile) file.toFile());
-                             GMRLogger.logLine("New save file detected: " + file.toString());
+                            GMRLogger.logLine("New save file detected: " + file.toString());
                         }
                         if (eventKind == java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY) {
                             SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
                             if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
                                 updatedSaveFile(new SaveFile(file.getFileName().toString()));
-                                 GMRLogger.logLine("New save file detected: " + file.toString());
+                                GMRLogger.logLine("New save file detected: " + file.toString());
                             }
 
                         }
@@ -180,7 +189,7 @@ public abstract class WatchDirectory implements Runnable {
                 boolean validKey = key.reset();
 
                 if (!validKey) {
-                     GMRLogger.logLine("Invalid key");
+                    GMRLogger.logLine("Invalid key");
                     break; // infinite for loop
                 }
 
@@ -203,7 +212,7 @@ public abstract class WatchDirectory implements Runnable {
     public void run() {
         try {
             String osName = System.getProperty("os.name").toLowerCase();
-            if (osName.contains("mac")) {
+            if (!osName.contains("mac")) {
                 processEventsMac();
             } else {
                 processEventsWinLin();

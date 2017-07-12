@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import java.io.BufferedReader;
@@ -36,6 +37,9 @@ public class JGMRConfig {
     private int notificationFrequency = 15;
     private boolean notificationsMinized = true;
     private boolean minimizeToTray = true;
+    
+    
+    @JsonProperty("uploadedGames")
     private List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore
@@ -170,9 +174,15 @@ public class JGMRConfig {
         return false;
     }
 
+    @JsonIgnore
     public List<Game> getUploadedGames() {
         return uploadedGames;
     }
+    @JsonIgnore
+    public void  setUploadedGames(List<Game> uploadedGames){
+        this.uploadedGames = uploadedGames;
+    }
+    
 
     public void addUploadedGame(Game game) {
         game.setUploaded(DateTime.now());
@@ -185,8 +195,5 @@ public class JGMRConfig {
         this.uploadedGames.remove(game);
     }
 
-    public void setUploadedGames(List<Game> uploadedGames) {
-        this.uploadedGames = uploadedGames;
-    }
 
 }
