@@ -13,17 +13,21 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.domain.Player;
+import org.joda.time.DateTime;
 
 /**
  * FXML Controller class
@@ -48,26 +52,64 @@ public class GamepaneController implements Initializable {
     private Button btDownload;
     @FXML
     private HBox hbPlayers;
+    @FXML
+    private ProgressBar pbDownload;
 
-    Game game;
+    private Game game;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        vbGamePane.getChildren().remove(pbDownload);
     }
 
     public void constructView(Game g) {
         this.game = g;
         lbGameName.setText(g.getName());
+
         lbTimeLeft.setText(g.getPrettyTimeLeft());
         getPlayers();
     }
 
     public VBox getVbGamePane() {
         return vbGamePane;
+    }
+
+    @FXML
+    protected void downloadGame() {
+
+        GameController gc = new GameController() {
+            @Override
+            public void sendDownloadProgress(double percent) {
+                updateDownloadProgressBar(percent);
+            }
+        };
+        vbGamePane.getChildren().add(pbDownload);
+        Task t = new Task() {
+            @Override
+            protected Object call() throws Exception {
+
+                gc.downloadSaveFile(game);
+                Platform.runLater(() -> {
+                    vbGamePane.getChildren().remove(pbDownload);
+                });
+
+                return null;
+            }
+
+        };
+
+        Thread thread = new Thread(t);
+        thread.start();
+
+    }
+
+    private void updateDownloadProgressBar(double size) {
+        Platform.runLater(() -> {
+            pbDownload.setProgress(size);
+        });
     }
 
     private void getPlayers() {
@@ -83,7 +125,7 @@ public class GamepaneController implements Initializable {
                 for (Player p : game.getPlayers()) {
                     if (!p.getSteamId().equals("0")) {
                         File playerimage = new File("cache/" + p.getSteamId() + ".jpg");
-                        if (!playerimage.exists()) {
+                        if (!playerimage.exists() || DateTime.now().minusWeeks(1).isAfter(playerimage.lastModified())) {
                             Player gmrPlayer = pc.getPlayerFromGMR(p.getSteamId());
                             try {
                                 pc.downloadPlayerAvatar(gmrPlayer);
@@ -91,18 +133,30 @@ public class GamepaneController implements Initializable {
                                 Logger.getLogger(GamepaneController.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
-                        System.out.println(playerimage.getPath());
+
                         ImageView imageView = new ImageView();
                         Image image = new Image("file:" + playerimage.getAbsolutePath());
-                        imageView.maxHeight(25);
-                        imageView.setPreserveRatio(false);
-                        
-                        
+                        imageView.setPreserveRatio(true);
+                        imageView.setFitHeight(25);
+                        imageView.setFitWidth(25);
+
                         imageView.setImage(image);
-                        Platform.runLater(() ->{
+                        Platform.runLater(() -> {
                             hbPlayers.getChildren().add(imageView);
                         });
-                        
+
+                    } else {
+                        ImageView imageView = new ImageView();
+                        Image image = new Image(getClass().getResourceAsStream("computericon.png"));
+                        imageView.setPreserveRatio(true);
+                        imageView.setFitHeight(25);
+                        imageView.setFitWidth(25);
+
+                        imageView.setImage(image);
+                        Platform.runLater(() -> {
+                            hbPlayers.getChildren().add(imageView);
+                        });
+
                     }
                 }
             }

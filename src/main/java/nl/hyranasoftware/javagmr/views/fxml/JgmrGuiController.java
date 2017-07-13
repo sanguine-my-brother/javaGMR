@@ -123,6 +123,7 @@ public class JgmrGuiController implements Initializable {
                 updateDownloadProgressBar(percent);
             }
         };
+
         checkForUpdates();
         initializeChoiceDialog();
         jgmrVbox.getChildren().remove(hbDownload);
@@ -198,13 +199,23 @@ public class JgmrGuiController implements Initializable {
                             lvAllGames.setItems(currentGames);
 
                             playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
+                            vbPlayerTurnBox.getChildren().clear();
+                            boolean second = false;
                             for (Game g : playerGames) {
                                 Stage dialog = new Stage();
                                 Scene scene = getScene("gamepane.fxml");
                                 GamepaneController gpc = (GamepaneController) scene.getUserData();
                                 gpc.constructView(g);
+                                if(second){
+                                    gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
+                                    gpc.getVbGamePane().applyCss();
+                                    second = false;
+                                }else{
+                                    gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
+                                    gpc.getVbGamePane().applyCss();
+                                    second = true;
+                                }
                                 vbPlayerTurnBox.getChildren().add(gpc.getVbGamePane());     
-                                vbPlayerTurnBox.prefHeightProperty().add(50);
                                 
                             }
                             if (wdt == null) {

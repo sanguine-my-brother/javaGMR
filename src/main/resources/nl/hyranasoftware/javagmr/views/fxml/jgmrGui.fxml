@@ -11,20 +11,20 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="jgmrVbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="532.0" prefWidth="761.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.JgmrGuiController">
+<VBox fx:id="jgmrVbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="850.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.JgmrGuiController">
    <children>
-      <ToolBar prefHeight="41.0" prefWidth="643.0">
+      <ToolBar minHeight="41.0" prefHeight="41.0" prefWidth="643.0">
         <items>
           <Button fx:id="btSettings" mnemonicParsing="false" onAction="#settingsButton" text="Settings" />
-            <Button mnemonicParsing="false" onAction="#uploadGameManually" text="Upload Game Manually" />
+            <Button mnemonicParsing="false" onAction="#uploadGameManually" styleClass="warning" text="Upload Game Manually" />
             <Label fx:id="lbTime" text="Time until next pull from GMR:" />
         </items>
       </ToolBar>
-      <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="488.0" prefWidth="761.0">
+      <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="591.0" prefWidth="761.0">
         <items>
           <AnchorPane fx:id="apAbove" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" SplitPane.resizableWithParent="false">
                <children>
-                  <ScrollPane fx:id="spGames" prefHeight="227.0" prefWidth="759.0">
+                  <ScrollPane fx:id="spGames" prefHeight="287.0" prefWidth="850.0">
                      <content>
                         <VBox fx:id="vbPlayerTurnBox" prefHeight="200.0" prefWidth="100.0" />
                      </content>
@@ -32,20 +32,20 @@
                </children></AnchorPane>
           <AnchorPane minHeight="100.0" minWidth="100.0" prefHeight="304.0" prefWidth="759.0" SplitPane.resizableWithParent="false">
                <children>
-                  <ListView fx:id="lvAllGames" prefHeight="240.0" prefWidth="759.0" />
+                  <ListView fx:id="lvAllGames" prefHeight="287.0" prefWidth="850.0" />
                </children></AnchorPane>
         </items>
       </SplitPane>
       <HBox fx:id="hbUpload" prefHeight="0.0" prefWidth="200.0" visible="true">
          <children>
             <Label prefHeight="17.0" prefWidth="110.0" text="Uploading:" />
-            <ProgressBar fx:id="pbUpload" prefHeight="20.0" prefWidth="648.0" progress="0.0" />
+            <ProgressBar fx:id="pbUpload" prefHeight="20.0" prefWidth="648.0" progress="0.0" styleClass="success" />
          </children>
       </HBox>
       <HBox fx:id="hbDownload" prefHeight="0.0" prefWidth="200.0" visible="true">
          <children>
             <Label prefHeight="17.0" prefWidth="110.0" text="Downloading: " />
-            <ProgressBar fx:id="pbDownload" prefHeight="20.0" prefWidth="648.0" progress="0.0" />
+            <ProgressBar fx:id="pbDownload" prefHeight="20.0" prefWidth="648.0" progress="0.0" styleClass="success" />
          </children>
       </HBox>
    </children>
