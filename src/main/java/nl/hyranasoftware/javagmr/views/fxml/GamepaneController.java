@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -47,8 +48,9 @@ public class GamepaneController implements Initializable {
     private Button btDownload;
     @FXML
     private HBox hbPlayers;
-    
+
     Game game;
+
     /**
      * Initializes the controller class.
      */
@@ -57,47 +59,57 @@ public class GamepaneController implements Initializable {
         // TODO
     }
 
-    public void constructView(Game g){
+    public void constructView(Game g) {
         this.game = g;
         lbGameName.setText(g.getName());
         lbTimeLeft.setText(g.getPrettyTimeLeft());
         getPlayers();
     }
-    
-    public VBox getVbGamePane(){
+
+    public VBox getVbGamePane() {
         return vbGamePane;
     }
-    
-    private void getPlayers(){
+
+    private void getPlayers() {
         File cacheDirectory = new File("cache");
-        if(!cacheDirectory.exists()){
+        if (!cacheDirectory.exists()) {
             cacheDirectory.mkdir();
         }
         Thread getPlayers = new Thread(new Runnable() {
             @Override
             public void run() {
+                game.sortPlayers();
                 PlayerController pc = new PlayerController();
-                for(Player p : game.getPlayers()){
-                    File playerimage = new File("cache/" + p.getSteamId() + ".jpg");
-                    if(!playerimage.exists()){
-                        Player gmrPlayer = pc.getPlayerFromGMR(p.getSteamId());
-                        try {
-                            pc.downloadPlayerAvatar(gmrPlayer);
-                        } catch (IOException ex) {
-                            Logger.getLogger(GamepaneController.class.getName()).log(Level.SEVERE, null, ex);
+                for (Player p : game.getPlayers()) {
+                    if (!p.getSteamId().equals("0")) {
+                        File playerimage = new File("cache/" + p.getSteamId() + ".jpg");
+                        if (!playerimage.exists()) {
+                            Player gmrPlayer = pc.getPlayerFromGMR(p.getSteamId());
+                            try {
+                                pc.downloadPlayerAvatar(gmrPlayer);
+                            } catch (IOException ex) {
+                                Logger.getLogger(GamepaneController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
+                        System.out.println(playerimage.getPath());
+                        ImageView imageView = new ImageView();
+                        Image image = new Image("file:" + playerimage.getAbsolutePath());
+                        imageView.maxHeight(25);
+                        imageView.setPreserveRatio(false);
+                        
+                        
+                        imageView.setImage(image);
+                        Platform.runLater(() ->{
+                            hbPlayers.getChildren().add(imageView);
+                        });
+                        
                     }
-                    System.out.println(playerimage.getPath());
-                    ImageView imageView = new ImageView();
-                    Image image = new Image("file:" + playerimage.getAbsolutePath());
-                    imageView.setImage(image);
-                    hbPlayers.getChildren().add(imageView);
                 }
             }
-             
-         });
+
+        });
         getPlayers.setName(game.getName() + "_retrievingPlayers");
-        getPlayers.run();
+        getPlayers.start();
     }
-    
+
 }

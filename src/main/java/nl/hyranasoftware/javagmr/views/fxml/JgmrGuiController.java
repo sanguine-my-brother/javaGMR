@@ -205,6 +205,7 @@ public class JgmrGuiController implements Initializable {
                                 gpc.constructView(g);
                                 vbPlayerTurnBox.getChildren().add(gpc.getVbGamePane());     
                                 vbPlayerTurnBox.prefHeightProperty().add(50);
+                                
                             }
                             if (wdt == null) {
                                 startListeningForChanges();

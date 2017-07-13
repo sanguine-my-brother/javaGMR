@@ -6,7 +6,13 @@
 package nl.hyranasoftware.javagmr.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.Collections;
+import static java.util.Collections.list;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -62,6 +68,88 @@ public class Game implements Comparable<Game> {
     @JsonProperty("Type")
     public int getType() {
         return type;
+    }
+
+    public void sortPlayers() {
+
+        Collections.sort(players, new Comparator<Player>() {
+            @Override
+            public int compare(Player o1, Player o2) {
+                if (o1.turnOrder > o2.turnOrder) {
+                    return 1;
+                }
+                return -1;
+            }
+
+        });
+        int i = 0;
+        ListIterator<Player> iterator = players.listIterator();
+        List<Player> previousPlayers = new ArrayList();
+        List<Player> nextPlayers = new ArrayList();
+        while (iterator.hasNext()) {
+            Player player = iterator.next();
+            if (i >= currentTurn.playerNumber) {
+                previousPlayers.add(player);
+            } else {
+                nextPlayers.add(player);
+                System.out.println(iterator.nextIndex());
+            }
+            
+            i++;
+
+        }
+        previousPlayers.addAll(nextPlayers);
+        players = previousPlayers;
+        /*
+        List<Player> newList = new ArrayList();
+        List<Player> tempPlayers = players;
+        int currentPlayer = currentTurn.playerNumber;
+        ListIterator<Player> iterator = tempPlayers.listIterator();
+        int index = 0;
+
+        while (!tempPlayers.isEmpty()) {
+            if (index == tempPlayers.size()) {
+                index = 0;
+            }
+            System.out.println(this.getName() + " " + tempPlayers.size());
+            Player tempPlayer = tempPlayers.get(index);
+            if (currentPlayer == tempPlayer.getTurnOrder()) {
+
+                newList.add(tempPlayer);
+                tempPlayers.remove(index);
+            }
+
+            if (currentPlayer > players.size()) {
+                currentPlayer = 0;
+            }
+            currentPlayer++;
+            index++;
+        }
+         */
+ /*
+        while(iterator.hasNext()){
+            if(!iterator.hasNext()){
+                break;
+            }
+            Player playernext = iterator.next();
+            System.out.println("currentPlayer: " + currentPlayer + " playernext: " + playernext.turnOrder);
+            if(playernext.getTurnOrder() == currentPlayer){
+                newList.add(playernext);
+                tempPlayers.remove(playernext);
+                currentPlayer++;
+                System.out.println("currentPlayer: " + currentPlayer + " playernext: " + playernext.turnOrder);
+                if(players.size() < currentPlayer){
+                    currentPlayer = 0;
+                }
+            }
+            if(!iterator.hasNext()){
+                iterator = tempPlayers.listIterator();
+            }
+            if(tempPlayers.isEmpty()){
+                break;
+            }
+        }
+         */
     }
 
     public void getPlayersFromGMR() {
