@@ -64,14 +64,13 @@ public class UploadSaveFileDialogController implements Initializable {
 
     @FXML
     protected void uploadSaveGame() {
-         GMRLogger.logLine(lvGames.getSelectionModel().getSelectedIndex() + "");
+        GMRLogger.logLine(lvGames.getSelectionModel().getSelectedIndex() + "");
         File file = new File(tbSaveFile.getText());
         Game selectedGame = (Game) lvGames.getSelectionModel().getSelectedItem();
         if (lvGames.getSelectionModel().getSelectedIndex() > -1 && file.exists()) {
             Task task = new Task() {
                 @Override
                 protected Object call() throws Exception {
-
                     boolean uploadStatusSucces = gc.uploadSaveFile(selectedGame, file);
 
                     Platform.runLater(() -> {

@@ -162,7 +162,6 @@ public class JgmrGuiController implements Initializable {
         FXMLLoader loader = null;
         String url = null;
         url = getClass().getResource(fxml).toString();
-        System.out.println("  * url: " + url);
         loader = new FXMLLoader(getClass().getResource(fxml));
         Parent root = null;
         try {
@@ -206,17 +205,22 @@ public class JgmrGuiController implements Initializable {
                                 Scene scene = getScene("gamepane.fxml");
                                 GamepaneController gpc = (GamepaneController) scene.getUserData();
                                 gpc.constructView(g);
-                                if(second){
-                                    gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
+                                if (g.getName().toLowerCase().contains("theme")) {
+                                    gpc.getVbGamePane().getStyleClass().add("gmrleaguegame");
                                     gpc.getVbGamePane().applyCss();
-                                    second = false;
-                                }else{
-                                    gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
-                                    gpc.getVbGamePane().applyCss();
-                                    second = true;
+                                } else {
+                                    if (second) {
+                                        gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
+                                        gpc.getVbGamePane().applyCss();
+                                        second = false;
+                                    } else {
+                                        gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
+                                        gpc.getVbGamePane().applyCss();
+                                        second = true;
+                                    }
                                 }
-                                vbPlayerTurnBox.getChildren().add(gpc.getVbGamePane());     
-                                
+                                vbPlayerTurnBox.getChildren().add(gpc.getVbGamePane());
+
                             }
                             if (wdt == null) {
                                 startListeningForChanges();
@@ -320,6 +324,8 @@ public class JgmrGuiController implements Initializable {
                     newSaveFileDialog.getItems().addAll(playerGames);
                     Optional<Game> result = newSaveFileDialog.showAndWait();
                     if (result.isPresent()) {
+                        int index = playerGames.indexOf(result);
+
                         jgmrVbox.getChildren().add(hbUpload);
                         pbUpload.setProgress(-1.0f);
                         Task t = new Task() {
@@ -370,7 +376,6 @@ public class JgmrGuiController implements Initializable {
             wd.activateWatchService();
         }
     }
-
 
     private void initializeWatcher() throws IOException {
 

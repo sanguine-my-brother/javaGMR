@@ -19,7 +19,7 @@
             </Label>
             <Label fx:id="lbTimeLeft" prefHeight="25.0" prefWidth="217.0" text="TimeLeft" />
             <Button fx:id="btGamePage" maxHeight="15.0" mnemonicParsing="false" prefHeight="4.0" prefWidth="88.0" snapToPixel="false" styleClass="first" text="GamePage" HBox.hgrow="NEVER" />
-            <Button fx:id="btUpload" maxHeight="15.0" mnemonicParsing="false" prefHeight="25.0" snapToPixel="false" styleClass="middle" text="Upload" HBox.hgrow="NEVER" />
+            <Button fx:id="btUpload" maxHeight="15.0" mnemonicParsing="false" prefHeight="25.0" snapToPixel="false" onAction="#uploadGame" styleClass="middle" text="Upload" HBox.hgrow="NEVER" />
             <Button fx:id="btDownload" accessibleText="Download Save File" maxHeight="15.0" mnemonicParsing="false" onAction="#downloadGame" snapToPixel="false" stylesheets="@bootstrap3.css" text="Download" textOverrun="WORD_ELLIPSIS" HBox.hgrow="NEVER">
                <styleClass>
                   <String fx:value="success" />

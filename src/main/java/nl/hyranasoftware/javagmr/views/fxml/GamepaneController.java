@@ -5,10 +5,14 @@
  */
 package nl.hyranasoftware.javagmr.views.fxml;
 
+import com.github.plushaze.traynotification.animations.Animations;
+import com.github.plushaze.traynotification.notification.Notifications;
+import com.github.plushaze.traynotification.notification.TrayNotification;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,17 +20,25 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.domain.Player;
+import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import org.joda.time.DateTime;
 
 /**
@@ -63,6 +75,8 @@ public class GamepaneController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         vbGamePane.getChildren().remove(pbDownload);
+        pbDownload.getStyleClass().add("success");
+        pbDownload.applyCss();
     }
 
     public void constructView(Game g) {
@@ -78,6 +92,26 @@ public class GamepaneController implements Initializable {
     }
 
     @FXML
+    protected void uploadGame() {
+        FileChooser directoryChooser = new FileChooser();
+        if (JGMRConfig.getInstance().getPath() != null) {
+            directoryChooser.setInitialDirectory(new File(JGMRConfig.getInstance().getPath()));
+        }
+        Stage stage = new Stage();
+        File fileResult = directoryChooser.showOpenDialog(stage);
+        if (fileResult != null) {
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Upload to " + game.getName());
+            alert.setHeaderText("Upload to " + game.getName());
+            alert.setContentText("Are you sure you wish to upload " + fileResult.getName() + " to the game " + game.getName());
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK) {
+                uploadGame(fileResult);
+            }
+        }
+    }
+
+    @FXML
     protected void downloadGame() {
 
         GameController gc = new GameController() {
@@ -86,6 +120,7 @@ public class GamepaneController implements Initializable {
                 updateDownloadProgressBar(percent);
             }
         };
+
         vbGamePane.getChildren().add(pbDownload);
         Task t = new Task() {
             @Override
@@ -94,6 +129,9 @@ public class GamepaneController implements Initializable {
                 gc.downloadSaveFile(game);
                 Platform.runLater(() -> {
                     vbGamePane.getChildren().remove(pbDownload);
+                    TrayNotification downloadSucces = new TrayNotification("Download successful", "Go and conquer your enemies", Notifications.SUCCESS);
+                    downloadSucces.setAnimation(Animations.POPUP);
+                    downloadSucces.showAndDismiss(Duration.seconds(3));
                 });
 
                 return null;
@@ -164,6 +202,47 @@ public class GamepaneController implements Initializable {
         });
         getPlayers.setName(game.getName() + "_retrievingPlayers");
         getPlayers.start();
+    }
+
+    private void uploadGame(File file) {
+
+        vbGamePane.getChildren().add(pbDownload);
+        pbDownload.setProgress(-1.0f);
+        GameController gc = new GameController();
+        if (file.exists()) {
+            Task task = new Task() {
+                @Override
+                protected Object call() throws Exception {
+                    boolean uploadStatusSucces = gc.uploadSaveFile(game, file);
+
+                    Platform.runLater(() -> {
+                        if (uploadStatusSucces) {
+                            TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
+                            uploadSucces.setAnimation(Animations.POPUP);
+                            uploadSucces.showAndDismiss(Duration.seconds(3));
+                            ((VBox) vbGamePane.getParent()).getChildren().remove(vbGamePane);
+                        } else {
+                            try {
+                                Dialog dg = new Dialog();
+                                dg.setContentText("Either check on GMR if it's your turn or try uploading it again");
+                                dg.getDialogPane().getButtonTypes().add(ButtonType.OK);
+                                dg.setTitle("Could not upload savefile");
+                                dg.show();
+                            } catch (Exception e) {
+                                System.out.print(e);
+                            }
+                        }
+                        vbGamePane.getChildren().remove(pbDownload);
+                    });
+
+                    return null;
+                }
+            };
+            Thread t = new Thread(task);
+            t.setName("Manuelupload");
+            t.start();
+        }
+        
     }
 
 }

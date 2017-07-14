@@ -5,6 +5,7 @@
  */
 package nl.hyranasoftware.javagmr.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -92,7 +94,6 @@ public class Game implements Comparable<Game> {
                 previousPlayers.add(player);
             } else {
                 nextPlayers.add(player);
-                System.out.println(iterator.nextIndex());
             }
             
             i++;
@@ -115,18 +116,21 @@ public class Game implements Comparable<Game> {
         }
     }
 
+    @JsonIgnore
     public String getPrettyTimeLeft() {
         PrettyTime p = new PrettyTime();
+        p.setLocale(Locale.ENGLISH);
         if (currentTurn.getExpires() != null) {
-            return p.format(currentTurn.getExpires().toDate());
+            return "Expires: " + p.format(currentTurn.getExpires().toDate());
         } else {
-            return p.format(currentTurn.getStarted().toDate());
+            return "Last turn: " + p.format(currentTurn.getStarted().toDate());
         }
     }
 
     @Override
     public String toString() {
         PrettyTime p = new PrettyTime();
+        p.setLocale(Locale.ENGLISH);
         if (currentTurn.getExpires() != null) {
             return this.name + " || Expires: " + p.format(currentTurn.getExpires().toDate());
         } else {
