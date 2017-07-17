@@ -20,6 +20,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -122,6 +123,10 @@ public class GamepaneController implements Initializable {
         };
 
         vbGamePane.getChildren().add(pbDownload);
+        //Scene scene = ((VBox) vbGamePane.getParent()).getParent().getParent().getScene();
+        Scene scene = vbGamePane.getScene();
+        JgmrGuiController jgui = (JgmrGuiController) scene.getUserData();
+        jgui.downloadGame(game);
         Task t = new Task() {
             @Override
             protected Object call() throws Exception {
@@ -132,6 +137,7 @@ public class GamepaneController implements Initializable {
                     TrayNotification downloadSucces = new TrayNotification("Download successful", "Go and conquer your enemies", Notifications.SUCCESS);
                     downloadSucces.setAnimation(Animations.POPUP);
                     downloadSucces.showAndDismiss(Duration.seconds(3));
+                    jgui.resumeWatchService();
                 });
 
                 return null;
@@ -204,10 +210,13 @@ public class GamepaneController implements Initializable {
         getPlayers.start();
     }
 
-    private void uploadGame(File file) {
+    public void uploadGame(File file) {
 
-        vbGamePane.getChildren().add(pbDownload);
-        pbDownload.setProgress(-1.0f);
+        Platform.runLater(() -> {
+            vbGamePane.getChildren().add(pbDownload);
+            pbDownload.setProgress(-1.0f);
+        });
+
         GameController gc = new GameController();
         if (file.exists()) {
             Task task = new Task() {
@@ -221,6 +230,9 @@ public class GamepaneController implements Initializable {
                             uploadSucces.setAnimation(Animations.POPUP);
                             uploadSucces.showAndDismiss(Duration.seconds(3));
                             ((VBox) vbGamePane.getParent()).getChildren().remove(vbGamePane);
+                            Scene scene = vbGamePane.getScene();
+                            JgmrGuiController jgui = (JgmrGuiController) scene.getUserData();
+                            jgui.removeGameFromPlayerTurn(game);
                         } else {
                             try {
                                 Dialog dg = new Dialog();
@@ -242,6 +254,14 @@ public class GamepaneController implements Initializable {
             t.setName("Manuelupload");
             t.start();
         }
+
+    }
+
+    public void isAllGames() {
+        btGamePage.getStyleClass().remove("first");
+        lbTimeLeft.setPrefWidth(lbTimeLeft.getPrefWidth() + 130);
+        hbGameInfo.getChildren().remove(btUpload);
+        hbGameInfo.getChildren().remove(btDownload);
         
     }
 

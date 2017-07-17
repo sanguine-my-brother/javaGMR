@@ -35,7 +35,7 @@ public abstract class WatchDirectory implements Runnable {
     int index = 0;
     GameController gc = new GameController();
 
-    public WatchDirectory(List<Game> playerGames) {
+    public WatchDirectory() {
 
     }
 
@@ -171,13 +171,15 @@ public abstract class WatchDirectory implements Runnable {
                     if (!newDownload) {
                         GMRLogger.logLine("Event kind: " + eventKind);
                         if (eventKind == java.nio.file.StandardWatchEventKinds.ENTRY_CREATE) {
-                            updatedSaveFile((SaveFile) file.toFile());
+                            SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
+                            updatedSaveFile(saveFile);
                             GMRLogger.logLine("New save file detected: " + file.toString());
                         }
                         if (eventKind == java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY) {
                             SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
                             if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
-                                updatedSaveFile(new SaveFile(file.getFileName().toString()));
+                                
+                                updatedSaveFile(saveFile);
                                 GMRLogger.logLine("New save file detected: " + file.toString());
                             }
 
@@ -212,7 +214,7 @@ public abstract class WatchDirectory implements Runnable {
     public void run() {
         try {
             String osName = System.getProperty("os.name").toLowerCase();
-            if (!osName.contains("mac")) {
+            if (osName.contains("mac")) {
                 processEventsMac();
             } else {
                 processEventsWinLin();

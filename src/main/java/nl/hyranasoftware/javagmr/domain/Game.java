@@ -37,6 +37,7 @@ public class Game implements Comparable<Game> {
     private CurrentTurn currentTurn;
     private int type;
     private DateTime uploaded;
+    private boolean processed;
 
     @JsonProperty("GameId")
     public int getGameid() {
@@ -72,6 +73,18 @@ public class Game implements Comparable<Game> {
         return type;
     }
 
+    @JsonIgnore
+    public boolean isProcessed() {
+        return processed;
+    }
+
+    @JsonIgnore
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
+    }
+    
+    
+
     public void sortPlayers() {
 
         Collections.sort(players, new Comparator<Player>() {
@@ -103,6 +116,8 @@ public class Game implements Comparable<Game> {
         players = previousPlayers;
         
     }
+    
+
 
     public void getPlayersFromGMR() {
         try {

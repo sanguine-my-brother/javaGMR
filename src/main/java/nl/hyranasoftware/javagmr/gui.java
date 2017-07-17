@@ -40,6 +40,7 @@ public class gui extends Application {
         url = getClass().getResource("views/fxml/jgmrGui.fxml").toString();
         System.out.println("  * url: " + url);
         loader = new FXMLLoader(getClass().getResource("views/fxml/jgmrGui.fxml"));
+
         Parent root = null;
         try {
             root = (Parent) loader.load();
@@ -47,8 +48,11 @@ public class gui extends Application {
             Logger.getLogger(gui.class.getName()).log(Level.SEVERE, null, ex);
         }
         Scene scene = new Scene(root);
+
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("eicon.png")));
         primaryStage.setTitle("Giant Multi Robot Java-Client");
+        Object controller = loader.getController();
+        scene.setUserData(controller);
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
