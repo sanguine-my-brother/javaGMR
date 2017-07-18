@@ -38,6 +38,7 @@ public class Game implements Comparable<Game> {
     private int type;
     private DateTime uploaded;
     private boolean processed;
+    private boolean processedAllGames;
 
     @JsonProperty("GameId")
     public int getGameid() {
@@ -82,6 +83,18 @@ public class Game implements Comparable<Game> {
     public void setProcessed(boolean processed) {
         this.processed = processed;
     }
+
+    @JsonIgnore
+    public boolean isProcessedAllGames() {
+        return processedAllGames;
+    }
+
+    @JsonIgnore
+    public void setProcessedAllGames(boolean processedAllGames) {
+        this.processedAllGames = processedAllGames;
+    }
+    
+    
     
     
 

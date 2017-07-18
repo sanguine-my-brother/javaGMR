@@ -102,17 +102,18 @@ public class JgmrGuiController implements Initializable {
     @FXML
     private ProgressBar pbUpload;
 
-    ContextMenu cm = new ContextMenu();
-    boolean newDownload;
-    WatchDirectory wd;
-    Thread wdt;
-    Set<Game> currentGames;
-    Set<Game> playerGames;
-    ChoiceDialog<Game> newSaveFileDialog;
-    TrayNotification notification;
-    SystemTray systemTray;
-    Timeline notificationTimeline;
-    int timeLeft;
+    private ContextMenu cm = new ContextMenu();
+    private boolean newDownload;
+    private WatchDirectory wd;
+    private Thread wdt;
+    private Set<Game> currentGames;
+    private  Set<Game> playerGames;
+    private ChoiceDialog<Game> newSaveFileDialog;
+    private TrayNotification notification;
+    private SystemTray systemTray;
+    private Timeline notificationTimeline;
+    private int timeLeft;
+    private boolean second;
 
     GameController gc;
 
@@ -207,9 +208,9 @@ public class JgmrGuiController implements Initializable {
                                         vbAllGames.getChildren().remove(tempList.indexOf(game));
                                     }
                                 }
-                            }                           
+                            }
                             currentGames.addAll(retrievedGames);
-                            
+
                             List<Game> games = gc.retrievePlayersTurns(retrievedGames);
                             if (playerGames.size() > games.size()) {
                                 Iterator iterator = playerGames.iterator();
@@ -223,7 +224,7 @@ public class JgmrGuiController implements Initializable {
                                 }
                             }
                             playerGames.addAll(games);
-                            
+
                             renderGames(false, playerGames, vbPlayerTurnBox);
                             renderGames(true, currentGames, vbAllGames);
 
@@ -258,38 +259,50 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void renderGames(boolean isAllGames, Set<Game> games, VBox vbox) {
-        boolean second = false;
+        
         for (Game g : games) {
-            if (!g.isProcessed() || isAllGames) {
-                Stage dialog = new Stage();
-                Scene scene = getScene("gamepane.fxml");
-                GamepaneController gpc = (GamepaneController) scene.getUserData();
-
-                gpc.constructView(g);
-                if (isAllGames) {
-                    gpc.isAllGames();
-                }
-                if (g.getName().toLowerCase().contains("theme")) {
-                    gpc.getVbGamePane().getStyleClass().add("gmrleaguegame");
-                    gpc.getVbGamePane().applyCss();
-                } else {
-                    if (second) {
-                        gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
-                        gpc.getVbGamePane().applyCss();
-                        second = false;
-                    } else {
-                        gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
-                        gpc.getVbGamePane().applyCss();
-                        second = true;
-                    }
-                }
-                gpc.getVbGamePane().setUserData(gpc);
-                vbox.getChildren().add(gpc.getVbGamePane());
-                g.setProcessed(true);
+            if (!g.isProcessed() && !isAllGames) {
+                renderVboxes(isAllGames, games, vbox, g);
+            }
+            if (!g.isProcessedAllGames() && isAllGames){
+                renderVboxes(isAllGames, games, vbox, g);
             }
 
         }
 
+    }
+
+    private void renderVboxes(boolean isAllGames, Set<Game> games, VBox vbox, Game g) {
+
+        Stage dialog = new Stage();
+        Scene scene = getScene("gamepane.fxml");
+        GamepaneController gpc = (GamepaneController) scene.getUserData();
+
+        gpc.constructView(g);
+        if (isAllGames) {
+            gpc.isAllGames();
+        }
+        if (g.getName().toLowerCase().contains("theme")) {
+            gpc.getVbGamePane().getStyleClass().add("gmrleaguegame");
+            gpc.getVbGamePane().applyCss();
+        } else {
+            if (second) {
+                gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
+                gpc.getVbGamePane().applyCss();
+                second = false;
+            } else {
+                gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
+                gpc.getVbGamePane().applyCss();
+                second = true;
+            }
+        }
+        gpc.getVbGamePane().setUserData(gpc);
+        vbox.getChildren().add(gpc.getVbGamePane());
+        if(isAllGames){
+            g.setProcessedAllGames(true);
+        }else{
+        g.setProcessed(true);
+        }
     }
 
     @FXML
