@@ -54,6 +54,7 @@ public class gui extends Application {
         Object controller = loader.getController();
         scene.setUserData(controller);
         primaryStage.setScene(scene);
+        primaryStage.resizableProperty().setValue(false);
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent arg0) {

@@ -34,6 +34,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -107,12 +108,13 @@ public class JgmrGuiController implements Initializable {
     private WatchDirectory wd;
     private Thread wdt;
     private Set<Game> currentGames;
-    private  Set<Game> playerGames;
+    private Set<Game> playerGames;
     private ChoiceDialog<Game> newSaveFileDialog;
     private TrayNotification notification;
     private SystemTray systemTray;
     private Timeline notificationTimeline;
     private int timeLeft;
+    private Game currentGame;
     private boolean second;
 
     GameController gc;
@@ -130,7 +132,6 @@ public class JgmrGuiController implements Initializable {
                 updateDownloadProgressBar(percent);
             }
         };
-
         checkForUpdates();
         initializeChoiceDialog();
         jgmrVbox.getChildren().remove(hbDownload);
@@ -277,7 +278,6 @@ public class JgmrGuiController implements Initializable {
         Stage dialog = new Stage();
         Scene scene = getScene("gamepane.fxml");
         GamepaneController gpc = (GamepaneController) scene.getUserData();
-
         gpc.constructView(g);
         if (isAllGames) {
             gpc.isAllGames();
@@ -333,7 +333,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     public void downloadGame(Game g) {
-        newSaveFileDialog.setSelectedItem(g);
+        currentGame = g;
         newDownload = true;
         if (wd != null) {
             wd.setNewDownload();
@@ -341,7 +341,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     public void removeGameFromPlayerTurn(Game g) {
-        playerGames.remove(g);
+         playerGames.remove(g);
     }
 
     private void handleNewSaveFile(SaveFile file) {
@@ -350,6 +350,7 @@ public class JgmrGuiController implements Initializable {
                 if (!newSaveFileDialog.isShowing()) {
                     newSaveFileDialog.getItems().clear();
                     newSaveFileDialog.getItems().addAll(playerGames);
+                    newSaveFileDialog.setSelectedItem(currentGame);
                     Optional<Game> result = newSaveFileDialog.showAndWait();
                     if (result.isPresent()) {
                         Task t = new Task() {
@@ -360,8 +361,14 @@ public class JgmrGuiController implements Initializable {
                                     List<Game> games = new ArrayList<Game>(playerGames);
                                     int index = games.indexOf(result.get());
                                     VBox vbox = (VBox) vbPlayerTurnBox.getChildren().get(index);
-                                    GamepaneController gpc = (GamepaneController) vbox.getUserData();
-                                    gpc.uploadGame(file);
+                                    for(Node node : vbPlayerTurnBox.getChildren()){
+                                        VBox vb = (VBox) node;
+                                        GamepaneController gpc = (GamepaneController) vb.getUserData();
+                                        if(gpc.getGame() == game){
+                                            gpc.uploadGame(file);
+                                        }
+                                        
+                                    }
                                 }
                                 return null;
                             }

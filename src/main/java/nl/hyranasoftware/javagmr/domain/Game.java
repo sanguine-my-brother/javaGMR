@@ -171,7 +171,7 @@ public class Game implements Comparable<Game> {
     public int hashCode() {
         int hash = 7;
         hash = 89 * hash + this.gameid;
-        hash = 89 * hash + Objects.hashCode(this.name);
+        hash = 89 * hash + this.currentTurn.playerNumber;
         return hash;
     }
 
@@ -186,8 +186,12 @@ public class Game implements Comparable<Game> {
         if (getClass() != obj.getClass()) {
             return false;
         }
+        
         final Game other = (Game) obj;
         if (this.gameid != other.gameid) {
+            return false;
+        }
+        if (this.currentTurn.playerNumber != other.currentTurn.playerNumber){
             return false;
         }
         return true;

@@ -229,10 +229,11 @@ public class GamepaneController implements Initializable {
                             TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
                             uploadSucces.setAnimation(Animations.POPUP);
                             uploadSucces.showAndDismiss(Duration.seconds(3));
-                            ((VBox) vbGamePane.getParent()).getChildren().remove(vbGamePane);
                             Scene scene = vbGamePane.getScene();
                             JgmrGuiController jgui = (JgmrGuiController) scene.getUserData();
                             jgui.removeGameFromPlayerTurn(game);
+                            ((VBox) vbGamePane.getParent()).getChildren().remove(vbGamePane);
+
                         } else {
                             try {
                                 Dialog dg = new Dialog();
@@ -257,12 +258,16 @@ public class GamepaneController implements Initializable {
 
     }
 
+    public Game getGame() {
+        return game;
+    }
+
     public void isAllGames() {
         btGamePage.getStyleClass().remove("first");
         lbTimeLeft.setPrefWidth(lbTimeLeft.getPrefWidth() + 130);
         hbGameInfo.getChildren().remove(btUpload);
         hbGameInfo.getChildren().remove(btDownload);
-        
+
     }
 
 }
