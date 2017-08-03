@@ -37,6 +37,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
@@ -48,6 +49,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -102,6 +104,10 @@ public class JgmrGuiController implements Initializable {
     private ProgressBar pbDownload;
     @FXML
     private ProgressBar pbUpload;
+    @FXML
+    private TitledPane yourturnTitledPane;
+    @FXML
+    private Accordion gamesAccordion;
 
     private ContextMenu cm = new ContextMenu();
     private boolean newDownload;
@@ -124,6 +130,7 @@ public class JgmrGuiController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        gamesAccordion.setExpandedPane(yourturnTitledPane);
         playerGames = new HashSet<Game>();
         currentGames = new HashSet<Game>();
         gc = new GameController() {
@@ -196,17 +203,25 @@ public class JgmrGuiController implements Initializable {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    List<Game> retrievedGames = FXCollections.observableArrayList(gc.getGames());
+                    List<Game> retrievedGames = gc.getGames();
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
+                            //horrible ugly code needs to be cleaned up one day
                             if (currentGames.size() > retrievedGames.size()) {
                                 Iterator iterator = currentGames.iterator();
                                 while (iterator.hasNext()) {
                                     Game game = (Game) iterator.next();
                                     if (!retrievedGames.contains(game)) {
-                                        List<Game> tempList = new ArrayList(currentGames);
-                                        vbAllGames.getChildren().remove(tempList.indexOf(game));
+                                        Iterator<Node> iteratorNodes = vbAllGames.getChildren().iterator();
+                                        while (iteratorNodes.hasNext()) {
+                                            VBox vb = (VBox) iteratorNodes.next();
+                                            GamepaneController gpc = (GamepaneController) vb.getUserData();
+                                            if (gpc.getGame() == game) {
+                                                iteratorNodes.remove();
+                                            }
+                                        }
+
                                     }
                                 }
                             }
@@ -218,16 +233,22 @@ public class JgmrGuiController implements Initializable {
                                 while (iterator.hasNext()) {
                                     Game game = (Game) iterator.next();
                                     if (!games.contains(game)) {
-                                        List<Game> tempList = new ArrayList(playerGames);
-                                        vbPlayerTurnBox.getChildren().remove(tempList.indexOf(game));
+                                        Iterator<Node> iteratorNodes = vbPlayerTurnBox.getChildren().iterator();
+                                        while (iteratorNodes.hasNext()) {
+                                            VBox vb = (VBox) iteratorNodes.next();
+                                            GamepaneController gpc = (GamepaneController) vb.getUserData();
+                                            if (gpc.getGame() == game) {
+                                                iteratorNodes.remove();
+                                            }
+                                        }
                                         playerGames.remove(game);
                                     }
                                 }
                             }
                             playerGames.addAll(games);
 
-                            renderGames(false, playerGames, vbPlayerTurnBox);
                             renderGames(true, currentGames, vbAllGames);
+                            renderGames(false, playerGames, vbPlayerTurnBox);
 
                             if (wdt == null) {
                                 startListeningForChanges();
@@ -260,12 +281,12 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void renderGames(boolean isAllGames, Set<Game> games, VBox vbox) {
-        
+
         for (Game g : games) {
             if (!g.isProcessed() && !isAllGames) {
                 renderVboxes(isAllGames, games, vbox, g);
             }
-            if (!g.isProcessedAllGames() && isAllGames){
+            if (!g.isProcessedAllGames() && isAllGames) {
                 renderVboxes(isAllGames, games, vbox, g);
             }
 
@@ -298,10 +319,10 @@ public class JgmrGuiController implements Initializable {
         }
         gpc.getVbGamePane().setUserData(gpc);
         vbox.getChildren().add(gpc.getVbGamePane());
-        if(isAllGames){
+        if (isAllGames) {
             g.setProcessedAllGames(true);
-        }else{
-        g.setProcessed(true);
+        } else {
+            g.setProcessed(true);
         }
     }
 
@@ -341,7 +362,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     public void removeGameFromPlayerTurn(Game g) {
-         playerGames.remove(g);
+        playerGames.remove(g);
     }
 
     private void handleNewSaveFile(SaveFile file) {
@@ -361,13 +382,13 @@ public class JgmrGuiController implements Initializable {
                                     List<Game> games = new ArrayList<Game>(playerGames);
                                     int index = games.indexOf(result.get());
                                     VBox vbox = (VBox) vbPlayerTurnBox.getChildren().get(index);
-                                    for(Node node : vbPlayerTurnBox.getChildren()){
+                                    for (Node node : vbPlayerTurnBox.getChildren()) {
                                         VBox vb = (VBox) node;
                                         GamepaneController gpc = (GamepaneController) vb.getUserData();
-                                        if(gpc.getGame() == game){
+                                        if (gpc.getGame() == game) {
                                             gpc.uploadGame(file);
                                         }
-                                        
+
                                     }
                                 }
                                 return null;

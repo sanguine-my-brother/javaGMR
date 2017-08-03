@@ -17,9 +17,9 @@
             <Label fx:id="lbTime" text="Time until next pull from GMR:" />
         </items>
       </ToolBar>
-      <Accordion prefHeight="610.0" prefWidth="850.0">
+      <Accordion fx:id="gamesAccordion" prefHeight="610.0" prefWidth="850.0">
         <panes>
-          <TitledPane animated="false" prefHeight="535.0" prefWidth="850.0" text="Your turn">
+          <TitledPane fx:id="yourturnTitledPane" animated="false" prefHeight="535.0" prefWidth="850.0" text="Your turn">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>

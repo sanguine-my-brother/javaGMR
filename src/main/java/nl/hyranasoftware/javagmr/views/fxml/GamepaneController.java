@@ -40,6 +40,7 @@ import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.domain.Player;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import nl.hyranasoftware.javagmr.util.OpenURL;
 import org.joda.time.DateTime;
 
 /**
@@ -111,6 +112,12 @@ public class GamepaneController implements Initializable {
             }
         }
     }
+    
+    @FXML
+    protected void viewGame(){
+         String webURI = "http://multiplayerrobot.com/Game#" + game.getGameid();
+         OpenURL.openUrlInBrowser(webURI);
+    }
 
     @FXML
     protected void downloadGame() {
@@ -161,20 +168,23 @@ public class GamepaneController implements Initializable {
         if (!cacheDirectory.exists()) {
             cacheDirectory.mkdir();
         }
-        Thread getPlayers = new Thread(new Runnable() {
+        Task<Void> getPlayersTask = new Task<Void>() {
             @Override
-            public void run() {
-                game.sortPlayers();
+            protected Void call() throws Exception {
+                                game.sortPlayers();
                 PlayerController pc = new PlayerController();
                 for (Player p : game.getPlayers()) {
                     if (!p.getSteamId().equals("0")) {
                         File playerimage = new File("cache/" + p.getSteamId() + ".jpg");
-                        if (!playerimage.exists() || DateTime.now().minusWeeks(1).isAfter(playerimage.lastModified())) {
+                        if (!playerimage.exists()) {
                             Player gmrPlayer = pc.getPlayerFromGMR(p.getSteamId());
                             try {
                                 pc.downloadPlayerAvatar(gmrPlayer);
                             } catch (IOException ex) {
                                 Logger.getLogger(GamepaneController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            if (DateTime.now().minusWeeks(1).isAfter(playerimage.lastModified())) {
+                                
                             }
                         }
 
@@ -198,14 +208,17 @@ public class GamepaneController implements Initializable {
 
                         imageView.setImage(image);
                         Platform.runLater(() -> {
+                            
                             hbPlayers.getChildren().add(imageView);
+                            
                         });
 
                     }
                 }
+                return null;
             }
-
-        });
+        };
+        Thread getPlayers = new Thread(getPlayersTask);
         getPlayers.setName(game.getName() + "_retrievingPlayers");
         getPlayers.start();
     }
