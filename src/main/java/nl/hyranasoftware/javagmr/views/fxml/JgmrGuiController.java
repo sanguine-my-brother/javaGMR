@@ -14,10 +14,14 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
@@ -30,8 +34,10 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
@@ -42,6 +48,8 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -79,13 +87,15 @@ public class JgmrGuiController implements Initializable {
     @FXML
     private VBox jgmrVbox;
     @FXML
+    private VBox vbPlayerTurnBox;
+    @FXML
+    private VBox vbAllGames;
+    @FXML
     private HBox hbUpload;
     @FXML
     private HBox hbDownload;
     @FXML
-    private ListView lvPlayerTurnGames;
-    @FXML
-    private ListView lvAllGames;
+    private ScrollPane gamesPane;
     @FXML
     private AnchorPane apAbove;
     @FXML
@@ -94,18 +104,24 @@ public class JgmrGuiController implements Initializable {
     private ProgressBar pbDownload;
     @FXML
     private ProgressBar pbUpload;
+    @FXML
+    private TitledPane yourturnTitledPane;
+    @FXML
+    private Accordion gamesAccordion;
 
-    ContextMenu cm = new ContextMenu();
-    boolean newDownload;
-    WatchDirectory wd;
-    Thread wdt;
-    ObservableList<Game> currentGames = FXCollections.observableArrayList();
-    ObservableList<Game> playerGames = FXCollections.observableArrayList();
-    ChoiceDialog<Game> newSaveFileDialog;
-    TrayNotification notification;
-    SystemTray systemTray;
-    Timeline notificationTimeline;
-    int timeLeft;
+    private ContextMenu cm = new ContextMenu();
+    private boolean newDownload;
+    private WatchDirectory wd;
+    private Thread wdt;
+    private Set<Game> currentGames;
+    private Set<Game> playerGames;
+    private ChoiceDialog<Game> newSaveFileDialog;
+    private TrayNotification notification;
+    private SystemTray systemTray;
+    private Timeline notificationTimeline;
+    private int timeLeft;
+    private Game currentGame;
+    private boolean second;
 
     GameController gc;
 
@@ -114,6 +130,9 @@ public class JgmrGuiController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        gamesAccordion.setExpandedPane(yourturnTitledPane);
+        playerGames = new HashSet<Game>();
+        currentGames = new HashSet<Game>();
         gc = new GameController() {
             @Override
             public void sendDownloadProgress(double percent) {
@@ -122,10 +141,8 @@ public class JgmrGuiController implements Initializable {
         };
         checkForUpdates();
         initializeChoiceDialog();
-        initializeContextMenu();
         jgmrVbox.getChildren().remove(hbDownload);
         jgmrVbox.getChildren().remove(hbUpload);
-        initializeListViews();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
             new Timeline(new KeyFrame(
                     Duration.seconds(2),
@@ -159,7 +176,6 @@ public class JgmrGuiController implements Initializable {
         FXMLLoader loader = null;
         String url = null;
         url = getClass().getResource(fxml).toString();
-        System.out.println("  * url: " + url);
         loader = new FXMLLoader(getClass().getResource(fxml));
         Parent root = null;
         try {
@@ -187,16 +203,53 @@ public class JgmrGuiController implements Initializable {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    List<Game> retrievedGames = FXCollections.observableArrayList(gc.getGames());
+                    List<Game> retrievedGames = gc.getGames();
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            currentGames.clear();
-                            currentGames = FXCollections.observableArrayList(retrievedGames);
-                            lvAllGames.setItems(currentGames);
+                            //horrible ugly code needs to be cleaned up one day
+                            if (currentGames.size() > retrievedGames.size()) {
+                                Iterator iterator = currentGames.iterator();
+                                while (iterator.hasNext()) {
+                                    Game game = (Game) iterator.next();
+                                    if (!retrievedGames.contains(game)) {
+                                        Iterator<Node> iteratorNodes = vbAllGames.getChildren().iterator();
+                                        while (iteratorNodes.hasNext()) {
+                                            VBox vb = (VBox) iteratorNodes.next();
+                                            GamepaneController gpc = (GamepaneController) vb.getUserData();
+                                            if (gpc.getGame() == game) {
+                                                iteratorNodes.remove();
+                                            }
+                                        }
 
-                            playerGames = FXCollections.observableArrayList(gc.retrievePlayersTurns(currentGames));
-                            lvPlayerTurnGames.setItems(playerGames);
+                                    }
+                                }
+                            }
+                            currentGames.addAll(retrievedGames);
+
+                            List<Game> games = gc.retrievePlayersTurns(retrievedGames);
+                            if (playerGames.size() > games.size()) {
+                                Iterator iterator = playerGames.iterator();
+                                while (iterator.hasNext()) {
+                                    Game game = (Game) iterator.next();
+                                    if (!games.contains(game)) {
+                                        Iterator<Node> iteratorNodes = vbPlayerTurnBox.getChildren().iterator();
+                                        while (iteratorNodes.hasNext()) {
+                                            VBox vb = (VBox) iteratorNodes.next();
+                                            GamepaneController gpc = (GamepaneController) vb.getUserData();
+                                            if (gpc.getGame() == game) {
+                                                iteratorNodes.remove();
+                                            }
+                                        }
+                                        playerGames.remove(game);
+                                    }
+                                }
+                            }
+                            playerGames.addAll(games);
+
+                            renderGames(true, currentGames, vbAllGames);
+                            renderGames(false, playerGames, vbPlayerTurnBox);
+
                             if (wdt == null) {
                                 startListeningForChanges();
                             }
@@ -227,15 +280,50 @@ public class JgmrGuiController implements Initializable {
 
     }
 
-    @FXML
-    private void uploadGameManually() {
+    private void renderGames(boolean isAllGames, Set<Game> games, VBox vbox) {
+
+        for (Game g : games) {
+            if (!g.isProcessed() && !isAllGames) {
+                renderVboxes(isAllGames, games, vbox, g);
+            }
+            if (!g.isProcessedAllGames() && isAllGames) {
+                renderVboxes(isAllGames, games, vbox, g);
+            }
+
+        }
+
+    }
+
+    private void renderVboxes(boolean isAllGames, Set<Game> games, VBox vbox, Game g) {
+
         Stage dialog = new Stage();
-        Scene scene = getScene("uploadSaveGameDialog.fxml");
-        UploadSaveFileDialogController usfd = (UploadSaveFileDialogController) scene.getUserData();
-        usfd.setGames(playerGames);
-        dialog.setTitle("Giant Multi Robot Java-Client Save uploader");
-        dialog.setScene(scene);
-        dialog.show();
+        Scene scene = getScene("gamepane.fxml");
+        GamepaneController gpc = (GamepaneController) scene.getUserData();
+        gpc.constructView(g);
+        if (isAllGames) {
+            gpc.isAllGames();
+        }
+        if (g.getName().toLowerCase().contains("theme")) {
+            gpc.getVbGamePane().getStyleClass().add("gmrleaguegame");
+            gpc.getVbGamePane().applyCss();
+        } else {
+            if (second) {
+                gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
+                gpc.getVbGamePane().applyCss();
+                second = false;
+            } else {
+                gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
+                gpc.getVbGamePane().applyCss();
+                second = true;
+            }
+        }
+        gpc.getVbGamePane().setUserData(gpc);
+        vbox.getChildren().add(gpc.getVbGamePane());
+        if (isAllGames) {
+            g.setProcessedAllGames(true);
+        } else {
+            g.setProcessed(true);
+        }
     }
 
     @FXML
@@ -247,62 +335,11 @@ public class JgmrGuiController implements Initializable {
         dialog.show();
     }
 
-    private void initializeListViews() {
-        lvAllGames.setCellFactory(new Callback<ListView<Game>, ListCell<Game>>() {
-            @Override
-            public ListCell<Game> call(ListView<Game> param) {
-                ListCell<Game> cell = new ListCell<Game>() {
-                    @Override
-                    protected void updateItem(Game g, boolean b) {
-                        super.updateItem(g, b);
-                        if (g != null) {
-                            setText(g.toString());
-                        }
-                    }
-                };
-                return cell;
-            }
-
-        });
-        lvPlayerTurnGames.setCellFactory(new Callback<ListView<Game>, ListCell<Game>>() {
-            @Override
-            public ListCell<Game> call(ListView<Game> param) {
-                ListCell<Game> cell = new ListCell<Game>() {
-
-                    @Override
-                    protected void updateItem(Game g, boolean b) {
-                        super.updateItem(g, b);
-                        if (g != null) {
-                            setText(g.toString());
-                        } else {
-                            setText(null);
-                        }
-
-                    }
-                };
-                cell.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent event) {
-                        if (cell.getText() != null) {
-                            if (event.getButton() == MouseButton.PRIMARY) {
-                                cm.show(cell, event.getScreenX(), event.getScreenY());
-                            }
-                        }
-                    }
-
-                });
-                cell.setContextMenu(cm);
-                return cell;
-            }
-
-        });
-    }
-
     private void startListeningForChanges() {
         if (JGMRConfig.getInstance().getPath() != null) {
             if (wdt == null) {
                 if (playerGames != null) {
-                    wd = new WatchDirectory(playerGames) {
+                    wd = new WatchDirectory() {
                         @Override
                         public void updatedSaveFile(SaveFile file) {
                             handleNewSaveFile(file);
@@ -316,51 +353,41 @@ public class JgmrGuiController implements Initializable {
         }
     }
 
-    private void pauseWatchService() {
+    public void downloadGame(Game g) {
+        currentGame = g;
+        newDownload = true;
         if (wd != null) {
             wd.setNewDownload();
         }
     }
 
+    public void removeGameFromPlayerTurn(Game g) {
+        playerGames.remove(g);
+    }
+
     private void handleNewSaveFile(SaveFile file) {
-        String fileName = file.toString();
         Platform.runLater(() -> {
             if (!newDownload) {
                 if (!newSaveFileDialog.isShowing()) {
-                    newSaveFileDialog.getItems().removeAll();
+                    newSaveFileDialog.getItems().clear();
                     newSaveFileDialog.getItems().addAll(playerGames);
+                    newSaveFileDialog.setSelectedItem(currentGame);
                     Optional<Game> result = newSaveFileDialog.showAndWait();
                     if (result.isPresent()) {
-                        jgmrVbox.getChildren().add(hbUpload);
-                        pbUpload.setProgress(-1.0f);
                         Task t = new Task() {
                             @Override
                             protected Object call() throws Exception {
                                 if (result.isPresent()) {
-                                    boolean didUpload = gc.uploadSaveFile(result.get(), fileName);
-                                    if (!didUpload) {
-
-                                        Platform.runLater(() -> {
-                                            Dialog dialog = new Dialog();
-                                            dialog.setTitle("Couldn't upload savefile");
-                                            dialog.setContentText("The savefile didn't succesfully upload to GMR, try again later or upload the savefile through the website");
-                                            dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
-
-                                            dialog.show();
-                                            ((Stage) dialog.getDialogPane().getScene().getWindow()).setAlwaysOnTop(true);
-                                            pbUpload.setProgress(0);
-                                            jgmrVbox.getChildren().remove(hbUpload);
-                                        });
-
-                                    } else {
-                                        lvPlayerTurnGames.getItems().remove(result);
-                                        Platform.runLater(() -> {
-                                            TrayNotification uploadSucces = new TrayNotification("Upload successful", "", Notifications.SUCCESS);
-                                            uploadSucces.setAnimation(Animations.POPUP);
-                                            uploadSucces.showAndDismiss(Duration.seconds(3));
-                                            pbUpload.setProgress(0);
-                                            jgmrVbox.getChildren().remove(hbUpload);
-                                        });
+                                    Game game = result.get();
+                                    List<Game> games = new ArrayList<Game>(playerGames);
+                                    int index = games.indexOf(result.get());
+                                    VBox vbox = (VBox) vbPlayerTurnBox.getChildren().get(index);
+                                    for (Node node : vbPlayerTurnBox.getChildren()) {
+                                        VBox vb = (VBox) node;
+                                        GamepaneController gpc = (GamepaneController) vb.getUserData();
+                                        if (gpc.getGame() == game) {
+                                            gpc.uploadGame(file);
+                                        }
 
                                     }
                                 }
@@ -377,63 +404,11 @@ public class JgmrGuiController implements Initializable {
         });
     }
 
-    private void resumeWatchService() {
+    public void resumeWatchService() {
+        newDownload = false;
         if (wd != null) {
             wd.activateWatchService();
         }
-    }
-
-    private void initializeContextMenu() {
-        MenuItem downloadSaveFile = new MenuItem("Download Save File");
-        downloadSaveFile.setOnAction(event -> {
-            pauseWatchService();
-            newDownload = true;
-            jgmrVbox.getChildren().add(hbDownload);
-            newSaveFileDialog.setSelectedItem((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-            Task t = new Task() {
-                @Override
-                protected Object call() {
-                    try {
-                        gc.downloadSaveFile((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem());
-                        Platform.runLater(() -> {
-                            TrayNotification uploadSucces = new TrayNotification("Download successful", "Go and conquer your enemies", Notifications.SUCCESS);
-                            uploadSucces.setAnimation(Animations.POPUP);
-                            uploadSucces.showAndDismiss(Duration.seconds(3));
-                            pbDownload.setProgress(0);
-                            jgmrVbox.getChildren().remove(hbDownload);
-                            startListeningForChanges();
-                            resumeWatchService();
-                            newDownload = false;
-                        });
-                        return null;
-                    } catch (Exception ex) {
-                        Platform.runLater(() -> {
-                            TrayNotification downloadFailure = new TrayNotification("Download failed", "Check your internet connection \nor check if the GMR site is down", Notifications.ERROR);
-                            downloadFailure.setAnimation(Animations.POPUP);
-                            downloadFailure.showAndDismiss(Duration.seconds(3));
-                            pbDownload.setProgress(0);
-                            jgmrVbox.getChildren().remove(hbDownload);
-                        });
-
-                    }
-                    return null;
-                }
-            };
-            Thread thread = new Thread(t);
-            thread.start();
-        });
-
-        MenuItem goToGameSite = new MenuItem("View game's page on GMR (UNSTABLE)");
-        goToGameSite.setOnAction(event -> {
-            String webURI = "http://multiplayerrobot.com/Game#" + ((Game) lvPlayerTurnGames.getSelectionModel().getSelectedItem()).getGameid();
-            OpenURL.openUrlInBrowser(webURI);
-        });
-        cm.getItems().addAll(downloadSaveFile, goToGameSite);
-
-    }
-
-    private void initializeWatcher() throws IOException {
-
     }
 
     private void displayNotification() {
@@ -446,8 +421,8 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void initializeNotifications() {
-        if (lvAllGames.getScene() != null) {
-            Stage stage = (Stage) lvAllGames.getScene().getWindow();
+        if (vbAllGames.getScene() != null) {
+            Stage stage = (Stage) vbAllGames.getScene().getWindow();
             if (playerGames.size() > 0 && JGMRConfig.getInstance().getNotificationFrequency() > 0) {
                 if (JGMRConfig.getInstance().isNotificationsMinized() && stage.isIconified()) {
                     displayNotification();
@@ -478,8 +453,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void initializeSystemtray() {
-        //SystemTray.SWING_UI = new CustomSwingUI();
-        Stage stage = (Stage) lvAllGames.getScene().getWindow();
+        Stage stage = (Stage) vbAllGames.getScene().getWindow();
 
         systemTray = SystemTray.get();
         if (systemTray != null) {
@@ -519,7 +493,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void checkForUpdates() {
-                Properties props = new Properties();
+        Properties props = new Properties();
         try {
             props.load(getClass().getResourceAsStream("version.properties"));
         } catch (IOException ex) {
