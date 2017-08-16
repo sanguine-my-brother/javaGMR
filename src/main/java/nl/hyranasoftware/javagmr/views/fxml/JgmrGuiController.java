@@ -281,12 +281,14 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void renderGames(boolean isAllGames, Set<Game> games, VBox vbox) {
-
+        if(isAllGames){
+            vbox.getChildren().clear();
+        }
         for (Game g : games) {
             if (!g.isProcessed() && !isAllGames) {
                 renderVboxes(isAllGames, games, vbox, g);
             }
-            if (!g.isProcessedAllGames() && isAllGames) {
+            if (isAllGames) {
                 renderVboxes(isAllGames, games, vbox, g);
             }
 
