@@ -25,6 +25,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
@@ -95,7 +99,7 @@ public class GameController {
 
                 if (JGMRConfig.getInstance().getUploadedGames().contains(g)) {
                     Game uploadedGame = JGMRConfig.getInstance().getUploadedGames().get(JGMRConfig.getInstance().getUploadedGames().indexOf(g));
-                    if (!uploadedGame.getCurrentTurn().equals(g.getCurrentTurn())){
+                    if (!uploadedGame.getCurrentTurn().equals(g.getCurrentTurn())) {
                         JGMRConfig.getInstance().uploadedGameExpired(g);
                         playerTurns.add(g);
                     }
@@ -123,18 +127,33 @@ public class GameController {
         httpConnection.setReadTimeout(15000);
 
         File targetFile = new File(JGMRConfig.getInstance().getPath() + "/(jGMR) Play this one.Civ5Save");
-        java.io.BufferedInputStream is = new java.io.BufferedInputStream(httpConnection.getInputStream());
+        if (!new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock").exists()) {
+            File lock = new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock");
+            lock.createNewFile();
 
-        try (OutputStream outStream = new FileOutputStream(targetFile)) {
-            byte[] buffer = new byte[8 * 1024];
-            int bytesRead;
-            double downLoadFileSize = 0;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                downLoadFileSize = downLoadFileSize + bytesRead;
-                outStream.write(buffer, 0, bytesRead);
-                sendDownloadProgress(((double) downLoadFileSize / (double) completeFileSize));
+            java.io.BufferedInputStream is = new java.io.BufferedInputStream(httpConnection.getInputStream());
+
+            try (OutputStream outStream = new FileOutputStream(targetFile)) {
+                byte[] buffer = new byte[8 * 1024];
+                int bytesRead;
+                double downLoadFileSize = 0;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    downLoadFileSize = downLoadFileSize + bytesRead;
+                    outStream.write(buffer, 0, bytesRead);
+                    sendDownloadProgress(((double) downLoadFileSize / (double) completeFileSize));
+                }
+                JGMRConfig.getInstance().readDirectory();
             }
-            JGMRConfig.getInstance().readDirectory();
+            lock.delete();
+        } else {
+            Dialog dg = new Dialog();
+            dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
+            dg.setTitle("Download or Upload already in progress.");
+            dg.getDialogPane().getButtonTypes().add(new ButtonType("Login", ButtonData.OK_DONE));
+            Platform.runLater(() -> {
+                dg.showAndWait();
+            });
+
         }
 
     }
@@ -176,45 +195,64 @@ public class GameController {
 
     private boolean doUpload(InputStream stream, Game game) {
         String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
-        try {
+        File lock = new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock");
+        if (!lock.exists()) {
+            try {
 
-            int available = stream.available();       
-            final byte bytes[] = new byte[available];
-            
-            while (stream.read(bytes) > 0) {
+                lock.createNewFile();
 
+                int available = stream.available();
+                final byte bytes[] = new byte[available];
+
+                while (stream.read(bytes) > 0) {
+
+                }
+
+                stream.close();
+
+                Unirest.setTimeouts(10000, 15000);
+                String result = Unirest.post(requestUrl)
+                        .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
+                        .queryString("turnId", game.getCurrentTurn().getTurnId())
+                        .body(bytes)
+                        .asJson().getBody().toString();
+
+                ObjectMapper mapper = new ObjectMapper();
+                String gamesNode = mapper.readTree(result).get("ResultType").toString();
+                int resultType = mapper.readValue(gamesNode, int.class);
+                if (resultType == 1) {
+                    JGMRConfig.getInstance().readDirectory();
+                    JGMRConfig.getInstance().addUploadedGame(game);
+                    lock.delete();
+                    return true;
+                }
+                game.setUploaded(DateTime.now());
+
+                GMRLogger.logLine(result);
+                lock.delete();
+                return false;
+
+            } catch (UnirestException ex) {
+                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+                lock.delete();
+                return false;
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+                lock.delete();
+                return false;
+            } catch (IOException ex) {
+                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+                lock.delete();
+                return false;
             }
-
-            stream.close();
- 
-            Unirest.setTimeouts(10000, 15000);
-            String result = Unirest.post(requestUrl)
-                    .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
-                    .queryString("turnId", game.getCurrentTurn().getTurnId())
-                    .body(bytes)
-                    .asJson().getBody().toString();
-
-            ObjectMapper mapper = new ObjectMapper();
-            String gamesNode = mapper.readTree(result).get("ResultType").toString();
-            int resultType = mapper.readValue(gamesNode, int.class);
-            if (resultType == 1) {
-                JGMRConfig.getInstance().readDirectory();
-                JGMRConfig.getInstance().addUploadedGame(game);
-                return true;
-            }
-            game.setUploaded(DateTime.now());
-
-            GMRLogger.logLine(result);
-            return false;
-
-        } catch (UnirestException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        } catch (IOException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        } else {
+            Dialog dg = new Dialog();
+            dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
+            dg.setTitle("Download or Upload already in progress.");
+            dg.getDialogPane().getButtonTypes().add(new ButtonType("Login", ButtonData.OK_DONE));
+            Platform.runLater(() -> {
+                dg.showAndWait();
+            });
             return false;
         }
 

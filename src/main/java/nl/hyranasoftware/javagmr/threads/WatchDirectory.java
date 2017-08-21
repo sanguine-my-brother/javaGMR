@@ -83,7 +83,8 @@ public abstract class WatchDirectory implements Runnable {
                     WatchEvent pathEvent = (WatchEvent) genericEvent;
                     File file = new File(pathEvent.context().toString());
                     GMRLogger.logLine("File path: " + file.getAbsolutePath());
-                    if (!newDownload) {
+                    if (!newDownload && !file.getAbsolutePath().contains("lock")) {
+
                         GMRLogger.logLine("Event kind: " + eventKind);
                         if (eventKind == ENTRY_CREATE) {
                             updatedSaveFile(new SaveFile(file.getName()));
@@ -101,6 +102,7 @@ public abstract class WatchDirectory implements Runnable {
 
                             }
                         }
+
                     }
 
                 }
@@ -193,7 +195,8 @@ public abstract class WatchDirectory implements Runnable {
 
                     java.nio.file.WatchEvent pathEvent = (java.nio.file.WatchEvent) genericEvent;
                     Path file = (Path) pathEvent.context();
-                    if (!newDownload) {
+                    if (!newDownload && !file.getFileName().toString().contains("lock")) {
+
                         GMRLogger.logLine("Event kind: " + eventKind);
                         if (eventKind == java.nio.file.StandardWatchEventKinds.ENTRY_CREATE) {
                             SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
@@ -240,8 +243,10 @@ public abstract class WatchDirectory implements Runnable {
         try {
             String osName = System.getProperty("os.name").toLowerCase();
             if (!osName.contains("windows")) {
+                Logger.getLogger(WatchDirectory.class.getName()).log(Level.INFO, null, "Proces events unix");
                 processEventsMac();
             } else {
+                Logger.getLogger(WatchDirectory.class.getName()).log(Level.INFO, null, "Proces events Windows");
                 processEventsWinLin();
             }
 

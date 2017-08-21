@@ -281,7 +281,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void renderGames(boolean isAllGames, Set<Game> games, VBox vbox) {
-        if(isAllGames){
+        if (isAllGames) {
             vbox.getChildren().clear();
         }
         for (Game g : games) {
@@ -305,19 +305,25 @@ public class JgmrGuiController implements Initializable {
         if (isAllGames) {
             gpc.isAllGames();
         }
-        if (g.getName().toLowerCase().contains("theme")) {
-            gpc.getVbGamePane().getStyleClass().add("gmrleaguegame");
-            gpc.getVbGamePane().applyCss();
-        } else {
-            if (second) {
+        if (second) {
+            if (g.getName().toLowerCase().contains("theme")) {
+                gpc.getVbGamePane().getStyleClass().add("gmrleaguegamesecond");
+                gpc.getVbGamePane().applyCss();
+
+            } else {
                 gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
                 gpc.getVbGamePane().applyCss();
-                second = false;
+            }
+            second = false;
+        } else {
+            if (g.getName().toLowerCase().contains("theme")) {
+                gpc.getVbGamePane().getStyleClass().add("gmrleaguegame");
+                gpc.getVbGamePane().applyCss();
             } else {
                 gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
                 gpc.getVbGamePane().applyCss();
-                second = true;
             }
+            second = true;
         }
         gpc.getVbGamePane().setUserData(gpc);
         vbox.getChildren().add(gpc.getVbGamePane());
