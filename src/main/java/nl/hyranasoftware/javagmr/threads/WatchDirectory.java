@@ -139,7 +139,7 @@ public abstract class WatchDirectory implements Runnable {
             previousFileDate = saveFile.lastModified();
 
             try {
-                Thread.sleep(5000);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(WatchDirectory.class.getName()).log(Level.SEVERE, null, ex);
             }
