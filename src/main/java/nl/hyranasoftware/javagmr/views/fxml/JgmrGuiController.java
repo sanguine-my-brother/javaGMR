@@ -198,6 +198,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void pullGames() {
+        refreshGameBoxTimes();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
             lbTime.setText("Retrieving game list from GMR... Please wait");
             new Thread(new Runnable() {
@@ -529,4 +530,22 @@ public class JgmrGuiController implements Initializable {
         });
         t.run();
     }
+
+    private void refreshGameBoxTimes() {
+        Thread t = new Thread(() -> {
+            List<Node> nodesPlayerturn = vbPlayerTurnBox.getChildren();
+            for (Node n : nodesPlayerturn) {
+                GamepaneController gpc = (GamepaneController) n.getUserData();
+                gpc.refreshTime();
+            }
+            List<Node> nodesAllGames = vbAllGames.getChildren();
+            for (Node n : nodesAllGames) {
+                GamepaneController gpc = (GamepaneController) n.getUserData();
+                gpc.refreshTime();
+            }
+
+        });
+        t.run();
+    }
+    
 }

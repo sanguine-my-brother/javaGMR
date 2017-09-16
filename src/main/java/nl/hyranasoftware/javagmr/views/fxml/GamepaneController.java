@@ -14,12 +14,15 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -89,15 +92,13 @@ public class GamepaneController implements Initializable {
         lbGameName.setText(g.getName());
         lbTimeLeft.setText(g.getPrettyTimeLeft());
         getPlayers();
-        Timeline timeline = new Timeline(new KeyFrame(
-                Duration.minutes(1),
-                ae -> refreshTime()));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+
     }
 
-    private void refreshTime() {
-        lbTimeLeft.setText(game.getPrettyTimeLeft());
+    public void refreshTime() {
+        Platform.runLater(() -> {
+            lbTimeLeft.setText(game.getPrettyTimeLeft());
+        });
     }
 
     public VBox getVbGamePane() {
@@ -123,7 +124,7 @@ public class GamepaneController implements Initializable {
                     uploadGame(fileResult);
                 }
             }
-        }else{
+        } else {
             Dialog dg = new Dialog();
             dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
             dg.setTitle("Download or Upload already in progress.");
@@ -142,44 +143,55 @@ public class GamepaneController implements Initializable {
 
     @FXML
     protected void downloadGame() {
-        GameController gc = new GameController() {
-            @Override
-            public void sendDownloadProgress(double percent) {
-                updateDownloadProgressBar(percent);
-            }
-        };
-        Scene scene = vbGamePane.getScene();
-        JgmrGuiController jgui = (JgmrGuiController) scene.getUserData();
-        jgui.downloadGame(game);
-        if (!new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock").exists()) {
-            vbGamePane.getChildren().add(pbDownload);
-            //Scene scene = ((VBox) vbGamePane.getParent()).getParent().getParent().getScene();
-            Task t = new Task() {
-                @Override
-                protected Object call() throws Exception {
-                    gc.downloadSaveFile(game);
-                    Platform.runLater(() -> {
-                        vbGamePane.getChildren().remove(pbDownload);
-                        TrayNotification downloadSucces = new TrayNotification("Download successful", "Go and conquer your enemies", Notifications.SUCCESS);
-                        downloadSucces.setAnimation(Animations.POPUP);
-                        downloadSucces.showAndDismiss(Duration.seconds(3));
-                        jgui.resumeWatchService();
-                    });
-                    return null;
-                }
-            };
-            Thread thread = new Thread(t);
-            thread.start();
-        } else {
+        if (game.getCurrentTurn().isIsfirstTurn()) {
             Dialog dg = new Dialog();
-            dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
-            dg.setTitle("Download or Upload already in progress.");
+            dg.setContentText("Congratulations, you get to make a new game. Please create a new Hotseat game in Civ 5 and than press the manual upload button. (It's next to the download button)\nIf you need more information about this game press the most left button, it will take you directly to the game page");
+
+            dg.setTitle("New Game");
+
             dg.getDialogPane().getButtonTypes().add(new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE));
             Platform.runLater(() -> {
                 dg.showAndWait();
             });
+        } else {
+            GameController gc = new GameController() {
+                @Override
+                public void sendDownloadProgress(double percent) {
+                    updateDownloadProgressBar(percent);
+                }
+            };
+            Scene scene = vbGamePane.getScene();
+            JgmrGuiController jgui = (JgmrGuiController) scene.getUserData();
+            jgui.downloadGame(game);
+            if (!new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock").exists()) {
+                vbGamePane.getChildren().add(pbDownload);
+                //Scene scene = ((VBox) vbGamePane.getParent()).getParent().getParent().getScene();
+                Task t = new Task() {
+                    @Override
+                    protected Object call() throws Exception {
+                        gc.downloadSaveFile(game);
+                        Platform.runLater(() -> {
+                            vbGamePane.getChildren().remove(pbDownload);
+                            TrayNotification downloadSucces = new TrayNotification("Download successful", "Go and conquer your enemies", Notifications.SUCCESS);
+                            downloadSucces.setAnimation(Animations.POPUP);
+                            downloadSucces.showAndDismiss(Duration.seconds(3));
+                            jgui.resumeWatchService();
+                        });
+                        return null;
+                    }
+                };
+                Thread thread = new Thread(t);
+                thread.start();
+            } else {
+                Dialog dg = new Dialog();
+                dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
+                dg.setTitle("Download or Upload already in progress.");
+                dg.getDialogPane().getButtonTypes().add(new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE));
+                Platform.runLater(() -> {
+                    dg.showAndWait();
+                });
+            }
         }
-
     }
 
     private void updateDownloadProgressBar(double size) {
@@ -209,7 +221,7 @@ public class GamepaneController implements Initializable {
                                 Logger.getLogger(GamepaneController.class.getName()).log(Level.SEVERE, null, ex);
                             }
                             if (DateTime.now().minusWeeks(1).isAfter(playerimage.lastModified())) {
-                                
+
                             }
                         }
                         ImageView imageView = new ImageView();
