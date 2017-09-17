@@ -227,6 +227,7 @@ public class JgmrGuiController implements Initializable {
                                     }
                                 }
                             }
+                            System.gc();
                             currentGames.addAll(retrievedGames);
 
                             List<Game> games = gc.retrievePlayersTurns(retrievedGames);
