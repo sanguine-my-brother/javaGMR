@@ -69,6 +69,7 @@ import nl.hyranasoftware.javagmr.threads.WatchDirectory;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import nl.hyranasoftware.javagmr.util.OpenURL;
 import nl.hyranasoftware.javagmr.util.SaveFile;
+import org.joda.time.DateTime;
 
 /**
  * FXML Controller class
@@ -307,22 +308,30 @@ public class JgmrGuiController implements Initializable {
             gpc.isAllGames();
         }
         if (second) {
-            if (g.getName().toLowerCase().contains("theme")) {
-                gpc.getVbGamePane().getStyleClass().add("gmrleaguegamesecond");
-                gpc.getVbGamePane().applyCss();
+            if (!g.getCurrentTurn().getStarted().isBefore(DateTime.now().minusMonths(1))) {
+                if (g.getName().toLowerCase().contains("theme")) {
+                    gpc.getVbGamePane().getStyleClass().add("gmrleaguegamesecond");
+                    gpc.getVbGamePane().applyCss();
 
-            } else {
-                gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
-                gpc.getVbGamePane().applyCss();
+                } else {
+                    gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
+                    gpc.getVbGamePane().applyCss();
+                }
+            }else{
+                gpc.getVbGamePane().getStyleClass().add("gmrOldTurnSecond");
             }
             second = false;
         } else {
-            if (g.getName().toLowerCase().contains("theme")) {
-                gpc.getVbGamePane().getStyleClass().add("gmrleaguegame");
-                gpc.getVbGamePane().applyCss();
+            if (!g.getCurrentTurn().getStarted().isBefore(DateTime.now().minusMonths(1))) {
+                if (g.getName().toLowerCase().contains("theme")) {
+                    gpc.getVbGamePane().getStyleClass().add("gmrleaguegame");
+                    gpc.getVbGamePane().applyCss();
+                } else {
+                    gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
+                    gpc.getVbGamePane().applyCss();
+                }
             } else {
-                gpc.getVbGamePane().getStyleClass().add("gameitemfirst");
-                gpc.getVbGamePane().applyCss();
+                gpc.getVbGamePane().getStyleClass().add("gmrOldTurn");
             }
             second = true;
         }
@@ -541,5 +550,5 @@ public class JgmrGuiController implements Initializable {
         });
         t.run();
     }
-    
+
 }

@@ -948,3 +948,9 @@ VBox > .split-menu-button.last > .arrow-button {
 .gmrleaguegamesecond{
     -fx-background: #fdff6b;
 }
+.gmrOldTurn{
+    -fx-background: #e04545;
+}
+.gmrOldTurnSecond{
+    -fx-background: #d82222;
+}

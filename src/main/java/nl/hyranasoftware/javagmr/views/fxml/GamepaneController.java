@@ -171,6 +171,7 @@ public class GamepaneController implements Initializable {
                     protected Object call() throws Exception {
                         gc.downloadSaveFile(game);
                         Platform.runLater(() -> {
+                            pbDownload.setProgress(0);
                             vbGamePane.getChildren().remove(pbDownload);
                             TrayNotification downloadSucces = new TrayNotification("Download successful", "Go and conquer your enemies", Notifications.SUCCESS);
                             downloadSucces.setAnimation(Animations.POPUP);
