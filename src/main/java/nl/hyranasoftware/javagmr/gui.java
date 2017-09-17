@@ -34,6 +34,7 @@ public class gui extends Application {
     @Override
     @java.lang.SuppressWarnings("squid:AVuVjDYZtpYg8Dj43Cce")
     public void start(Stage primaryStage) {
+        GMRLogger.logLine("Opened jGMR");
 
         FXMLLoader loader = null;
         String url = null;

@@ -28,9 +28,11 @@ public class JGMRConfig {
     private String path;
     private String authCode;
     private String playerSteamId;
-    private int notificationFrequency = 15;
-    private boolean notificationsMinized = true;
-    private boolean minimizeToTray = true;
+    private int notificationFrequency;
+    private boolean notificationsMinized;
+    private boolean minimizeToTray;
+    private boolean saveFileDialog;
+    private boolean logToFile;
     
     
     @JsonProperty("uploadedGames")
@@ -54,6 +56,10 @@ public class JGMRConfig {
                     instance = mapper.readValue(configFile, JGMRConfig.class);
                 } else {
                     instance = new JGMRConfig();
+                    instance.notificationsMinized = true;
+                    instance.minimizeToTray = true;
+                    instance.saveFileDialog = true;
+                    instance.logToFile = false;
                     instance.notificationFrequency = 15;
                 }
             } catch (Exception ex) {
@@ -179,7 +185,6 @@ public class JGMRConfig {
     
 
     public void addUploadedGame(Game game) {
-        game.setUploaded(DateTime.now());
         this.uploadedGames.add(game);
         this.saveConfig();
     }
@@ -188,6 +193,26 @@ public class JGMRConfig {
     public void uploadedGameExpired(Game game) {
         this.uploadedGames.remove(game);
     }
+
+    public boolean isSaveFileDialog() {
+        return saveFileDialog;
+    }
+
+    public void setSaveFileDialog(boolean saveFileDialog) {
+        this.saveFileDialog = saveFileDialog;
+        this.saveConfig();
+    }
+
+    public boolean isLogToFile() {
+        return logToFile;
+    }
+
+    public void setLogToFile(boolean logToFile) {
+        this.logToFile = logToFile;
+        this.saveConfig();
+    }
+    
+    
 
 
 }

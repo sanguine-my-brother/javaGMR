@@ -36,7 +36,6 @@ public class Game implements Comparable<Game> {
     private List<Player> players;
     private CurrentTurn currentTurn;
     private int type;
-    private DateTime uploaded;
     private boolean processed;
     private boolean processedAllGames;
 
@@ -58,15 +57,6 @@ public class Game implements Comparable<Game> {
     @JsonProperty("CurrentTurn")
     public CurrentTurn getCurrentTurn() {
         return currentTurn;
-    }
-
-    @JsonProperty("uploaded")
-    public DateTime getUploaded() {
-        return uploaded;
-    }
-
-    public void setUploaded(DateTime uploaded) {
-        this.uploaded = uploaded;
     }
 
     @JsonProperty("Type")
@@ -93,10 +83,6 @@ public class Game implements Comparable<Game> {
     public void setProcessedAllGames(boolean processedAllGames) {
         this.processedAllGames = processedAllGames;
     }
-    
-    
-    
-    
 
     public void sortPlayers() {
 
@@ -121,16 +107,14 @@ public class Game implements Comparable<Game> {
             } else {
                 nextPlayers.add(player);
             }
-            
+
             i++;
 
         }
         previousPlayers.addAll(nextPlayers);
         players = previousPlayers;
-        
-    }
-    
 
+    }
 
     public void getPlayersFromGMR() {
         try {
@@ -186,12 +170,12 @@ public class Game implements Comparable<Game> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        
+
         final Game other = (Game) obj;
         if (this.gameid != other.gameid) {
             return false;
         }
-        if (this.currentTurn.playerNumber != other.currentTurn.playerNumber){
+        if (this.currentTurn.playerNumber != other.currentTurn.playerNumber) {
             return false;
         }
         return true;
