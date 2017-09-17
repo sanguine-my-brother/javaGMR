@@ -54,6 +54,7 @@ public abstract class WatchDirectory implements Runnable {
      * @throws Exception
      */
     public void processEventsMac() throws IOException {
+         GMRLogger.logLine("Starting Mac proces watcher");
         if (JGMRConfig.getInstance().getPath() != null) {
             com.barbarysoftware.watchservice.WatchService watcher = com.barbarysoftware.watchservice.WatchService.newWatchService();
             WatchableFile hotseatDir = new WatchableFile(new File(JGMRConfig.getInstance().getPath()));
@@ -88,14 +89,16 @@ public abstract class WatchDirectory implements Runnable {
                         GMRLogger.logLine("Event kind: " + eventKind);
                         if (eventKind == ENTRY_CREATE) {
                             updatedSaveFile(new SaveFile(file.getName()));
-                            GMRLogger.logLine("New save file detected: " + file.toString());
+                            GMRLogger.logLine("New save file detected CREATE EVENT: " + file.toString());
                         }
                         if (eventKind == ENTRY_MODIFY) {
                             if (available) {
                                 available = false;
                                 SaveFile saveFile = new SaveFile(file.getAbsolutePath());
                                 if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
+                                    GMRLogger.logLine("Waiting for CIV 5 to finish in MAC: " + file.toString());
                                     waitForCivToFinish(saveFile);
+                                    GMRLogger.logLine("Done waiting for CIV 5 to finish in MAC: " + file.toString());
                                 } else {
                                     available = true;
                                 }
@@ -120,11 +123,13 @@ public abstract class WatchDirectory implements Runnable {
     }
 
     private void waitForCivToFinish(SaveFile saveFile) {
+         GMRLogger.logLine("Starting waitForCivToFinish");
         boolean strikeOne = false;
         while (true) {
 
             if (saveFile.lastModified() == previousFileDate && previousFileDate != 0) {
                 if (strikeOne) {
+                    GMRLogger.logLine("StrikeOne is true B001");
                     if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
                         updatedSaveFile(new SaveFile(saveFile.getName()));
                         GMRLogger.logLine("New save file detected: " + saveFile.toString());
@@ -133,18 +138,20 @@ public abstract class WatchDirectory implements Runnable {
                     }
                 }
                 strikeOne = true;
+                GMRLogger.logLine("Strikeone made true");
             } else {
                 strikeOne = false;
             }
             previousFileDate = saveFile.lastModified();
 
             try {
+                GMRLogger.logLine("Trying to sleep B002");
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
-                Logger.getLogger(WatchDirectory.class.getName()).log(Level.SEVERE, null, ex);
+                GMRLogger.logLine("Thread sleep exception A002: " + ex.toString());
             }
 
-        }
+        } 
     }
 
     /**
@@ -157,12 +164,13 @@ public abstract class WatchDirectory implements Runnable {
      * @throws Exception
      */
     public void processEventsWinLin() {
+        GMRLogger.logLine("Starting WINLIN proces watcher");
         if (JGMRConfig.getInstance().getPath() != null) {
             java.nio.file.WatchService watcher = null;
             try {
                 watcher = FileSystems.getDefault().newWatchService();
             } catch (IOException ex) {
-                Logger.getLogger(WatchDirectory.class.getName()).log(Level.SEVERE, null, ex);
+                GMRLogger.logLine("ProcesEvents WinLin exception A001:" + ex.toString());
             }
             Path dir = new File(JGMRConfig.getInstance().getPath()).toPath();
             try {
@@ -201,14 +209,14 @@ public abstract class WatchDirectory implements Runnable {
                         if (eventKind == java.nio.file.StandardWatchEventKinds.ENTRY_CREATE) {
                             SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
                             updatedSaveFile(saveFile);
-                            GMRLogger.logLine("New save file detected: " + file.toString());
+                            GMRLogger.logLine("New save file detected WinLin: " + file.toString());
                         }
                         if (eventKind == java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY) {
                             SaveFile saveFile = new SaveFile(JGMRConfig.getInstance().getPath() + "/" + file.toString());
                             if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
 
                                 updatedSaveFile(saveFile);
-                                GMRLogger.logLine("New save file detected: " + file.toString());
+                                GMRLogger.logLine("New save file detected WinLin: " + file.toString());
                             }
 
                         }
@@ -243,15 +251,15 @@ public abstract class WatchDirectory implements Runnable {
         try {
             String osName = System.getProperty("os.name").toLowerCase();
             if (!osName.contains("windows")) {
-                Logger.getLogger(WatchDirectory.class.getName()).log(Level.INFO, null, "Proces events unix");
+               GMRLogger.logLine("Proces events unix");
                 processEventsMac();
             } else {
-                Logger.getLogger(WatchDirectory.class.getName()).log(Level.INFO, null, "Proces events Windows");
+                GMRLogger.logLine("Proces events Windows");
                 processEventsWinLin();
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(WatchDirectory.class.getName()).log(Level.SEVERE, null, ex);
+            GMRLogger.logLine("Exception in Run A003: " + ex.toString());
         }
     }
 

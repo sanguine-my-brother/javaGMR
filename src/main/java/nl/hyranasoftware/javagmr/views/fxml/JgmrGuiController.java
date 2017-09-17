@@ -345,7 +345,7 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void startListeningForChanges() {
-        if (JGMRConfig.getInstance().getPath() != null) {
+        if (JGMRConfig.getInstance().getPath() != null && JGMRConfig.getInstance().isSaveFileDialog()) {
             if (wdt == null) {
                 if (playerGames != null) {
                     wd = new WatchDirectory() {
@@ -538,12 +538,6 @@ public class JgmrGuiController implements Initializable {
                 GamepaneController gpc = (GamepaneController) n.getUserData();
                 gpc.refreshTime();
             }
-            List<Node> nodesAllGames = vbAllGames.getChildren();
-            for (Node n : nodesAllGames) {
-                GamepaneController gpc = (GamepaneController) n.getUserData();
-                gpc.refreshTime();
-            }
-
         });
         t.run();
     }

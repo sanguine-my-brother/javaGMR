@@ -226,7 +226,6 @@ public class GameController {
                     lock.delete();
                     return true;
                 }
-                game.setUploaded(DateTime.now());
 
                 GMRLogger.logLine(result);
                 lock.delete();

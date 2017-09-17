@@ -52,6 +52,7 @@ public class PlayerController {
         HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
         long completeFileSize = httpConnection.getContentLength();
         httpConnection.setReadTimeout(15000);
+        
 
         File targetFile = new File("cache/" + player.getSteamId() + ".jpg");
         java.io.BufferedInputStream is = new java.io.BufferedInputStream(httpConnection.getInputStream());
