@@ -1,5 +1,5 @@
 # javaGMR # 
-JavaGMR is a platform client for [Giant multiplayer Robot](http://multiplayerrobot.com/) It has the ability to detect civilization league games and much more!
+JavaGMR is a platform client for [Giant multiplayer Robot](http://multiplayerrobot.com/) It has the ability to detect civilization league games and more!
 Now use a desktop client whether you have a Mac, Linux or Windows, even you can now enjoy the comfort of multiplayer robot from the comfort of your desktop.
 
 - Download games!
