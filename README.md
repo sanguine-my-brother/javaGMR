@@ -9,6 +9,12 @@ Now use a desktop client whether you have a Mac, Linux or Windows, even you can 
 
 And the best thing of all, the software is open source so go ahead and make changes to the client!
 
+## Is it any good? ##
+ 
+Yes
+
+## Screenshots ##
+
 ![Your turns](/images/yourturn.JPG)
 ![All games](/images/allgames.JPG)
 
