@@ -66,6 +66,7 @@ import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.gui;
 import nl.hyranasoftware.javagmr.threads.WatchDirectory;
+import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import nl.hyranasoftware.javagmr.util.OpenURL;
 import nl.hyranasoftware.javagmr.util.SaveFile;
@@ -202,7 +203,7 @@ public class JgmrGuiController implements Initializable {
         refreshGameBoxTimes();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
             lbTime.setText("Retrieving game list from GMR... Please wait");
-            new Thread(new Runnable() {
+            Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     List<Game> retrievedGames = gc.getGames();
@@ -229,6 +230,7 @@ public class JgmrGuiController implements Initializable {
                             }
                             System.gc();
                             currentGames.addAll(retrievedGames);
+                            GMRLogger.logLine("Currentgames count: " + currentGames.size());
 
                             List<Game> games = gc.retrievePlayersTurns(retrievedGames);
                             if (playerGames.size() > games.size()) {
@@ -261,8 +263,10 @@ public class JgmrGuiController implements Initializable {
                     });
                 }
 
-            }).start();
-            ;
+            });
+            t.setName("PullGamesThread");
+            t.start();
+            
         }
         timeLeft = 60;
         if (systemTray != null) {
@@ -285,21 +289,35 @@ public class JgmrGuiController implements Initializable {
 
     private void renderGames(boolean isAllGames, Set<Game> games, VBox vbox) {
         if (isAllGames) {
-            vbox.getChildren().clear();
+            //vbox.getChildren().clear();
         }
         for (Game g : games) {
             if (!g.isProcessed() && !isAllGames) {
-                renderVboxes(isAllGames, games, vbox, g);
+                renderVboxes(isAllGames, vbox, g);
             }
             if (isAllGames) {
-                renderVboxes(isAllGames, games, vbox, g);
+                boolean found = false;
+                for (Node n : vbAllGames.getChildren()) {
+
+                    GamepaneController gpc = (GamepaneController) n.getUserData();
+                    if (gpc.getGame().equals(g)) {
+                        found = true;
+                        if (!g.getCurrentTurn().equals(gpc.getGame().getCurrentTurn())) {
+                            vbAllGames.getChildren().remove(n);
+                            renderVboxes(isAllGames, vbox, g);
+                        }
+                    }
+                }
+                if (!found) {
+                    renderVboxes(isAllGames, vbox, g);
+                }
             }
 
         }
 
     }
 
-    private void renderVboxes(boolean isAllGames, Set<Game> games, VBox vbox, Game g) {
+    private void renderVboxes(boolean isAllGames, VBox vbox, Game g) {
 
         Stage dialog = new Stage();
         Scene scene = getScene("gamepane.fxml");
@@ -318,7 +336,7 @@ public class JgmrGuiController implements Initializable {
                     gpc.getVbGamePane().getStyleClass().add("gameitemsecond");
                     gpc.getVbGamePane().applyCss();
                 }
-            }else{
+            } else {
                 gpc.getVbGamePane().getStyleClass().add("gmrOldTurnSecond");
             }
             second = false;
@@ -366,7 +384,7 @@ public class JgmrGuiController implements Initializable {
                     };
                 }
                 wdt = new Thread(wd);
-                wdt.setDaemon(true);
+                wdt.setName("WatchDirectoryThread");
                 wdt.start();
             }
         }
@@ -414,6 +432,7 @@ public class JgmrGuiController implements Initializable {
                             }
                         };
                         Thread thread = new Thread(t);
+                        thread.setName("UploadGameVBOXThread");
                         thread.start();
 
                     }
@@ -538,7 +557,8 @@ public class JgmrGuiController implements Initializable {
                 Logger.getLogger(JgmrGuiController.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        t.run();
+        t.setName("CheckForUpdates");
+        t.start();
     }
 
     private void refreshGameBoxTimes() {
@@ -549,7 +569,8 @@ public class JgmrGuiController implements Initializable {
                 gpc.refreshTime();
             }
         });
-        t.run();
+        t.setName("refreshTurnTime");
+        t.start();
     }
 
 }

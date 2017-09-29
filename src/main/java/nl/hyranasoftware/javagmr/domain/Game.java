@@ -154,8 +154,7 @@ public class Game implements Comparable<Game> {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 89 * hash + this.gameid;
-        hash = 89 * hash + this.currentTurn.playerNumber;
+        hash = 89 * hash * this.gameid;
         return hash;
     }
 
@@ -175,9 +174,7 @@ public class Game implements Comparable<Game> {
         if (this.gameid != other.gameid) {
             return false;
         }
-        if (this.currentTurn.playerNumber != other.currentTurn.playerNumber) {
-            return false;
-        }
+        
         return true;
     }
 

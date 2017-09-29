@@ -18,21 +18,24 @@ import java.util.logging.Logger;
 public class GMRLogger {
 
     private final static Logger LOGGER = Logger.getLogger("GMR Logger");
-    private static FileHandler fh;
+
     public static void logLine(String line) {
-        
-        if (JGMRConfig.getInstance().isLogToFile() && fh == null) {
+        FileHandler fh = null;
+        if (JGMRConfig.getInstance().isLogToFile()) {
             try {
-                fh = new FileHandler("logfile.txt", true);
+                fh = new FileHandler("logfile.txt");
                 LOGGER.addHandler(fh);
+
             } catch (IOException ex) {
                 Logger.getLogger(GMRLogger.class.getName()).log(Level.SEVERE, null, ex);
             } catch (SecurityException ex) {
                 Logger.getLogger(GMRLogger.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
         LOGGER.log(Level.INFO, line);
+        if (fh != null) {
+            fh.close();
+        }
     }
 
 }

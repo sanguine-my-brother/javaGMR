@@ -243,7 +243,7 @@ public class GameController {
                 Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
                 lock.delete();
                 return false;
-            }
+            } 
         } else {
             Dialog dg = new Dialog();
             dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");

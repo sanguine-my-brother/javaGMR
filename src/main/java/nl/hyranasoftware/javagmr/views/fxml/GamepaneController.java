@@ -300,8 +300,9 @@ public class GamepaneController implements Initializable {
                 }
             };
             Thread t = new Thread(task);
-            t.setName("Manuelupload");
+            t.setName("Uploading: " + game.getName());
             t.start();
+            
         }
 
     }
