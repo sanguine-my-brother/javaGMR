@@ -5,26 +5,23 @@
  */
 package nl.hyranasoftware.javagmr.views.fxml;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.plushaze.traynotification.animations.Animations;
 import com.github.plushaze.traynotification.notification.Notifications;
 import com.github.plushaze.traynotification.notification.TrayNotification;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -34,6 +31,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -44,9 +42,13 @@ import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
 import nl.hyranasoftware.javagmr.domain.Game;
+import nl.hyranasoftware.javagmr.domain.Note;
 import nl.hyranasoftware.javagmr.domain.Player;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import nl.hyranasoftware.javagmr.util.OpenURL;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.GlyphFont;
+import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.joda.time.DateTime;
 
 /**
@@ -67,6 +69,8 @@ public class GamepaneController implements Initializable {
     @FXML
     private Button btGamePage;
     @FXML
+    private Button btNoteEditor;
+    @FXML
     private Button btUpload;
     @FXML
     private Button btDownload;
@@ -85,6 +89,16 @@ public class GamepaneController implements Initializable {
         vbGamePane.getChildren().remove(pbDownload);
         pbDownload.getStyleClass().add("success");
         pbDownload.applyCss();
+        btDownload.setTooltip(new Tooltip("Download game"));
+        btUpload.setTooltip(new Tooltip("Upload game"));
+        btNoteEditor.setTooltip(new Tooltip("Open notes editor"));
+        btGamePage.setTooltip(new Tooltip("Go to the GMR page of this game"));
+        //GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
+      // FontAwesome.Glyph.
+        //btDownload.setGraphic(fontAwesome.create(FontAwesome.Glyph.DOWNLOAD));
+        //btDownload.setText(.getText());
+        //Text fontAwesomeIcon = FontAwesomeIconFactory.get();
+        
     }
 
     public void constructView(Game g) {
@@ -193,6 +207,23 @@ public class GamepaneController implements Initializable {
                 });
             }
         }
+    }
+    
+    private Scene getScene(String fxml) {
+        FXMLLoader loader = null;
+        String url = null;
+        url = getClass().getResource(fxml).toString();
+        loader = new FXMLLoader(getClass().getResource(fxml));
+        Parent root = null;
+        try {
+            root = (Parent) loader.load();
+        } catch (IOException ex) {
+            Logger.getLogger(GamepaneController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Object controller = loader.getController();
+        Scene scene = new Scene(root);
+        scene.setUserData(controller);
+        return scene;
     }
 
     private void updateDownloadProgressBar(double size) {
@@ -317,6 +348,32 @@ public class GamepaneController implements Initializable {
         hbGameInfo.getChildren().remove(btUpload);
         hbGameInfo.getChildren().remove(btDownload);
 
+    }
+    
+    @FXML
+    public void openEditor(){
+        File noteFile = new File("notes/" + this.game.getGameid() + ".json");
+        try{
+            Note note = null;
+            if(noteFile.exists()){
+                ObjectMapper mapper = new ObjectMapper();
+                note = mapper.readValue(noteFile, Note.class);
+            }else{
+                note = new Note(this.game.getGameid());
+                
+            }
+            Scene scene = this.getScene("texteditor.fxml");
+            TexteditorController tec = (TexteditorController) scene.getUserData();
+            tec.constructView(note);
+            Stage editor = new Stage();
+            editor.setOnHiding(event -> {
+                tec.saveOnExit();
+            });
+            editor.setScene(scene);
+            editor.show();
+        }catch (Exception ex){
+            
+        }
     }
 
 }
