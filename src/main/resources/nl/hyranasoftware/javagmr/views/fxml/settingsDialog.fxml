@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="342.0" prefWidth="515.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.SettingsDialogController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="342.0" prefWidth="515.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.SettingsDialogController">
    <children>
       <Button layoutX="423.0" layoutY="297.0" mnemonicParsing="false" onAction="#saveConfig" prefHeight="31.0" prefWidth="75.0" text="Save" />
       <TextField fx:id="tbSaveDirectory" layoutX="200.0" layoutY="10.0" prefHeight="25.0" prefWidth="214.0" />
@@ -16,7 +16,7 @@
       <Label layoutX="11.0" layoutY="14.0" text="Save file directory" />
       <TextField fx:id="tbAuthCode" layoutX="200.0" layoutY="45.0" prefHeight="25.0" prefWidth="304.0" />
       <Label layoutX="11.0" layoutY="49.0" text="Authcode" />
-      <Label layoutX="18.0" layoutY="213.0" prefHeight="70.0" prefWidth="478.0" text="You can retrieve your authcode from the giant multiplayer robot website. Without the authcode this application will not work" textOverrun="CLIP" wrapText="true" />
+      <Label layoutX="19.0" layoutY="243.0" prefHeight="70.0" prefWidth="478.0" text="You can retrieve your authcode from the giant multiplayer robot website. Without the authcode this application will not work" textOverrun="CLIP" wrapText="true" />
       <Label layoutX="11.0" layoutY="79.0" prefHeight="25.0" prefWidth="164.0" text="Notifcation frequency" textOverrun="CLIP">
          <font>
             <Font name="Calibri" size="14.0" />
@@ -26,5 +26,6 @@
       <CheckBox fx:id="cbSystemtray" layoutX="11.0" layoutY="148.0" mnemonicParsing="false" text="Minimize to system tray instead of closing the application" />
       <CheckBox fx:id="cbSaveLogInformation" layoutX="11.0" layoutY="178.0" mnemonicParsing="false" text="Save log information to file" />
       <CheckBox fx:id="cbShowSave" layoutX="11.0" layoutY="205.0" mnemonicParsing="false" text="Display pop up when saving a file (Requires restart of jGMR)" />
+      <CheckBox fx:id="cbAskForSave" layoutX="11.0" layoutY="235.0" mnemonicParsing="false" text="Don't ask me if I want to save when closing the note editor" />
    </children>
 </Pane>

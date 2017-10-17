@@ -360,6 +360,7 @@ public class GamepaneController implements Initializable {
                 note = mapper.readValue(noteFile, Note.class);
             }else{
                 note = new Note(this.game.getGameid());
+                note.setText(" ");
                 
             }
             Scene scene = this.getScene("texteditor.fxml");

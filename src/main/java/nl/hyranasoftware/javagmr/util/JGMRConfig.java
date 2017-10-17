@@ -33,6 +33,7 @@ public class JGMRConfig {
     private boolean minimizeToTray;
     private boolean saveFileDialog;
     private boolean logToFile;
+    private boolean dontAskMeToSave;
     
     
     @JsonProperty("uploadedGames")
@@ -60,6 +61,7 @@ public class JGMRConfig {
                     instance.minimizeToTray = true;
                     instance.saveFileDialog = true;
                     instance.logToFile = false;
+                    instance.dontAskMeToSave = false;
                     instance.notificationFrequency = 15;
                 }
             } catch (Exception ex) {
@@ -68,6 +70,8 @@ public class JGMRConfig {
         }
         return instance;
     }
+    
+    
 
     public String getPath() {
         return path;
@@ -211,6 +215,17 @@ public class JGMRConfig {
         this.logToFile = logToFile;
         this.saveConfig();
     }
+
+    public boolean isDontAskMeToSave() {
+        return dontAskMeToSave;
+    }
+
+    public void setDontAskMeToSave(boolean dontAskMeToSave) {
+        this.dontAskMeToSave = dontAskMeToSave;
+        this.saveConfig();
+    }
+    
+    
     
     
 
