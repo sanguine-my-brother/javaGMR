@@ -67,24 +67,20 @@ public class CurrentTurn {
     public int hashCode() {
         int hash = 7;
         hash = 43 * hash + this.turnId;
-        hash = 43 * hash + Objects.hashCode(this.started);
-        hash = 43 * hash + Objects.hashCode(this.expires);
         return hash;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
+        final CurrentTurn otherTurn = (CurrentTurn) obj;
         if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final CurrentTurn other = (CurrentTurn) obj;
-        if (!Objects.equals(this.started, other.started)) {
+        
+        if (this.number != otherTurn.number){
             return false;
         }
         return true;

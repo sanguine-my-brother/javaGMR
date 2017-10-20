@@ -13,7 +13,7 @@
    <children>
       <ToolBar minHeight="41.0" prefHeight="41.0" prefWidth="643.0">
         <items>
-          <Button fx:id="btSettings" mnemonicParsing="false" onAction="#settingsButton" text="Settings" />
+          <Button fx:id="btSettings" accessibleHelp="Settings" accessibleText="Settings" mnemonicParsing="false" onAction="#settingsButton" text="Settings" />
             <Label fx:id="lbTime" text="Time until next pull from GMR:" />
         </items>
       </ToolBar>

@@ -6,25 +6,22 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="342.0" prefWidth="515.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.SettingsDialogController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="370.0" prefWidth="515.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.SettingsDialogController">
    <children>
-      <Button layoutX="423.0" layoutY="297.0" mnemonicParsing="false" onAction="#saveConfig" prefHeight="31.0" prefWidth="75.0" text="Save" />
-      <TextField fx:id="tbSaveDirectory" layoutX="200.0" layoutY="10.0" prefHeight="25.0" prefWidth="214.0" />
-      <Button fx:id="btBrowseSaveDirectory" layoutX="413.0" layoutY="10.0" mnemonicParsing="false" onAction="#browseSaveDirectory" prefHeight="25.0" prefWidth="90.0" text="Browse" />
+      <Button fx:id="btBrowseSaveDirectory" layoutX="413.0" layoutY="10.0" minHeight="30.0" mnemonicParsing="false" onAction="#browseSaveDirectory" prefHeight="35.0" prefWidth="90.0" styleClass="last" text="Browse" />
+      <Button layoutX="421.0" layoutY="322.0" mnemonicParsing="false" onAction="#saveConfig" prefHeight="31.0" prefWidth="75.0" styleClass="success" text="Save" />
+      <TextField fx:id="tbSaveDirectory" layoutX="200.0" layoutY="10.0" prefHeight="25.0" prefWidth="214.0" styleClass="first" />
       <Label layoutX="11.0" layoutY="14.0" text="Save file directory" />
       <TextField fx:id="tbAuthCode" layoutX="200.0" layoutY="45.0" prefHeight="25.0" prefWidth="304.0" />
       <Label layoutX="11.0" layoutY="49.0" text="Authcode" />
-      <Label layoutX="18.0" layoutY="213.0" prefHeight="70.0" prefWidth="478.0" text="You can retrieve your authcode from the giant multiplayer robot website. Without the authcode this application will not work" textOverrun="CLIP" wrapText="true" />
-      <Label layoutX="11.0" layoutY="79.0" prefHeight="25.0" prefWidth="164.0" text="Notifcation frequency" textOverrun="CLIP">
-         <font>
-            <Font name="Calibri" size="14.0" />
-         </font></Label>
-      <ComboBox fx:id="cbFrequency" layoutX="200.0" layoutY="79.0" prefHeight="25.0" prefWidth="304.0" />
-      <CheckBox fx:id="cbMinimized" layoutX="11.0" layoutY="118.0" mnemonicParsing="false" text="Show notifications when minimized" />
-      <CheckBox fx:id="cbSystemtray" layoutX="11.0" layoutY="148.0" mnemonicParsing="false" text="Minimize to system tray instead of closing the application" />
-      <CheckBox fx:id="cbSaveLogInformation" layoutX="11.0" layoutY="178.0" mnemonicParsing="false" text="Save log information to file" />
-      <CheckBox fx:id="cbShowSave" layoutX="11.0" layoutY="205.0" mnemonicParsing="false" text="Display pop up when saving a file (Requires restart of jGMR)" />
+      <Label layoutX="10.0" layoutY="120.0" prefHeight="38.0" prefWidth="478.0" text="You can retrieve your authcode from the giant multiplayer robot website. Without the authcode this application will not work" textOverrun="CLIP" wrapText="true" />
+      <Label layoutX="11.0" layoutY="83.0" prefHeight="25.0" prefWidth="164.0" text="Notifcation frequency" textOverrun="CLIP" />
+      <ComboBox fx:id="cbFrequency" layoutX="200.0" layoutY="80.0" prefHeight="25.0" prefWidth="304.0" />
+      <CheckBox fx:id="cbMinimized" layoutX="11.0" layoutY="168.0" mnemonicParsing="false" text="Show notifications when minimized" />
+      <CheckBox fx:id="cbSystemtray" layoutX="11.0" layoutY="198.0" mnemonicParsing="false" text="Minimize to system tray instead of closing the application" />
+      <CheckBox fx:id="cbSaveLogInformation" layoutX="11.0" layoutY="228.0" mnemonicParsing="false" text="Save log information to file" />
+      <CheckBox fx:id="cbShowSave" layoutX="11.0" layoutY="255.0" mnemonicParsing="false" text="Display pop up when saving a file (Requires restart of jGMR)" />
+      <CheckBox fx:id="cbAskForSave" layoutX="11.0" layoutY="285.0" mnemonicParsing="false" text="Don't ask me if I want to save when closing the note editor (Save automatically on exit)" />
    </children>
 </Pane>
