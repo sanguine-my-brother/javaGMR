@@ -41,9 +41,11 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
+import nl.hyranasoftware.javagmr.domain.CurrentTurn;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.domain.Note;
 import nl.hyranasoftware.javagmr.domain.Player;
+import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import nl.hyranasoftware.javagmr.util.OpenURL;
 import org.controlsfx.glyphfont.FontAwesome;
@@ -80,6 +82,8 @@ public class GamepaneController implements Initializable {
     private ProgressBar pbDownload;
 
     private Game game;
+    private CurrentTurn currentTurn;
+    private int currentTurnPlayerNumber;
 
     /**
      * Initializes the controller class.
@@ -89,20 +93,23 @@ public class GamepaneController implements Initializable {
         vbGamePane.getChildren().remove(pbDownload);
         pbDownload.getStyleClass().add("success");
         pbDownload.applyCss();
+
         btDownload.setTooltip(new Tooltip("Download game"));
         btUpload.setTooltip(new Tooltip("Upload game"));
         btNoteEditor.setTooltip(new Tooltip("Open notes editor"));
         btGamePage.setTooltip(new Tooltip("Go to the GMR page of this game"));
         //GlyphFont fontAwesome = GlyphFontRegistry.font("FontAwesome");
-      // FontAwesome.Glyph.
+        // FontAwesome.Glyph.
         //btDownload.setGraphic(fontAwesome.create(FontAwesome.Glyph.DOWNLOAD));
         //btDownload.setText(.getText());
         //Text fontAwesomeIcon = FontAwesomeIconFactory.get();
-        
+
     }
 
     public void constructView(Game g) {
         this.game = g;
+        this.currentTurn = g.getCurrentTurn();
+        currentTurnPlayerNumber = this.game.getCurrentTurn().getPlayerNumber();
         lbGameName.setText(g.getName());
         lbTimeLeft.setText(g.getPrettyTimeLeft());
         getPlayers();
@@ -110,9 +117,22 @@ public class GamepaneController implements Initializable {
     }
 
     public void refreshTime() {
+
         Platform.runLater(() -> {
             lbTimeLeft.setText(game.getPrettyTimeLeft());
         });
+    }
+
+    public void refreshPlayers(Game g) {
+        GMRLogger.logLine("Refreshing players on: " + g.getName());
+        this.game = g;
+        this.currentTurnPlayerNumber = g.getCurrentTurn().getPlayerNumber();
+        Platform.runLater(() -> {
+            hbPlayers.getChildren().clear();
+
+        });
+        getPlayers();
+
     }
 
     public VBox getVbGamePane() {
@@ -159,7 +179,7 @@ public class GamepaneController implements Initializable {
     protected void downloadGame() {
         if (game.getCurrentTurn().isIsfirstTurn()) {
             Dialog dg = new Dialog();
-            dg.setContentText("Congratulations, you get to make a new game. Please create a new Hotseat game in Civ 5 and than press the manual upload button. (It's next to the download button)\nIf you need more information about this game press the most left button, it will take you directly to the game page");
+            dg.setContentText("Congratulations, you get to make a new game. Please create a new Hotseat game in Civ 5 and than press the upload button. (It's next to the download button)\nIf you need more information about this game press the most left button, it will take you directly to the game page");
 
             dg.setTitle("New Game");
 
@@ -208,7 +228,7 @@ public class GamepaneController implements Initializable {
             }
         }
     }
-    
+
     private Scene getScene(String fxml) {
         FXMLLoader loader = null;
         String url = null;
@@ -333,7 +353,7 @@ public class GamepaneController implements Initializable {
             Thread t = new Thread(task);
             t.setName("Uploading: " + game.getName());
             t.start();
-            
+
         }
 
     }
@@ -343,25 +363,26 @@ public class GamepaneController implements Initializable {
     }
 
     public void isAllGames() {
-        btGamePage.getStyleClass().remove("first");
-        lbTimeLeft.setPrefWidth(lbTimeLeft.getPrefWidth() + 130);
+        //btGamePage.getStyleClass().remove("first");
+        btNoteEditor.getStyleClass().add("last");
+        lbTimeLeft.setPrefWidth(lbTimeLeft.getPrefWidth() + 70);
         hbGameInfo.getChildren().remove(btUpload);
         hbGameInfo.getChildren().remove(btDownload);
 
     }
-    
+
     @FXML
-    public void openEditor(){
+    public void openEditor() {
         File noteFile = new File("notes/" + this.game.getGameid() + ".json");
-        try{
+        try {
             Note note = null;
-            if(noteFile.exists()){
+            if (noteFile.exists()) {
                 ObjectMapper mapper = new ObjectMapper();
                 note = mapper.readValue(noteFile, Note.class);
-            }else{
+            } else {
                 note = new Note(this.game.getGameid());
                 note.setText(" ");
-                
+
             }
             Scene scene = this.getScene("texteditor.fxml");
             TexteditorController tec = (TexteditorController) scene.getUserData();
@@ -372,9 +393,17 @@ public class GamepaneController implements Initializable {
             });
             editor.setScene(scene);
             editor.show();
-        }catch (Exception ex){
-            
+        } catch (Exception ex) {
+
         }
+    }
+
+    public int getCurrentTurnPlayerNumber() {
+        return currentTurnPlayerNumber;
+    }
+
+    public void setCurrentTurnPlayerNumber(int currentTurnNumber) {
+        this.currentTurnPlayerNumber = currentTurnNumber;
     }
 
 }

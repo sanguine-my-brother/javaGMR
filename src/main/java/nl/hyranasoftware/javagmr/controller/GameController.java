@@ -76,7 +76,7 @@ public class GameController {
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnirestException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+            return new ArrayList<Game>();
         }
         return null;
     }

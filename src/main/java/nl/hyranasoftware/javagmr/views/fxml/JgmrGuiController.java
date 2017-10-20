@@ -15,9 +15,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -115,7 +118,7 @@ public class JgmrGuiController implements Initializable {
     private boolean newDownload;
     private WatchDirectory wd;
     private Thread wdt;
-    private Set<Game> currentGames;
+    private Map<Integer, Game> currentGames;
     private Set<Game> playerGames;
     private ChoiceDialog<Game> newSaveFileDialog;
     private TrayNotification notification;
@@ -134,7 +137,7 @@ public class JgmrGuiController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         gamesAccordion.setExpandedPane(yourturnTitledPane);
         playerGames = new HashSet<Game>();
-        currentGames = new HashSet<Game>();
+        currentGames = new HashMap<Integer, Game>();
         gc = new GameController() {
             @Override
             public void sendDownloadProgress(double percent) {
@@ -212,7 +215,7 @@ public class JgmrGuiController implements Initializable {
                         public void run() {
                             //horrible ugly code needs to be cleaned up one day
                             if (currentGames.size() > retrievedGames.size()) {
-                                Iterator iterator = currentGames.iterator();
+                                Iterator iterator = currentGames.values().iterator();
                                 while (iterator.hasNext()) {
                                     Game game = (Game) iterator.next();
                                     if (!retrievedGames.contains(game)) {
@@ -228,8 +231,13 @@ public class JgmrGuiController implements Initializable {
                                     }
                                 }
                             }
-                            System.gc();
-                            currentGames.addAll(retrievedGames);
+                            for (Game g : retrievedGames) {
+                                if (currentGames.containsKey(g.getGameid())) {
+                                    currentGames.replace(g.getGameid(), g);
+                                } else {
+                                    currentGames.put(g.getGameid(), g);
+                                }
+                            }
                             GMRLogger.logLine("Currentgames count: " + currentGames.size());
 
                             List<Game> games = gc.retrievePlayersTurns(retrievedGames);
@@ -252,7 +260,7 @@ public class JgmrGuiController implements Initializable {
                             }
                             playerGames.addAll(games);
 
-                            renderGames(true, currentGames, vbAllGames);
+                            renderGames(true, currentGames.values(), vbAllGames);
                             renderGames(false, playerGames, vbPlayerTurnBox);
 
                             if (wdt == null) {
@@ -266,7 +274,7 @@ public class JgmrGuiController implements Initializable {
             });
             t.setName("PullGamesThread");
             t.start();
-            
+
         }
         timeLeft = 60;
         if (systemTray != null) {
@@ -287,7 +295,7 @@ public class JgmrGuiController implements Initializable {
 
     }
 
-    private void renderGames(boolean isAllGames, Set<Game> games, VBox vbox) {
+    private void renderGames(boolean isAllGames, Collection<Game> games, VBox vbox) {
         if (isAllGames) {
             //vbox.getChildren().clear();
         }
@@ -302,10 +310,6 @@ public class JgmrGuiController implements Initializable {
                     GamepaneController gpc = (GamepaneController) n.getUserData();
                     if (gpc.getGame().equals(g)) {
                         found = true;
-                        if (!g.getCurrentTurn().equals(gpc.getGame().getCurrentTurn())) {
-                            vbAllGames.getChildren().remove(n);
-                            renderVboxes(isAllGames, vbox, g);
-                        }
                     }
                 }
                 if (!found) {
@@ -567,6 +571,15 @@ public class JgmrGuiController implements Initializable {
             for (Node n : nodesPlayerturn) {
                 GamepaneController gpc = (GamepaneController) n.getUserData();
                 gpc.refreshTime();
+            }
+            List<Node> nodesAllGames = vbAllGames.getChildren();
+            for (Node n : nodesAllGames) {
+                GamepaneController gpc = (GamepaneController) n.getUserData();
+                gpc.refreshTime();
+                Game g = currentGames.get(gpc.getGame().getGameid());
+                if(g.getCurrentTurn().getPlayerNumber() != gpc.getCurrentTurnPlayerNumber()){
+                    gpc.refreshPlayers(g);
+                }
             }
         });
         t.setName("refreshTurnTime");
