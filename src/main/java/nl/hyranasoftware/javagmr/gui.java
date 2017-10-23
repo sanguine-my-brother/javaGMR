@@ -5,7 +5,6 @@
  */
 package nl.hyranasoftware.javagmr;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
