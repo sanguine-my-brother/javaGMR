@@ -22,8 +22,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
-import nl.hyranasoftware.githubupdater.GithubUtility;
-import nl.hyranasoftware.githubupdater.domain.Release;
 
 /**
  *
