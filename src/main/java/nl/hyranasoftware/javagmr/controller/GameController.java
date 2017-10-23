@@ -32,9 +32,6 @@ import javafx.scene.control.Dialog;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
-import org.joda.time.DateTime;
-import static org.joda.time.DateTime.now;
-import org.joda.time.Interval;
 
 /**
  *
