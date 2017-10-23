@@ -48,9 +48,9 @@ import nl.hyranasoftware.javagmr.domain.Player;
 import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import nl.hyranasoftware.javagmr.util.OpenURL;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.GlyphFont;
-import org.controlsfx.glyphfont.GlyphFontRegistry;
+//import org.controlsfx.glyphfont.FontAwesome;
+//import org.controlsfx.glyphfont.GlyphFont;
+//import org.controlsfx.glyphfont.GlyphFontRegistry;
 import org.joda.time.DateTime;
 
 /**
