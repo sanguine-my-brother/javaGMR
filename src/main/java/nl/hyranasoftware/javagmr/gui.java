@@ -5,7 +5,6 @@
  */
 package nl.hyranasoftware.javagmr;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
@@ -22,8 +21,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
-import nl.hyranasoftware.githubupdater.GithubUtility;
-import nl.hyranasoftware.githubupdater.domain.Release;
 
 /**
  *
