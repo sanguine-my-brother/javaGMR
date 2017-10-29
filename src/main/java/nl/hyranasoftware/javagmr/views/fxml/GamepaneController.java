@@ -116,6 +116,7 @@ public class GamepaneController implements Initializable {
             btNoteEditor.getStyleClass().add("primary");
         }
         getPlayers();
+        lbTimeLeft.setTooltip(new Tooltip(g.getPrettyTimeStarted()));
 
     }
 
