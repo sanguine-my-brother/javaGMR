@@ -369,7 +369,7 @@ public class GamepaneController implements Initializable {
     public void isAllGames() {
         //btGamePage.getStyleClass().remove("first");
         btNoteEditor.getStyleClass().add("last");
-        lbTimeLeft.setPrefWidth(lbTimeLeft.getPrefWidth() + 70);
+        lbTimeLeft.setPrefWidth(lbTimeLeft.getPrefWidth() + 62);
         hbGameInfo.getChildren().remove(btUpload);
         hbGameInfo.getChildren().remove(btDownload);
         

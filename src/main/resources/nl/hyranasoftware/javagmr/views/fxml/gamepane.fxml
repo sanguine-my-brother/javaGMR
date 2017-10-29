@@ -18,7 +18,7 @@
                         <Insets left="10.0" />
                     </HBox.margin>
                 </Label>
-                <Label fx:id="lbTimeLeft" prefHeight="25.0" prefWidth="330" text="TimeLeft" />
+                <Label fx:id="lbTimeLeft" prefHeight="25.0" prefWidth="310" text="TimeLeft" />
                 <Button   fx:id="btGamePage" maxHeight="15.0" mnemonicParsing="false" prefHeight="4.0"  onAction="#viewGame" snapToPixel="false" styleClass="first" text="" HBox.hgrow="NEVER">
                     <graphic>
                         <Glyph fontFamily="FontAwesome" icon="LINK"/>  
