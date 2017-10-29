@@ -141,6 +141,7 @@ public class Game implements Comparable<Game> {
 
     public String getPrettyTimeStarted() {
         PrettyTime p = new PrettyTime();
+        p.setLocale(Locale.ENGLISH);
         return "Last turn: " + p.format(currentTurn.getStarted().toDate());
     }
 
