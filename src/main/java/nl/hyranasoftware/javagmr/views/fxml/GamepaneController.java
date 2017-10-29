@@ -112,7 +112,11 @@ public class GamepaneController implements Initializable {
         currentTurnPlayerNumber = this.game.getCurrentTurn().getPlayerNumber();
         lbGameName.setText(g.getName());
         lbTimeLeft.setText(g.getPrettyTimeLeft());
+        if(hasNote()){
+            btNoteEditor.getStyleClass().add("primary");
+        }
         getPlayers();
+        lbTimeLeft.setTooltip(new Tooltip(g.getPrettyTimeStarted()));
 
     }
 
@@ -365,14 +369,16 @@ public class GamepaneController implements Initializable {
     public void isAllGames() {
         //btGamePage.getStyleClass().remove("first");
         btNoteEditor.getStyleClass().add("last");
-        lbTimeLeft.setPrefWidth(lbTimeLeft.getPrefWidth() + 70);
+        lbTimeLeft.setPrefWidth(lbTimeLeft.getPrefWidth() + 62);
         hbGameInfo.getChildren().remove(btUpload);
         hbGameInfo.getChildren().remove(btDownload);
+        
 
     }
 
     @FXML
     public void openEditor() {
+        boolean didExist = false;
         File noteFile = new File("notes/" + this.game.getGameid() + ".json");
         try {
             Note note = null;
@@ -382,7 +388,7 @@ public class GamepaneController implements Initializable {
             } else {
                 note = new Note(this.game.getGameid());
                 note.setText(" ");
-
+                didExist = true;
             }
             Scene scene = this.getScene("texteditor.fxml");
             TexteditorController tec = (TexteditorController) scene.getUserData();
@@ -392,7 +398,11 @@ public class GamepaneController implements Initializable {
                 tec.saveOnExit();
             });
             editor.setScene(scene);
-            editor.show();
+            editor.showAndWait();
+            if(hasNote() && didExist){
+                btNoteEditor.getStyleClass().add("primary");
+                 btNoteEditor.applyCss();
+            }
         } catch (Exception ex) {
 
         }
@@ -404,6 +414,11 @@ public class GamepaneController implements Initializable {
 
     public void setCurrentTurnPlayerNumber(int currentTurnNumber) {
         this.currentTurnPlayerNumber = currentTurnNumber;
+    }
+    
+    private boolean hasNote(){
+        File noteFile = new File("notes/" + this.game.getGameid() + ".json");
+        return noteFile.exists();
     }
 
 }

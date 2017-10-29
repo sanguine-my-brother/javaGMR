@@ -139,6 +139,12 @@ public class Game implements Comparable<Game> {
         }
     }
 
+    public String getPrettyTimeStarted() {
+        PrettyTime p = new PrettyTime();
+        p.setLocale(Locale.ENGLISH);
+        return "Last turn: " + p.format(currentTurn.getStarted().toDate());
+    }
+
     @Override
     public String toString() {
         PrettyTime p = new PrettyTime();
@@ -174,7 +180,7 @@ public class Game implements Comparable<Game> {
         if (this.gameid != other.gameid) {
             return false;
         }
-        
+
         return true;
     }
 
