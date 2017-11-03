@@ -88,7 +88,7 @@ public abstract class WatchDirectory implements Runnable {
 
                         GMRLogger.logLine("Event kind: " + eventKind);
                         if (eventKind == ENTRY_CREATE) {
-                            updatedSaveFile(new SaveFile(file.getName()));
+                            updatedSaveFile(new SaveFile(file.getAbsolutePath()));
                             GMRLogger.logLine("New save file detected CREATE EVENT: " + file.toString());
                         }
                         if (eventKind == ENTRY_MODIFY) {
@@ -131,7 +131,7 @@ public abstract class WatchDirectory implements Runnable {
                 if (strikeOne) {
                     GMRLogger.logLine("StrikeOne is true B001");
                     if (JGMRConfig.getInstance().didSaveFileChange(saveFile)) {
-                        updatedSaveFile(new SaveFile(saveFile.getName()));
+                        updatedSaveFile(new SaveFile(saveFile.getAbsolutePath()));
                         GMRLogger.logLine("New save file detected: " + saveFile.toString());
                         available = true;
                         break;
