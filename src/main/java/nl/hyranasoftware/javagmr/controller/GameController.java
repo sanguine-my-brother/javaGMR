@@ -32,6 +32,7 @@ import javafx.scene.control.Dialog;
 import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import org.apache.http.entity.ContentType;
 
 /**
  *
@@ -191,13 +192,12 @@ public class GameController {
     }
 
     private boolean doUpload(InputStream stream, Game game) {
-        String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/SubmitTurn";
+        String requestUrl = "http://multiplayerrobot.com/Game/UploadSaveClient";
         File lock = new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock");
         if (!lock.exists()) {
             try {
 
                 lock.createNewFile();
-
                 int available = stream.available();
                 final byte bytes[] = new byte[available];
 
@@ -209,10 +209,10 @@ public class GameController {
 
                 Unirest.setTimeouts(10000, 15000);
                 String result = Unirest.post(requestUrl)
-                        .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
                         .queryString("turnId", game.getCurrentTurn().getTurnId())
-                        .body(bytes)
-                        .asJson().getBody().toString();
+                        .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
+                        .queryString("isCompressed", false)
+                        .body(bytes).asJson().getBody().toString();
 
                 ObjectMapper mapper = new ObjectMapper();
                 String gamesNode = mapper.readTree(result).get("ResultType").toString();
@@ -240,7 +240,7 @@ public class GameController {
                 Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
                 lock.delete();
                 return false;
-            } 
+            }
         } else {
             Dialog dg = new Dialog();
             dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
