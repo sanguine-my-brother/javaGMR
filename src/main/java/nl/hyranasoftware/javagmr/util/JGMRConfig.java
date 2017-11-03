@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import java.io.File;
@@ -27,9 +28,15 @@ public class JGMRConfig {
     private String path;
     private String authCode;
     private String playerSteamId;
-    private int notificationFrequency = 15;
-    private boolean notificationsMinized = true;
-    private boolean minimizeToTray = true;
+    private int notificationFrequency;
+    private boolean notificationsMinized;
+    private boolean minimizeToTray;
+    private boolean saveFileDialog;
+    private boolean logToFile;
+    private boolean dontAskMeToSave;
+    
+    
+    @JsonProperty("uploadedGames")
     private List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore
@@ -50,6 +57,11 @@ public class JGMRConfig {
                     instance = mapper.readValue(configFile, JGMRConfig.class);
                 } else {
                     instance = new JGMRConfig();
+                    instance.notificationsMinized = true;
+                    instance.minimizeToTray = true;
+                    instance.saveFileDialog = true;
+                    instance.logToFile = false;
+                    instance.dontAskMeToSave = false;
                     instance.notificationFrequency = 15;
                 }
             } catch (Exception ex) {
@@ -58,6 +70,8 @@ public class JGMRConfig {
         }
         return instance;
     }
+    
+    
 
     public String getPath() {
         return path;
@@ -108,7 +122,7 @@ public class JGMRConfig {
             this.authCode = authCode;
             this.playerSteamId = playerCode;
             saveConfig();
-        } 
+        }
 
     }
 
@@ -149,25 +163,32 @@ public class JGMRConfig {
     }
 
     public boolean didSaveFileChange(SaveFile saveFile) {
+
         if (saveFile.getSize() > 100 && !saveFiles.isEmpty() && saveFiles.indexOf(saveFile) != -1) {
             SaveFile retrievedFile = saveFiles.get(saveFiles.indexOf(saveFile));
             if (retrievedFile != null) {
-                if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0) {
-                    if (saveFile.getSize() < (retrievedFile.getSize() - 30) && !retrievedFile.getLastTimeModified().equals(saveFile.getLastTimeModified())) {
+ if (saveFile.getSize() > (retrievedFile.getSize() + 30) || saveFile.getSize() > 0 && saveFile.getSize() != 0 || saveFile.getSize() < (retrievedFile.getSize() - 30)) {
+                    if (!retrievedFile.getLastTimeModified().equals(saveFile.getLastTimeModified())) {
                         return true;
                     }
                 }
             }
         }
+
         return false;
     }
 
+    @JsonIgnore
     public List<Game> getUploadedGames() {
         return uploadedGames;
     }
+    @JsonIgnore
+    public void  setUploadedGames(List<Game> uploadedGames){
+        this.uploadedGames = uploadedGames;
+    }
+    
 
     public void addUploadedGame(Game game) {
-        game.setUploaded(DateTime.now());
         this.uploadedGames.add(game);
         this.saveConfig();
     }
@@ -177,8 +198,36 @@ public class JGMRConfig {
         this.uploadedGames.remove(game);
     }
 
-    public void setUploadedGames(List<Game> uploadedGames) {
-        this.uploadedGames = uploadedGames;
+    public boolean isSaveFileDialog() {
+        return saveFileDialog;
     }
+
+    public void setSaveFileDialog(boolean saveFileDialog) {
+        this.saveFileDialog = saveFileDialog;
+        this.saveConfig();
+    }
+
+    public boolean isLogToFile() {
+        return logToFile;
+    }
+
+    public void setLogToFile(boolean logToFile) {
+        this.logToFile = logToFile;
+        this.saveConfig();
+    }
+
+    public boolean isDontAskMeToSave() {
+        return dontAskMeToSave;
+    }
+
+    public void setDontAskMeToSave(boolean dontAskMeToSave) {
+        this.dontAskMeToSave = dontAskMeToSave;
+        this.saveConfig();
+    }
+    
+    
+    
+    
+
 
 }

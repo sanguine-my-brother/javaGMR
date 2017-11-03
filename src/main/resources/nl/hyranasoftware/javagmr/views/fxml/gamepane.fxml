@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.controlsfx.glyphfont.Glyph?>
+
+<VBox fx:id="vbGamePane" maxWidth="836.0" minHeight="-Infinity" minWidth="-Infinity" prefWidth="836.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.GamepaneController">
+    <children>
+        <HBox fx:id="hbGameInfo" maxHeight="25.0" prefHeight="100.0" prefWidth="200.0">
+            <children>
+                <Label fx:id="lbGameName" prefHeight="25.0" prefWidth="390.0" text="GameName">
+                    <HBox.margin>
+                        <Insets left="10.0" />
+                    </HBox.margin>
+                </Label>
+                <Label fx:id="lbTimeLeft" prefHeight="25.0" prefWidth="310" text="TimeLeft" />
+                <Button   fx:id="btGamePage" maxHeight="15.0" mnemonicParsing="false" prefHeight="4.0"  onAction="#viewGame" snapToPixel="false" styleClass="first" text="" HBox.hgrow="NEVER">
+                    <graphic>
+                        <Glyph fontFamily="FontAwesome" icon="LINK"/>  
+                    </graphic>
+                </Button>
+                <Button fx:id="btNoteEditor" maxHeight="15.0" mnemonicParsing="false" prefHeight="25.0" snapToPixel="false" onAction="#openEditor" styleClass="middle" text="" HBox.hgrow="NEVER" >
+                    <graphic>
+                        <Glyph fontFamily="FontAwesome" icon="PENCIL_SQUARE"/>  
+                    </graphic>
+                </Button>
+                <Button fx:id="btUpload" maxHeight="15.0" mnemonicParsing="false" prefHeight="25.0" snapToPixel="false" onAction="#uploadGame" styleClass="middle" text="" HBox.hgrow="NEVER" >
+                    <graphic>
+                        <Glyph fontFamily="FontAwesome" icon="UPLOAD"/>  
+                    </graphic>
+                </Button>
+                <Button fx:id="btDownload" accessibleText="Download Save File" maxHeight="15.0" mnemonicParsing="false" onAction="#downloadGame" snapToPixel="false" stylesheets="@bootstrap3.css" text="" textOverrun="WORD_ELLIPSIS" HBox.hgrow="NEVER">
+                    <graphic>
+                        <Glyph fontFamily="FontAwesome" icon="DOWNLOAD"/>  
+                    </graphic>
+                    <styleClass>
+                        <String fx:value="success" />
+                        <String fx:value="last" />
+                    </styleClass>
+            
+                </Button>
+            </children>
+        </HBox>
+        <HBox fx:id="hbPlayers" maxHeight="30.0" minHeight="30.0" prefHeight="0.0" prefWidth="845.0" spacing="5.0">
+            <padding>
+                <Insets left="5.0" />
+            </padding>
+            <VBox.margin>
+                <Insets left="5.0" />
+            </VBox.margin>
+        </HBox>
+        <ProgressBar fx:id="pbDownload" prefHeight="18.0" prefWidth="856.0" progress="0.0" />
+    </children>
+</VBox>

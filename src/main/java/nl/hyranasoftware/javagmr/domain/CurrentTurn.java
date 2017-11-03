@@ -6,6 +6,7 @@
 package nl.hyranasoftware.javagmr.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 import org.joda.time.DateTime;
 
 /**
@@ -61,6 +62,31 @@ public class CurrentTurn {
     public boolean isIsfirstTurn() {
         return isfirstTurn;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 43 * hash + this.turnId;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        final CurrentTurn otherTurn = (CurrentTurn) obj;
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        
+        if (this.number != otherTurn.number){
+            return false;
+        }
+        return true;
+    }
+    
+    
     
     
     

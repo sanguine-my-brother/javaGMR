@@ -10,10 +10,18 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import nl.hyranasoftware.javagmr.domain.Player;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import nl.hyranasoftware.javagmr.domain.Game;
+import nl.hyranasoftware.javagmr.util.JGMRConfig;
 
 /**
  *
@@ -37,6 +45,28 @@ public class PlayerController {
             Logger.getLogger(PlayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+
+    public void downloadPlayerAvatar(Player player) throws MalformedURLException, IOException {
+        URL url = new URL(player.avatarUrl);
+        HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
+        long completeFileSize = httpConnection.getContentLength();
+        httpConnection.setReadTimeout(15000);
+        
+
+        File targetFile = new File("cache/" + player.getSteamId() + ".jpg");
+        java.io.BufferedInputStream is = new java.io.BufferedInputStream(httpConnection.getInputStream());
+
+        try (OutputStream outStream = new FileOutputStream(targetFile)) {
+            byte[] buffer = new byte[8 * 1024];
+            int bytesRead;
+            double downLoadFileSize = 0;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                downLoadFileSize = downLoadFileSize + bytesRead;
+                outStream.write(buffer, 0, bytesRead);
+            }
+        }
+
     }
 
     public List<Player> retrievePlayersFromGame(List<Player> players) {
@@ -84,7 +114,7 @@ public class PlayerController {
         if (response != null) {
             if (!response.equals("null")) {
                 return response;
-            } 
+            }
         }
         return null;
     }
