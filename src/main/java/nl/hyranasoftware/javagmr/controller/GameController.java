@@ -46,13 +46,13 @@ public class GameController {
      */
     public List<Game> getGames() {
         try {
-            String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetGamesAndPlayers?playerIDText";
+            String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetGamesForPlayer";
             String response = Unirest.get(requestUrl).queryString("playerIDText", "").queryString("authKey", JGMRConfig.getInstance().getAuthCode()).asJson().getBody().toString();
 
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JodaModule());
-            String gamesNode = mapper.readTree(response).get("Games").toString();
-            List<Game> games = mapper.readValue(gamesNode, new TypeReference<List<Game>>() {
+            //String gamesNode = mapper.readTree(response).get("Games").toString();
+            List<Game> games = mapper.readValue(response, new TypeReference<List<Game>>() {
             });
             class PlayersTask implements Runnable {
 
@@ -200,19 +200,24 @@ public class GameController {
                 lock.createNewFile();
                 int available = stream.available();
                 final byte bytes[] = new byte[available];
-
+                /*
+ 
                 while (stream.read(bytes) > 0) {
 
                 }
+                
 
                 stream.close();
-
+*/
                 Unirest.setTimeouts(10000, 15000);
+                int turnid = game.getCurrentTurn().getTurnId();
+                
+                String authKey = JGMRConfig.getInstance().getAuthCode();
                 String result = Unirest.post(requestUrl)
-                        .queryString("turnId", game.getCurrentTurn().getTurnId())
-                        .queryString("authKey", JGMRConfig.getInstance().getAuthCode())
-                        .queryString("isCompressed", false)
-                        .body(bytes).asJson().getBody().toString();
+                        .field("turnId", game.getCurrentTurn().getTurnId())
+                        .field("authKey", JGMRConfig.getInstance().getAuthCode())
+                        .field("isCompressed", false)
+                        .field("saveFileUpload", stream, ContentType.MULTIPART_FORM_DATA, game.getCurrentTurn().getTurnId() + ".Civ5Save").asJson().getBody().toString();
 
                 ObjectMapper mapper = new ObjectMapper();
                 String gamesNode = mapper.readTree(result).get("ResultType").toString();
