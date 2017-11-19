@@ -94,16 +94,8 @@ public class GameController {
         List<Game> playerTurns = new ArrayList<Game>();
         for (Game g : games) {
             if (g.getCurrentTurn().getUserId().equals(JGMRConfig.getInstance().getPlayerSteamId())) {
-
-                if (JGMRConfig.getInstance().getUploadedGames().contains(g)) {
-                    Game uploadedGame = JGMRConfig.getInstance().getUploadedGames().get(JGMRConfig.getInstance().getUploadedGames().indexOf(g));
-                    if (!uploadedGame.getCurrentTurn().equals(g.getCurrentTurn())) {
-                        JGMRConfig.getInstance().uploadedGameExpired(g);
-                        playerTurns.add(g);
-                    }
-                } else {
                     playerTurns.add(g);
-                }
+             
             }
         }
 
@@ -216,7 +208,6 @@ public class GameController {
                 int resultType = mapper.readValue(gamesNode, int.class);
                 if (resultType == 1) {
                     JGMRConfig.getInstance().readDirectory();
-                    JGMRConfig.getInstance().addUploadedGame(game);
                     lock.delete();
                     return true;
                 }
@@ -260,9 +251,6 @@ public class GameController {
      */
     public void sendDownloadProgress(double percent) {
         throw new UnsupportedOperationException();
-        /*
-        THIS MUST BE OVERRIDDEN BY YOUR VIEW
-         */
 
     }
 
