@@ -200,15 +200,7 @@ public class GameController {
                 lock.createNewFile();
                 int available = stream.available();
                 final byte bytes[] = new byte[available];
-                /*
- 
-                while (stream.read(bytes) > 0) {
 
-                }
-                
-
-                stream.close();
-*/
                 Unirest.setTimeouts(10000, 15000);
                 int turnid = game.getCurrentTurn().getTurnId();
                 
@@ -251,6 +243,7 @@ public class GameController {
             dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
             dg.setTitle("Download or Upload already in progress.");
             dg.getDialogPane().getButtonTypes().add(new ButtonType("Login", ButtonData.OK_DONE));
+ 
             Platform.runLater(() -> {
                 dg.showAndWait();
             });

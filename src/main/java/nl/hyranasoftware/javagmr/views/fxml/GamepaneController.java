@@ -124,7 +124,8 @@ public class GamepaneController implements Initializable {
 
         Platform.runLater(() -> {
             lbTimeLeft.setText(game.getPrettyTimeLeft());
-        });
+            lbTimeLeft.getTooltip().setText(game.getPrettyTimeStarted());
+        }
     }
 
     public void refreshPlayers(Game g) {
