@@ -105,7 +105,10 @@ public class GamepaneController implements Initializable {
         //Text fontAwesomeIcon = FontAwesomeIconFactory.get();
 
     }
-
+    /**
+     * Used a seperate method to construct the view since the view is based upon an object. 
+     * @param g The game this view should be build on
+     */
     public void constructView(Game g) {
         this.game = g;
         this.currentTurn = g.getCurrentTurn();
@@ -124,6 +127,7 @@ public class GamepaneController implements Initializable {
 
         Platform.runLater(() -> {
             lbTimeLeft.setText(game.getPrettyTimeLeft());
+            lbTimeLeft.getTooltip().setText(game.getPrettyTimeStarted());
         });
     }
 
@@ -184,9 +188,7 @@ public class GamepaneController implements Initializable {
         if (game.getCurrentTurn().isIsfirstTurn()) {
             Dialog dg = new Dialog();
             dg.setContentText("Congratulations, you get to make a new game. Please create a new Hotseat game in Civ 5 and than press the upload button. (It's next to the download button)\nIf you need more information about this game press the most left button, it will take you directly to the game page");
-
             dg.setTitle("New Game");
-
             dg.getDialogPane().getButtonTypes().add(new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE));
             Platform.runLater(() -> {
                 dg.showAndWait();
@@ -201,7 +203,8 @@ public class GamepaneController implements Initializable {
             Scene scene = vbGamePane.getScene();
             JgmrGuiController jgui = (JgmrGuiController) scene.getUserData();
             jgui.downloadGame(game);
-            if (!new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock").exists()) {
+            File lock = new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock");
+            if (!lock.exists()) {
                 vbGamePane.getChildren().add(pbDownload);
                 //Scene scene = ((VBox) vbGamePane.getParent()).getParent().getParent().getScene();
                 Task t = new Task() {
@@ -226,8 +229,13 @@ public class GamepaneController implements Initializable {
                 dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
                 dg.setTitle("Download or Upload already in progress.");
                 dg.getDialogPane().getButtonTypes().add(new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE));
+                dg.getDialogPane().getButtonTypes().add(new ButtonType("Remove Lock", ButtonBar.ButtonData.APPLY));
                 Platform.runLater(() -> {
-                    dg.showAndWait();
+                     Optional<ButtonType> result = dg.showAndWait();
+                     if(result.get() == ButtonType.APPLY){
+                         lock.delete();
+                     }
+                    
                 });
             }
         }

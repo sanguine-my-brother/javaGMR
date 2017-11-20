@@ -35,9 +35,6 @@ public class JGMRConfig {
     private boolean logToFile;
     private boolean dontAskMeToSave;
     
-    
-    @JsonProperty("uploadedGames")
-    private List<Game> uploadedGames = new ArrayList();
 
     @JsonIgnore
     List<SaveFile> saveFiles = new ArrayList();
@@ -178,25 +175,6 @@ public class JGMRConfig {
         return false;
     }
 
-    @JsonIgnore
-    public List<Game> getUploadedGames() {
-        return uploadedGames;
-    }
-    @JsonIgnore
-    public void  setUploadedGames(List<Game> uploadedGames){
-        this.uploadedGames = uploadedGames;
-    }
-    
-
-    public void addUploadedGame(Game game) {
-        this.uploadedGames.add(game);
-        this.saveConfig();
-    }
-
-    @JsonIgnore
-    public void uploadedGameExpired(Game game) {
-        this.uploadedGames.remove(game);
-    }
 
     public boolean isSaveFileDialog() {
         return saveFileDialog;

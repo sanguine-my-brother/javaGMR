@@ -225,8 +225,6 @@ public class JgmrGuiController implements Initializable {
                                     currentGames.put(g.getGameid(), g);
                                 }
                             }
-                            GMRLogger.logLine("Currentgames count: " + currentGames.size());
-
                             List<Game> games = gc.retrievePlayersTurns(retrievedGames);
                             if (playerGames.size() > games.size()) {
                                 Iterator iterator = playerGames.iterator();

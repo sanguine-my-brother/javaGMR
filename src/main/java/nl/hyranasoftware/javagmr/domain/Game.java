@@ -139,6 +139,7 @@ public class Game implements Comparable<Game> {
         }
     }
 
+    @JsonIgnore
     public String getPrettyTimeStarted() {
         PrettyTime p = new PrettyTime();
         p.setLocale(Locale.ENGLISH);
