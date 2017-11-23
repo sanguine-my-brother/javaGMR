@@ -386,17 +386,15 @@ public class GamepaneController implements Initializable {
 
     @FXML
     public void openEditor() {
-        boolean didExist = false;
         File noteFile = new File("notes/" + this.game.getGameid() + ".json");
         try {
-            Note note = null;
+            Note note;
             if (noteFile.exists()) {
                 ObjectMapper mapper = new ObjectMapper();
                 note = mapper.readValue(noteFile, Note.class);
             } else {
                 note = new Note(this.game.getGameid());
-                note.setText(" ");
-                didExist = true;
+                note.setText("");
             }
             Scene scene = this.getScene("texteditor.fxml");
             TexteditorController tec = (TexteditorController) scene.getUserData();
@@ -407,14 +405,17 @@ public class GamepaneController implements Initializable {
             });
             editor.setScene(scene);
             editor.showAndWait();
-            if(hasNote() && didExist){
+            if(hasNote()){
                 btNoteEditor.getStyleClass().add("primary");
                  btNoteEditor.applyCss();
+            }else{
+                btNoteEditor.getStyleClass().remove("primary");
+                btNoteEditor.applyCss();
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
 
         }
-    }
+    }	
 
     public int getCurrentTurnPlayerNumber() {
         return currentTurnPlayerNumber;
@@ -426,7 +427,18 @@ public class GamepaneController implements Initializable {
     
     private boolean hasNote(){
         File noteFile = new File("notes/" + this.game.getGameid() + ".json");
-        return noteFile.exists();
+        
+        if (!noteFile.exists())
+                return false;
+        else {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Note note = mapper.readValue(noteFile, Note.class);
+                return !note.getText().equals("");
+            } catch (IOException ex) {
+            }
+        }
+        return false;
     }
 
 }
