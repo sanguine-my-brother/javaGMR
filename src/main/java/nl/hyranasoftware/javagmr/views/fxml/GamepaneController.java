@@ -107,7 +107,7 @@ public class GamepaneController implements Initializable {
     }
     /**
      * Used a seperate method to construct the view since the view is based upon an object. 
-     * @param g The game this view should be build on
+     * @param g The game this view should be built on
      */
     public void constructView(Game g) {
         this.game = g;
