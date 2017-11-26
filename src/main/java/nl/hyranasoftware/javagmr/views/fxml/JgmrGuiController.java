@@ -49,6 +49,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import nl.hyranasoftware.githubupdater.GithubUtility;
@@ -356,6 +357,7 @@ public class JgmrGuiController implements Initializable {
         Stage dialog = new Stage();
         Scene scene = getScene("settingsDialog.fxml");
         dialog.setTitle("Giant Multi Robot Java-Client");
+        dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setScene(scene);
         dialog.show();
     }
