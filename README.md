@@ -1,4 +1,8 @@
 # javaGMR # 
+[![forthebadge](https://forthebadge.com/images/badges/fuck-it-ship-it.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/powered-by-electricity.svg)](https://forthebadge.com)
+
+
 JavaGMR is a platform client for [Giant multiplayer Robot](http://multiplayerrobot.com/) It has the ability to detect civilization league games and more!
 Now use a desktop client whether you have a Mac, Linux or Windows, even you can now enjoy the comfort of multiplayer robot from the comfort of your desktop.
 
