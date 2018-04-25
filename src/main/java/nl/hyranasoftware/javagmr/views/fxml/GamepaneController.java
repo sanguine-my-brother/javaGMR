@@ -229,13 +229,13 @@ public class GamepaneController implements Initializable {
                 dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
                 dg.setTitle("Download or Upload already in progress.");
                 dg.getDialogPane().getButtonTypes().add(new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE));
-                dg.getDialogPane().getButtonTypes().add(new ButtonType("Remove Lock", ButtonBar.ButtonData.APPLY));
+                ButtonType bt = new ButtonType("Remove Lock", ButtonBar.ButtonData.APPLY);
+                dg.getDialogPane().getButtonTypes().add(bt);
                 Platform.runLater(() -> {
                      Optional<ButtonType> result = dg.showAndWait();
-                     if(result.get() == ButtonType.APPLY){
+                     if(result.get() == bt){
                          lock.delete();
                      }
-                    
                 });
             }
         }

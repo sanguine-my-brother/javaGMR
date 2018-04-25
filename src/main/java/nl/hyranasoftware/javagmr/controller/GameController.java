@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -233,10 +234,15 @@ public class GameController {
             Dialog dg = new Dialog();
             dg.setContentText("An upload or download is already in progress, please wait for the previous operation to finish.");
             dg.setTitle("Download or Upload already in progress.");
-            dg.getDialogPane().getButtonTypes().add(new ButtonType("Login", ButtonData.OK_DONE));
- 
+            dg.getDialogPane().getButtonTypes().add(new ButtonType("Ok", ButtonData.OK_DONE));
+            ButtonType bt = new ButtonType("Remove Lock", ButtonData.APPLY);
+            dg.getDialogPane().getButtonTypes().add(bt);
             Platform.runLater(() -> {
-                dg.showAndWait();
+                 Optional<ButtonType> result = dg.showAndWait();
+                 if(result.get() == bt){
+                     lock.delete();
+                 }
+                
             });
             return false;
         }
