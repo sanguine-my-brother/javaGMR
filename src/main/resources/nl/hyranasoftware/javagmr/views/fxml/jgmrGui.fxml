@@ -9,11 +9,12 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="jgmrVbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="850.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.JgmrGuiController">
+<VBox fx:id="jgmrVbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="850.0" stylesheets="@bootstrap3.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nl.hyranasoftware.javagmr.views.fxml.JgmrGuiController">
    <children>
       <ToolBar minHeight="41.0" prefHeight="41.0" prefWidth="643.0">
         <items>
           <Button fx:id="btSettings" accessibleHelp="Settings" accessibleText="Settings" mnemonicParsing="false" onAction="#settingsButton" text="Settings" />
+            <Button mnemonicParsing="false" text="Join Discord" onAction="#joinDiscord" />
             <Label fx:id="lbTime" text="Time until next pull from GMR:" />
         </items>
       </ToolBar>

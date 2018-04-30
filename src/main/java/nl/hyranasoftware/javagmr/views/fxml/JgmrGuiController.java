@@ -59,6 +59,7 @@ import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.gui;
 import nl.hyranasoftware.javagmr.threads.WatchDirectory;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import nl.hyranasoftware.javagmr.util.OpenURL;
 import nl.hyranasoftware.javagmr.util.SaveFile;
 import org.joda.time.DateTime;
 
@@ -358,6 +359,8 @@ public class JgmrGuiController implements Initializable {
         Scene scene = getScene("settingsDialog.fxml");
         dialog.setTitle("Giant Multi Robot Java-Client");
         dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setX(btSettings.getScene().getWindow().getX());
+        dialog.setY(btSettings.getScene().getWindow().getY());
         dialog.setScene(scene);
         dialog.show();
     }
@@ -571,6 +574,11 @@ public class JgmrGuiController implements Initializable {
         });
         t.setName("refreshTurnTime");
         t.start();
+    }
+
+    @FXML
+    public void joinDiscord(){
+        OpenURL.openUrlInBrowser("https://discord.gg/K59Wr4y");
     }
 
 }
