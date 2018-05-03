@@ -152,7 +152,7 @@ public class JgmrGuiController implements Initializable {
             }
         };
         Timer initializeSystemTrayTimer = new Timer();
-        initializeSystemTrayTimer.schedule(initializeSystemTrayTask, 500l);
+        initializeSystemTrayTimer.schedule(initializeSystemTrayTask, 1500l);
         initializeNotifications();
 
     }
