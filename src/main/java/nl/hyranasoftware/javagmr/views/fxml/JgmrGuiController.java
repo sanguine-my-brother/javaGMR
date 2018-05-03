@@ -13,17 +13,7 @@ import dorkbox.systemTray.SystemTray;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
@@ -59,6 +49,7 @@ import nl.hyranasoftware.javagmr.domain.Game;
 import nl.hyranasoftware.javagmr.gui;
 import nl.hyranasoftware.javagmr.threads.WatchDirectory;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
+import nl.hyranasoftware.javagmr.util.OpenURL;
 import nl.hyranasoftware.javagmr.util.SaveFile;
 import org.joda.time.DateTime;
 
@@ -145,21 +136,23 @@ public class JgmrGuiController implements Initializable {
             timeLeft = 60;
             pullGames();
         }
-        Timeline timeline = new Timeline(new KeyFrame(
-                Duration.minutes(1),
-                ae -> pullGames()));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
 
-        Timeline labelUpdater = new Timeline(new KeyFrame(
-                Duration.seconds(1),
-                ae -> updateLabel()));
-        labelUpdater.setCycleCount(Timeline.INDEFINITE);
-        labelUpdater.play();
-        new Timeline(new KeyFrame(
-                Duration.seconds(2),
-                ae -> initializeSystemtray()))
-                .play();
+        TimerTask updateLabelTask = new TimerTask(){
+          public void run(){
+              updateLabel();
+          }
+        };
+        Timer updateLabelTimer = new Timer();
+        updateLabelTimer.schedule(updateLabelTask, 1000l, 1000l);
+
+
+        TimerTask initializeSystemTrayTask = new TimerTask(){
+            public void run(){
+                initializeSystemtray();
+            }
+        };
+        Timer initializeSystemTrayTimer = new Timer();
+        initializeSystemTrayTimer.schedule(initializeSystemTrayTask, 1500l);
         initializeNotifications();
 
     }
@@ -192,7 +185,10 @@ public class JgmrGuiController implements Initializable {
     private void pullGames() {
         refreshGameBoxTimes();
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
-            lbTime.setText("Retrieving game list from GMR... Please wait");
+            Platform.runLater(() -> {
+                lbTime.setText("Retrieving game list from GMR... Please wait");
+            });
+
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -273,10 +269,18 @@ public class JgmrGuiController implements Initializable {
 
         timeLeft--;
         if (JGMRConfig.getInstance().getPlayerSteamId() != null) {
-            lbTime.setText("Time left until next pull: " + timeLeft + " seconds");
+            Platform.runLater(() -> {
+                lbTime.setText("Time left until next pull: " + timeLeft + " seconds");
+            });
+            if(timeLeft <= 0){
+                pullGames();
+            }
         } else {
-            lbTime.setText("Please enter your authcode in the settings..." + " Next pull: " + timeLeft + " seconds");
+            Platform.runLater(() -> {
+                lbTime.setText("Please enter your authcode in the settings..." + " Next pull: " + timeLeft + " seconds");
+            });
         }
+
 
     }
 
@@ -358,6 +362,8 @@ public class JgmrGuiController implements Initializable {
         Scene scene = getScene("settingsDialog.fxml");
         dialog.setTitle("Giant Multi Robot Java-Client");
         dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setX(btSettings.getScene().getWindow().getX());
+        dialog.setY(btSettings.getScene().getWindow().getY());
         dialog.setScene(scene);
         dialog.show();
     }
@@ -571,6 +577,11 @@ public class JgmrGuiController implements Initializable {
         });
         t.setName("refreshTurnTime");
         t.start();
+    }
+
+    @FXML
+    public void joinDiscord(){
+        OpenURL.openUrlInBrowser("https://discord.gg/K59Wr4y");
     }
 
 }
