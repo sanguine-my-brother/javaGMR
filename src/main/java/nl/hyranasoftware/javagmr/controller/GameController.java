@@ -20,6 +20,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -118,12 +120,14 @@ public class GameController {
         httpConnection.setReadTimeout(15000);
 
         File targetFile = new File(JGMRConfig.getInstance().getPath() + "/(jGMR) Play this one.Civ5Save");
+        
         if (!new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock").exists()) {
+            
             File lock = new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock");
             lock.createNewFile();
 
             java.io.BufferedInputStream is = new java.io.BufferedInputStream(httpConnection.getInputStream());
-
+            
             try (OutputStream outStream = new FileOutputStream(targetFile)) {
                 byte[] buffer = new byte[8 * 1024];
                 int bytesRead;
@@ -135,6 +139,9 @@ public class GameController {
                 }
                 JGMRConfig.getInstance().readDirectory();
             }
+     
+            copyTargetToArchive(targetFile, selectedItem);
+            
             lock.delete();
         } else {
             Dialog dg = new Dialog();
@@ -258,6 +265,16 @@ public class GameController {
     public void sendDownloadProgress(double percent) {
         throw new UnsupportedOperationException();
 
+    }
+
+    private void copyTargetToArchive(File targetFile, Game selectedItem) {
+        File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/Downloaded Files/" + selectedItem.getName() + "/turn" + Integer.toString(selectedItem.getCurrentTurn().getNumber())+ ".Civ5Save");
+        archivedFile.getParentFile().mkdirs();
+        try {
+            Files.copy(targetFile.toPath(),archivedFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }
