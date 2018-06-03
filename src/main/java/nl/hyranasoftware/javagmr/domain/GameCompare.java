@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package nl.hyranasoftware.javagmr.domain;
 
 import java.util.Comparator;
@@ -13,9 +8,25 @@ import java.util.Comparator;
  */
 public class GameCompare implements Comparator<Game>{
 
+    /**
+     * Used as a Game specific comparator with the following order of precedence:
+     * 1) Games that expire and have the earliest expiration date
+     * 2) Games that expire and have the latest expiration date
+     * 3) Games that do not expire and have the earliest starting date
+     * 4) Games that do not expire and have the latest starting date
+     */
     @Override
     public int compare(Game g1, Game g2) {
-        return g1.getCurrentTurn().getStarted().toDate().compareTo(g2.getCurrentTurn().getStarted().toDate());
+        if (g1.getCurrentTurn().getExpires() == null) {
+            if (g2.getCurrentTurn().getExpires() == null)
+                return g1.getCurrentTurn().getStarted().toDate().compareTo(g2.getCurrentTurn().getStarted().toDate());
+            else
+                return 1;
+        }else{
+            if (g2.getCurrentTurn().getExpires() == null)
+                return -1;
+            else
+                return g1.getCurrentTurn().getExpires().toDate().compareTo(g2.getCurrentTurn().getExpires().toDate());
+        }
     }
-    
 }
