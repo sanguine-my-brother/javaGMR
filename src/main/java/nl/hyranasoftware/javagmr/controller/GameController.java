@@ -268,7 +268,7 @@ public class GameController {
     }
 
     private void copyTargetToArchive(File targetFile, Game selectedItem) {
-        File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/Downloaded Files/" + selectedItem.getName() + " (" + selectedItem.getGameid() + ")/turn" + Integer.toString(selectedItem.getCurrentTurn().getNumber())+ ".Civ5Save");
+        File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/jGMR Downloaded Files/" + selectedItem.getName() + " (" + selectedItem.getGameid() + ")/turn" + Integer.toString(selectedItem.getCurrentTurn().getNumber())+ ".Civ5Save");
         archivedFile.getParentFile().mkdirs();
         try {
             Files.copy(targetFile.toPath(),archivedFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
