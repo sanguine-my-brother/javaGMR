@@ -112,7 +112,7 @@ public class GameController {
      * @param selectedItem This parameter is used to download the save file from
      * the site
      */
-    public void downloadSaveFile(Game selectedItem) throws MalformedURLException, IOException {
+    public File downloadSaveFile(Game selectedItem) throws MalformedURLException, IOException {
         String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetLatestSaveFileBytes";
         URL url = new URL(requestUrl + "?authkey=" + JGMRConfig.getInstance().getAuthCode() + "&gameId=" + selectedItem.getGameid());
         HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
@@ -139,8 +139,6 @@ public class GameController {
                 }
                 JGMRConfig.getInstance().readDirectory();
             }
-     
-            copyTargetToArchive(targetFile, selectedItem);
             
             lock.delete();
         } else {
@@ -153,7 +151,7 @@ public class GameController {
             });
 
         }
-
+        return targetFile;
     }
 
     /**
@@ -267,11 +265,21 @@ public class GameController {
 
     }
 
-    private void copyTargetToArchive(File targetFile, Game selectedItem) {
+    public void copyFileToDownloadArchive(File targetFile, Game selectedItem) {
         File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/jGMR Downloaded Files/" + selectedItem.getName() + " (" + selectedItem.getGameid() + ")/turn" + Integer.toString(selectedItem.getCurrentTurn().getNumber())+ ".Civ5Save");
         archivedFile.getParentFile().mkdirs();
         try {
             Files.copy(targetFile.toPath(),archivedFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void moveFileToUploadArchive(Game game, File file){
+        File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/jGMR Uploaded Files/" + game.getName() + " (" + game.getGameid() + ")/" + file.getName());
+        archivedFile.getParentFile().mkdirs();
+        try {
+            Files.move(file.toPath(), archivedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
