@@ -23,7 +23,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -71,8 +70,6 @@ public class GameController {
                     }
                 }
             }
-            Collections.sort(games);
-            Collections.reverse(games);
             return games;
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
@@ -101,8 +98,6 @@ public class GameController {
              
             }
         }
-
-        Collections.sort(playerTurns);
         return playerTurns;
     }
 

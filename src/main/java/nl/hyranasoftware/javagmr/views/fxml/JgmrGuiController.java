@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
@@ -56,6 +57,7 @@ import nl.hyranasoftware.githubupdater.GithubUtility;
 import nl.hyranasoftware.githubupdater.domain.Release;
 import nl.hyranasoftware.javagmr.controller.GameController;
 import nl.hyranasoftware.javagmr.domain.Game;
+import nl.hyranasoftware.javagmr.domain.GameCompare;
 import nl.hyranasoftware.javagmr.gui;
 import nl.hyranasoftware.javagmr.threads.WatchDirectory;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
@@ -124,7 +126,7 @@ public class JgmrGuiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         gamesAccordion.setExpandedPane(yourturnTitledPane);
-        playerGames = new HashSet<Game>();
+        playerGames = new TreeSet<Game>(new GameCompare());
         currentGames = new HashMap<Integer, Game>();
         gc = new GameController() {
             @Override
@@ -245,8 +247,11 @@ public class JgmrGuiController implements Initializable {
                                 }
                             }
                             playerGames.addAll(games);
-
-                            renderGames(true, currentGames.values(), vbAllGames);
+                            
+                            List<Game> orderedCurrentGames = new ArrayList<>(currentGames.values());
+                            Collections.sort(orderedCurrentGames, new GameCompare());
+                            
+                            renderGames(true, orderedCurrentGames, vbAllGames);
                             renderGames(false, playerGames, vbPlayerTurnBox);
 
                             if (wdt == null) {
