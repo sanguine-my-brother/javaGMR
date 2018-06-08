@@ -210,7 +210,8 @@ public class GamepaneController implements Initializable {
                 Task t = new Task() {
                     @Override
                     protected Object call() throws Exception {
-                        gc.downloadSaveFile(game);
+                        File downloadedFile = gc.downloadSaveFile(game);
+                        gc.copyFileToDownloadArchive(downloadedFile, game);
                         Platform.runLater(() -> {
                             pbDownload.setProgress(0);
                             vbGamePane.getChildren().remove(pbDownload);
@@ -358,6 +359,8 @@ public class GamepaneController implements Initializable {
                         }
                         vbGamePane.getChildren().remove(pbDownload);
                     });
+                    
+                    gc.moveFileToUploadArchive(game, file);
 
                     return null;
                 }

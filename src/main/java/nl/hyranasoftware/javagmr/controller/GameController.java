@@ -20,8 +20,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -69,8 +70,6 @@ public class GameController {
                     }
                 }
             }
-            Collections.sort(games);
-            Collections.reverse(games);
             return games;
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
@@ -99,8 +98,6 @@ public class GameController {
              
             }
         }
-
-        Collections.sort(playerTurns);
         return playerTurns;
     }
 
@@ -110,7 +107,7 @@ public class GameController {
      * @param selectedItem This parameter is used to download the save file from
      * the site
      */
-    public void downloadSaveFile(Game selectedItem) throws MalformedURLException, IOException {
+    public File downloadSaveFile(Game selectedItem) throws MalformedURLException, IOException {
         String requestUrl = "http://multiplayerrobot.com/api/Diplomacy/GetLatestSaveFileBytes";
         URL url = new URL(requestUrl + "?authkey=" + JGMRConfig.getInstance().getAuthCode() + "&gameId=" + selectedItem.getGameid());
         HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
@@ -118,12 +115,14 @@ public class GameController {
         httpConnection.setReadTimeout(15000);
 
         File targetFile = new File(JGMRConfig.getInstance().getPath() + "/(jGMR) Play this one.Civ5Save");
+        
         if (!new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock").exists()) {
+            
             File lock = new File(JGMRConfig.getInstance().getPath() + "/.jgmrlock.lock");
             lock.createNewFile();
 
             java.io.BufferedInputStream is = new java.io.BufferedInputStream(httpConnection.getInputStream());
-
+            
             try (OutputStream outStream = new FileOutputStream(targetFile)) {
                 byte[] buffer = new byte[8 * 1024];
                 int bytesRead;
@@ -135,6 +134,7 @@ public class GameController {
                 }
                 JGMRConfig.getInstance().readDirectory();
             }
+            
             lock.delete();
         } else {
             Dialog dg = new Dialog();
@@ -146,7 +146,7 @@ public class GameController {
             });
 
         }
-
+        return targetFile;
     }
 
     /**
@@ -260,4 +260,23 @@ public class GameController {
 
     }
 
+    public void copyFileToDownloadArchive(File targetFile, Game selectedItem) {
+        File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/jGMR Downloaded Files/" + selectedItem.getName() + " (" + selectedItem.getGameid() + ")/turn" + Integer.toString(selectedItem.getCurrentTurn().getNumber())+ ".Civ5Save");
+        archivedFile.getParentFile().mkdirs();
+        try {
+            Files.copy(targetFile.toPath(),archivedFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void moveFileToUploadArchive(Game game, File file){
+        File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/jGMR Uploaded Files/" + game.getName() + " (" + game.getGameid() + ")/" + file.getName());
+        archivedFile.getParentFile().mkdirs();
+        try {
+            Files.move(file.toPath(), archivedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

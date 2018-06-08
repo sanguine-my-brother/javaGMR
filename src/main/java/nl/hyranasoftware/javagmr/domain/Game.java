@@ -9,20 +9,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Collections;
-import static java.util.Collections.list;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.threads.RetrievePlayers;
-import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.ocpsoft.prettytime.PrettyTime;
 
 /**
@@ -133,9 +131,11 @@ public class Game implements Comparable<Game> {
         PrettyTime p = new PrettyTime();
         p.setLocale(Locale.ENGLISH);
         if (currentTurn.getExpires() != null) {
-            return "Expires: " + p.format(currentTurn.getExpires().toDate());
+            DateTimeFormatter dformat = DateTimeFormat.forPattern("dd/MM/yyyy");
+            return "Expires: " + p.format(currentTurn.getExpires().toDate()) + " (on " + dformat.print(currentTurn.getExpires()) + ")";
         } else {
-            return "Last turn: " + p.format(currentTurn.getStarted().toDate());
+            DateTimeFormatter dformat = DateTimeFormat.forPattern("dd/MM/yyyy");
+            return "Last turn: " + p.format(currentTurn.getStarted().toDate()) + " (since " + dformat.print(currentTurn.getStarted()) + ")";
         }
     }
 

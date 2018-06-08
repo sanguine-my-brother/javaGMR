@@ -90,6 +90,8 @@ public class UploadSaveFileDialogController implements Initializable {
                             }
                         }
                     });
+                    
+                    gc.moveFileToUploadArchive(selectedGame, file);
 
                     return null;
                 }
