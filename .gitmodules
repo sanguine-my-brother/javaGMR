@@ -1,3 +1,6 @@
 [submodule "githubupdater"]
 	path = githubupdater
 	url = https://github.com/eternia16/javaGithubUpdater.git
+[submodule "TrayNotification"]
+	path = TrayNotification
+	url = https://github.com/PlusHaze/TrayNotification.git
