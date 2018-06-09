@@ -4,9 +4,6 @@
 /notes/
 *.config
 
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
@@ -54,4 +51,12 @@ crashlytics-build.properties
 fabric.properties
 
 # Editor-based Rest Client
+.idea/httpRequests
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+=======
 .idea/httpRequests
