@@ -9,6 +9,7 @@ import com.github.plushaze.traynotification.animations.Animations;
 import com.github.plushaze.traynotification.notification.Notifications;
 import com.github.plushaze.traynotification.notification.TrayNotification;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import dorkbox.systemTray.Menu;
 import dorkbox.systemTray.SystemTray;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -24,8 +25,9 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeSet;
->>>>>>> feature/Discord
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
@@ -54,6 +56,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javax.swing.JMenu;
 import nl.hyranasoftware.githubupdater.GithubUtility;
 import nl.hyranasoftware.githubupdater.domain.Release;
 import nl.hyranasoftware.javagmr.controller.GameController;
@@ -118,6 +121,8 @@ public class JgmrGuiController implements Initializable {
     private int timeLeft;
     private Game currentGame;
     private boolean second;
+    private Timer updateLabelTimer = new Timer();
+    private Timer initializeSystemTrayTimer = new Timer();
 
     GameController gc;
 
@@ -155,7 +160,8 @@ public class JgmrGuiController implements Initializable {
               updateLabel();
           }
         };
-        Timer updateLabelTimer = new Timer();
+        
+        
         updateLabelTimer.schedule(updateLabelTask, 1000l, 1000l);
 
 
@@ -164,7 +170,7 @@ public class JgmrGuiController implements Initializable {
                 initializeSystemtray();
             }
         };
-        Timer initializeSystemTrayTimer = new Timer();
+        
         initializeSystemTrayTimer.schedule(initializeSystemTrayTask, 1500l);
         initializeNotifications();
 
@@ -505,7 +511,6 @@ public class JgmrGuiController implements Initializable {
 
     private void initializeSystemtray() {
         Stage stage = (Stage) vbAllGames.getScene().getWindow();
-
         systemTray = SystemTray.get();
         if (systemTray != null) {
 
@@ -514,7 +519,9 @@ public class JgmrGuiController implements Initializable {
                 systemTray.setStatus(playerGames.size() + " games await your turn.");
             }
             //OPEN
-            systemTray.getMenu().add(new dorkbox.systemTray.MenuItem("Show", new ActionListener() {
+            //systemTray.setMenu(new JMenu());
+            Menu test = systemTray.getMenu();
+            test.add(new dorkbox.systemTray.MenuItem("Show", new ActionListener() {
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     //Platform.runlater is needed otherwise the stage will not load anymmore
@@ -534,6 +541,8 @@ public class JgmrGuiController implements Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
+                          updateLabelTimer.cancel();
+                          initializeSystemTrayTimer.cancel();
                             Platform.exit();
                         }
                     });
