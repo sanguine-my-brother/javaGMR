@@ -34,6 +34,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -55,6 +56,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import javax.swing.JMenu;
 import nl.hyranasoftware.githubupdater.GithubUtility;
@@ -519,9 +521,10 @@ public class JgmrGuiController implements Initializable {
                 systemTray.setStatus(playerGames.size() + " games await your turn.");
             }
             //OPEN
-            //systemTray.setMenu(new JMenu());
-            Menu test = systemTray.getMenu();
-            test.add(new dorkbox.systemTray.MenuItem("Show", new ActionListener() {
+            systemTray.setMenu(new JMenu("JGMR"));
+            Menu menu = systemTray.getMenu();
+            if(menu != null){
+            menu.add(new dorkbox.systemTray.MenuItem("Show", new ActionListener() {
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     //Platform.runlater is needed otherwise the stage will not load anymmore
@@ -541,14 +544,23 @@ public class JgmrGuiController implements Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                          updateLabelTimer.cancel();
-                          initializeSystemTrayTimer.cancel();
                             Platform.exit();
+                            System.exit(0);
                         }
                     });
                 }
             }));
-
+            }
+            else{
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t){
+                Platform.exit();
+                System.exit(0);
+            }
+            
+            });
+        }
         }
     }
 
