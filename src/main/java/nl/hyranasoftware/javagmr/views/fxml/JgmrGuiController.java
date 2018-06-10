@@ -173,7 +173,7 @@ public class JgmrGuiController implements Initializable {
             }
         };
         
-        initializeSystemTrayTimer.schedule(initializeSystemTrayTask, 1500l);
+        initializeSystemTrayTimer.schedule(initializeSystemTrayTask, 3000l);
         initializeNotifications();
 
     }
@@ -521,7 +521,7 @@ public class JgmrGuiController implements Initializable {
                 systemTray.setStatus(playerGames.size() + " games await your turn.");
             }
             //OPEN
-            systemTray.setMenu(new JMenu("JGMR"));
+
             Menu menu = systemTray.getMenu();
             if(menu != null){
             menu.add(new dorkbox.systemTray.MenuItem("Show", new ActionListener() {
