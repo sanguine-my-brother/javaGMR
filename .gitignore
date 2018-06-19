@@ -60,3 +60,4 @@ fabric.properties
 !.vscode/extensions.json
 =======
 .idea/httpRequests
+/nbproject/
