@@ -6,7 +6,6 @@
 package nl.hyranasoftware.javagmr.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import java.io.File;
@@ -16,8 +15,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nl.hyranasoftware.javagmr.controller.PlayerController;
-import nl.hyranasoftware.javagmr.domain.Game;
-import org.joda.time.DateTime;
 
 /**
  *
@@ -25,8 +22,8 @@ import org.joda.time.DateTime;
  */
 public class JGMRConfig {
 
+    private String authCode; //first field so that ObjectMapper invokes setAuthCode() first
     private String path;
-    private String authCode;
     private String playerSteamId;
     private int notificationFrequency;
     private boolean notificationsMinized;
@@ -115,12 +112,11 @@ public class JGMRConfig {
     public void setAuthCode(String authCode) {
         PlayerController pc = new PlayerController();
         String playerCode = pc.getPlayerId(authCode);
+        this.authCode = authCode;
         if (playerCode != null) {
-            this.authCode = authCode;
             this.playerSteamId = playerCode;
             saveConfig();
         }
-
     }
 
     public String getPlayerSteamId() {
