@@ -27,11 +27,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import nl.hyranasoftware.javagmr.domain.Game;
+import nl.hyranasoftware.javagmr.util.FilenameEditor;
 import nl.hyranasoftware.javagmr.util.GMRLogger;
 import nl.hyranasoftware.javagmr.util.JGMRConfig;
 import org.apache.http.entity.ContentType;
@@ -260,23 +263,40 @@ public class GameController {
 
     }
 
-    public void copyFileToDownloadArchive(File targetFile, Game selectedItem) {
-        File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/jGMR Downloaded Files/" + selectedItem.getName() + " (" + selectedItem.getGameid() + ")/turn" + Integer.toString(selectedItem.getCurrentTurn().getNumber())+ ".Civ5Save");
+    public void copyFileToDownloadArchive(File source, Game game) {
+        String filename = JGMRConfig.getInstance().getPath() 
+                + "/jGMR Downloaded Files/"
+                + editFilenameIfInvalid(game.getName())
+                + " (" + game.getGameid() 
+                + ")/turn" + Integer.toString(game.getCurrentTurn().getNumber())+ ".Civ5Save";
+        System.out.println(filename);
+        File archivedFile = new File(filename);
         archivedFile.getParentFile().mkdirs();
         try {
-            Files.copy(targetFile.toPath(),archivedFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(source.toPath(),archivedFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
     public void moveFileToUploadArchive(Game game, File file){
-        File archivedFile = new File(JGMRConfig.getInstance().getPath() + "/jGMR Uploaded Files/" + game.getName() + " (" + game.getGameid() + ")/" + file.getName());
+        String filename = JGMRConfig.getInstance().getPath() 
+                + "/jGMR Uploaded Files/" 
+                + editFilenameIfInvalid(game.getName()) 
+                + " (" + game.getGameid() 
+                + ")/" + file.getName();
+        File archivedFile = new File(filename);
         archivedFile.getParentFile().mkdirs();
         try {
             Files.move(file.toPath(), archivedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
             Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    protected String editFilenameIfInvalid(String filename) {
+        filename = FilenameEditor.shortenName(filename);
+        filename = FilenameEditor.replaceGroup("([<>:\"/\\\\|?*\\x00-\\x1F])", filename, 1, " "); //removes one or more valid filename chars
+        return FilenameEditor.replaceGroup("([\\ .]+$)", filename, 1, ""); //removes last chars if they are spaces or dots
     }
 }
