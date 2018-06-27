@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>nl.hyranasoftware</groupId>
     <artifactId>javaGMR</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5</version>
     <packaging>jar</packaging>
     <build>
         <plugins>
@@ -11,6 +11,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -28,7 +29,8 @@
                 <configuration>
                     <mainClass>nl.hyranasoftware.javagmr.gui</mainClass>
                     <iconFile>eicon.icns</iconFile>
-                    <jrePath>/home/danny/programming/JRE/jre1.8.0_171.jre/</jrePath>
+                    <!--<jrePath>/home/danny/programming/JRE/jre1.8.0_171.jre/</jrePath>-->
+                    <jrePath>C:\Users\padou\jre_mac\jre1.8.0_171.jre</jrePath>
                     <generateDiskImageFile>true</generateDiskImageFile>
                 </configuration>
                 <executions>
