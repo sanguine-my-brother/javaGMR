@@ -22,6 +22,7 @@
                 </configuration>
             </plugin>
             
+            <!--
             <plugin>
                 <groupId>sh.tak.appbundler</groupId>
                 <artifactId>appbundle-maven-plugin</artifactId>
@@ -29,8 +30,8 @@
                 <configuration>
                     <mainClass>nl.hyranasoftware.javagmr.gui</mainClass>
                     <iconFile>eicon.icns</iconFile>
-                    <!--<jrePath>/home/danny/programming/JRE/jre1.8.0_171.jre/</jrePath>-->
-                    <!--<jrePath>C:\Users\padou\jre_mac\jre1.8.0_171.jre</jrePath>-->
+                    <!<jrePath>/home/danny/programming/JRE/jre1.8.0_171.jre/</jrePath>>
+                    <!<jrePath>C:\Users\padou\jre_mac\jre1.8.0_171.jre</jrePath>>
                     <jrePath>/mnt/c/Users/padou/jre_mac/jre1.8.0_171.jre</jrePath>
                     <generateDiskImageFile>true</generateDiskImageFile>
                 </configuration>
@@ -43,6 +44,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
             
             <plugin>
                 <!-- NOTE: We don't need a groupId specification because the group is
@@ -70,6 +72,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>nl.hyranasoftware.javagmr.gui</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -162,6 +172,21 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>githubUpdater</artifactId>
             <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>11.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>11.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>11.0.2</version>
         </dependency>
     </dependencies>
     <properties>
