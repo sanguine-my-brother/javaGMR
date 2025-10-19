@@ -32,7 +32,7 @@ public class JGMRConfig {
     private boolean saveFileDialog;
     private boolean logToFile;
     private boolean dontAskMeToSave;
-    
+    private boolean checkForUpdates;
 
     @JsonIgnore
     List<SaveFile> saveFiles = new ArrayList();
@@ -58,6 +58,7 @@ public class JGMRConfig {
                     instance.saveFileDialog = true;
                     instance.logToFile = false;
                     instance.dontAskMeToSave = false;
+                    instance.checkForUpdates = true;
                     instance.notificationFrequency = 15;
                 }
             } catch (Exception ex) {
@@ -208,6 +209,15 @@ public class JGMRConfig {
 
     public void setDontAskMeToSave(boolean dontAskMeToSave) {
         this.dontAskMeToSave = dontAskMeToSave;
+        this.saveConfig();
+    }
+
+    public boolean isCheckForUpdates() {
+        return checkForUpdates;
+    }
+
+    public void setCheckForUpdates(boolean checkForUpdates) {
+        this.checkForUpdates = checkForUpdates;
         this.saveConfig();
     }
     

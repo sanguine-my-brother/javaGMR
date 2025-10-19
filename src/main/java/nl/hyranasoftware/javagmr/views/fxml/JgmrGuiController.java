@@ -570,6 +570,11 @@ public class JgmrGuiController implements Initializable {
     }
 
     private void checkForUpdates() {
+        // honor user's setting: skip update check when disabled
+        if (!JGMRConfig.getInstance().isCheckForUpdates()) {
+            return;
+        }
+
         Properties props = new Properties();
         try {
             props.load(getClass().getResourceAsStream("version.properties"));

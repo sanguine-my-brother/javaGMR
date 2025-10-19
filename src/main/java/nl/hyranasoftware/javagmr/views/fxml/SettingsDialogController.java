@@ -36,6 +36,8 @@ public class SettingsDialogController implements Initializable {
     @FXML
     CheckBox cbSystemtray;
     @FXML
+    CheckBox cbCheckUpdates;
+    @FXML
     CheckBox cbEnabletray;
     @FXML
     CheckBox cbSaveLogInformation;
@@ -81,6 +83,7 @@ public class SettingsDialogController implements Initializable {
         cbSaveLogInformation.selectedProperty().set(JGMRConfig.getInstance().isLogToFile());
         cbShowSave.selectedProperty().set(JGMRConfig.getInstance().isSaveFileDialog());
         cbAskForSave.selectedProperty().set(JGMRConfig.getInstance().isDontAskMeToSave());
+        cbCheckUpdates.selectedProperty().set(JGMRConfig.getInstance().isCheckForUpdates());
     }
 
     @FXML
@@ -123,6 +126,7 @@ public class SettingsDialogController implements Initializable {
                 JGMRConfig.getInstance().setNotificationFrequency(0);
                 break;
         }
+        JGMRConfig.getInstance().setCheckForUpdates(cbCheckUpdates.selectedProperty().get());
         Stage stage = (Stage) tbAuthCode.getScene().getWindow();
         stage.close();
     }
