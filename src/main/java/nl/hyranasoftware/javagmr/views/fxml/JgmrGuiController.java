@@ -167,13 +167,18 @@ public class JgmrGuiController implements Initializable {
         updateLabelTimer.schedule(updateLabelTask, 1000l, 1000l);
 
 
-        TimerTask initializeSystemTrayTask = new TimerTask(){
-            public void run(){
-                initializeSystemtray();
-            }
-        };
-        
-        initializeSystemTrayTimer.schedule(initializeSystemTrayTask, 3000l);
+        if (!JGMRConfig.getInstance().isEnableTray()) {
+            systemTray = null;
+        }else{
+            TimerTask initializeSystemTrayTask = new TimerTask(){
+                public void run(){
+                    initializeSystemtray();
+                }
+            };
+            
+            initializeSystemTrayTimer.schedule(initializeSystemTrayTask, 3000l);
+
+        }
         initializeNotifications();
 
     }

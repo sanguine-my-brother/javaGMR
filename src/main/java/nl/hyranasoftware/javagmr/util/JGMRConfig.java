@@ -28,6 +28,7 @@ public class JGMRConfig {
     private int notificationFrequency;
     private boolean notificationsMinized;
     private boolean minimizeToTray;
+    private boolean enableTray;
     private boolean saveFileDialog;
     private boolean logToFile;
     private boolean dontAskMeToSave;
@@ -53,6 +54,7 @@ public class JGMRConfig {
                     instance = new JGMRConfig();
                     instance.notificationsMinized = true;
                     instance.minimizeToTray = true;
+                    instance.enableTray = true;
                     instance.saveFileDialog = true;
                     instance.logToFile = false;
                     instance.dontAskMeToSave = false;
@@ -92,6 +94,16 @@ public class JGMRConfig {
 
     public void setNotificationsMinized(boolean notificationsMinized) {
         this.notificationsMinized = notificationsMinized;
+        saveConfig();
+    }
+
+    public boolean isEnableTray() {
+        return enableTray;
+
+    }
+
+    public void setEnableTray(boolean enableTray) {
+        this.enableTray = enableTray;
         saveConfig();
     }
 
